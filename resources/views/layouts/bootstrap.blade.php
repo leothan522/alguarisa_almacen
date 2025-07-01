@@ -165,7 +165,7 @@
                         <div class="col-lg-6">
                             <div class="card-body p-md-5 mx-md-4">
 
-                                <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.svg') }}" alt="Logo Gobernación Guárico">
+                                <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.png') }}" alt="Logo Gobernación Guárico">
 
                                 <div class="text-center mt-5 <!-- pt-5-->">
                                     <a href="{{ route('web.index') }}">

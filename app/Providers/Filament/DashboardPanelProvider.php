@@ -20,6 +20,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
+use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -59,6 +61,16 @@ class DashboardPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->profile(isSimple: false)
-            ->favicon(asset('favicons/favicon-32x32.png'));
+            ->favicon(asset('favicons/favicon-32x32.png'))
+            ->plugins([
+                FilamentEditProfilePlugin::make()
+                    ->shouldRegisterNavigation(false)
+                    ->shouldShowDeleteAccountForm(false)
+            ])
+            ->userMenuItems([
+                'profile' => MenuItem::make()
+                ->label(fn() => \auth()->user()->name)
+                ->url(fn(): string => EditProfilePage::getUrl())
+            ]);
     }
 }

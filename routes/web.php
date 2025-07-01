@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('inicio');
+})->name('web.index');
 
 Route::middleware([
     'auth:sanctum',

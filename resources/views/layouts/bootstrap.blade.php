@@ -7,7 +7,7 @@
     <meta name="author" content="Ing. Yonathan Castillo">
     <meta name="generator" content="leothan 0.1">
 
-    <title>{{ config('app.name') }} | @yield('title', 'ALGUARISA')</title>
+    <title>@yield('title', 'ALGUARISA') - {{ config('app.name') }}</title>
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicons/apple-icon-57x57.png') }}">

@@ -169,7 +169,7 @@
 
                                 <div class="text-center @if(\Illuminate\Support\Facades\Route::currentRouteName() == 'web.index') mt-5 @endif">
                                     <a href="{{ route('web.index') }}">
-                                        <img class="img-fluid @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'register') mt-lg-5 @endif" src="{{ asset('img/logo_alguarisa.png') }}" alt="Logo Alguarisa">
+                                        <img class="img-fluid @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'web.index') mt-5 @endif @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'register') mt-sm-5 @else mt-sm-1 @endif" src="{{ asset('img/logo_alguarisa.png') }}" alt="Logo Alguarisa">
                                     </a>
                                     <h6 class="mt-1 mb-4 pb-1 text_title"><strong>Dirección de Tecnología y Sistemas.</strong></h6>
                                 </div>

@@ -1,60 +1,67 @@
-<x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+@extends('layouts.bootstrap')
 
-        <x-validation-errors class="mb-4" />
+@section('content')
+    <form class="needs-validation position-relative" method="POST" action="{{ route('register') }}" novalidate>
+        @csrf
 
-        <form method="POST" action="{{ route('register') }}">
-            @csrf
-
+        @if ($errors->any())
             <div>
-                <x-label for="name" value="{{ __('Name') }}" />
-                <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+                <div class="fs-6 text-danger fw-normal">{{ __('Whoops! Something went wrong.') }}</div>
+
+                <ul class="mt-3 fs-6 text-danger fw-normal">
+                    @foreach ($errors->all() as $error)
+                        <li><small>{{ $error }}</small></li>
+                    @endforeach
+                </ul>
             </div>
+        @endif
 
-            <div class="mt-4">
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+        <div class="form-floating mb-3 has-validation">
+            <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}"
+                   placeholder="Nombre Apellido" required autofocus/>
+            <label for="name">{{ __('Name') }}</label>
+            <div class="invalid-feedback">
+                Por favor ingrese su {{ __('Name') }}.
             </div>
+        </div>
 
-            <div class="mt-4">
-                <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+        <div class="form-floating mb-3 has-validation">
+            <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}"
+                   placeholder="name@example.com" required/>
+            <label for="email">{{ __('Email') }}</label>
+            <div class="invalid-feedback">
+                Por favor ingrese su {{ __('Email') }}.
             </div>
+        </div>
 
-            <div class="mt-4">
-                <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
-                <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
+        <div class="form-floating mb-3 has-validation">
+            <input id="password" type="password" class="form-control" name="password" placeholder="Password" required>
+            <label for="password">{{ __('Password') }}</label>
+            <div class="invalid-feedback">
+                Por favor ingrese su {{ __('Password') }}.
             </div>
+        </div>
 
-            @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
-                <div class="mt-4">
-                    <x-label for="terms">
-                        <div class="flex items-center">
-                            <x-checkbox name="terms" id="terms" required />
-
-                            <div class="ms-2">
-                                {!! __('I agree to the :terms_of_service and :privacy_policy', [
-                                        'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">'.__('Terms of Service').'</a>',
-                                        'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">'.__('Privacy Policy').'</a>',
-                                ]) !!}
-                            </div>
-                        </div>
-                    </x-label>
-                </div>
-            @endif
-
-            <div class="flex items-center justify-end mt-4">
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                    {{ __('Already registered?') }}
-                </a>
-
-                <x-button class="ms-4">
-                    {{ __('Register') }}
-                </x-button>
+        <div class="form-floating mb-3 has-validation">
+            <input id="password_confirmation" type="password" class="form-control" name="password_confirmation"
+                   placeholder="Password" required>
+            <label for="password_confirmation">{{ __('Confirm Password') }}</label>
+            <div class="invalid-feedback">
+                Por favor {{ __('Confirm Password') }}.
             </div>
-        </form>
-    </x-authentication-card>
-</x-guest-layout>
+        </div>
+
+        <div class="text-center pt-1 d-grid gap-2">
+            <button type="submit"
+                    class="btn shadow text-white btn-block fa-lg gradient-custom-2 mb-3">{{ __('Register') }}</button>
+            <a class="text-muted" href="{{ route('login') }}">{{ __('Already registered?') }}</a>
+        </div>
+
+        <div class="position-absolute top-50 start-50 translate-middle d-none verCargando">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+    </form>
+@endsection

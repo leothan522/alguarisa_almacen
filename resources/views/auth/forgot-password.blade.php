@@ -1,5 +1,7 @@
 @extends('layouts.bootstrap')
 
+@section('title', __('Forgot your password?'))
+
 @section('content')
     <form class="needs-validation position-relative" method="POST" action="{{ route('password.email') }}" novalidate>
         @csrf

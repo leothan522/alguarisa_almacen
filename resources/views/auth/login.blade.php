@@ -1,5 +1,7 @@
 @extends('layouts.bootstrap')
 
+@section('title', __('Log in'))
+
 @section('content')
     <form class="needs-validation position-relative" method="POST" action="{{ route('login') }}" novalidate>
         @csrf

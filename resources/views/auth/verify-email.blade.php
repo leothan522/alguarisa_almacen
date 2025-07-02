@@ -1,5 +1,7 @@
 @extends('layouts.bootstrap')
 
+@section('title', 'Verificar correo electrónico')
+
 @section('content')
     <form class="needs-validation position-relative" method="POST" action="{{ route('verification.send') }}" novalidate>
         @csrf

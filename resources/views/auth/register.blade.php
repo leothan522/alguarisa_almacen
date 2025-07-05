@@ -3,7 +3,7 @@
 @section('title', __('Register'))
 
 @section('content')
-    <form class="needs-validation position-relative" method="POST" action="{{ route('register') }}" novalidate>
+    <form class="needs-validation" method="POST" action="{{ route('register') }}" novalidate>
         @csrf
 
         @if ($errors->any())

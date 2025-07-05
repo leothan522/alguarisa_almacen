@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="es">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="Ing. Yonathan Castillo">
-    <meta name="generator" content="leothan 0.1">
+    <meta name="generator" content="Bootstrap v5.3.7">
 
     <title>@yield('title', 'ALGUARISA') - {{ config('app.name') }}</title>
 
@@ -163,7 +163,7 @@
                 <div class="card rounded-3 text-black">
                     <div class="row g-0">
                         <div class="col-lg-6">
-                            <div class="card-body p-md-5 mx-md-4">
+                            <div class="card-body p-md-5 mx-md-4 position-relative">
 
                                 <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.png') }}" alt="Logo Gobernación Guárico">
 

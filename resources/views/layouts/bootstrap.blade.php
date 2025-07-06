@@ -7,7 +7,7 @@
     <meta name="author" content="Ing. Yonathan Castillo">
     <meta name="generator" content="Bootstrap v5.3.7">
 
-    <title>@yield('title', 'ALGUARISA') - {{ config('app.name') }}</title>
+    <title>@yield('title', 'Alguarisa') - {{ config('app.name') }}</title>
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicons/apple-icon-57x57.png') }}">
@@ -168,7 +168,7 @@
                                 <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.png') }}" alt="Logo Gobernación Guárico">
 
                                 <div class="text-center @if(\Illuminate\Support\Facades\Route::currentRouteName() == 'web.index') mt-5 @endif">
-                                    <a href="{{ route('web.index') }}">
+                                    <a href="{{ env('APP_DOMINIO', route('web.index')) }}">
                                         <img class="img-fluid @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'web.index') mt-5 @endif @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'register') mt-sm-5 @else mt-sm-1 @endif" src="{{ asset('img/logo_alguarisa.png') }}" alt="Logo Alguarisa">
                                     </a>
                                     <h6 class="mt-1 mb-4 pb-1 text_title"><strong>Dirección de Tecnología y Sistemas.</strong></h6>

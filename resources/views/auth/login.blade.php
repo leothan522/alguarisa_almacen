@@ -55,14 +55,14 @@
             <button type="submit" class="btn shadow text-white btn-block fa-lg gradient-custom-2 mb-3">{{ __('Log in') }}</button>
 
             @if (Route::has('password.request'))
-                <a class="text-muted" href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
+                <a class="text-muted" href="{{ route('password.request') }}" onclick="verCargando()">{{ __('Forgot your password?') }}</a>
             @endif
         </div>
 
         <div class="d-flex align-items-center justify-content-center">
             @if (Route::has('register'))
                 <p class="mb-0 me-2">¿No tienes una cuenta?</p>
-                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-sm">{{ __('Register') }}</a>
+                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-sm" onclick="verCargando()">{{ __('Register') }}</a>
             @endif
         </div>
 

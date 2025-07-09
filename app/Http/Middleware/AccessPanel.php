@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class UserAdmin
+class AccessPanel
 {
     /**
      * Handle an incoming request.
@@ -17,7 +17,7 @@ class UserAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()){
-            if (!Auth::user()->is_admin && !Auth::user()->is_root){
+            if (!Auth::user()->access_panel && !Auth::user()->is_root){
                 return redirect()->route('home');
             }
         }

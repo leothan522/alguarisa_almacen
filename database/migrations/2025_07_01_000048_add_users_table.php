@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_admin')->default(false)->after('profile_photo_path');
-            $table->boolean('is_root')->default(false)->after('is_admin');
+            $table->text('telefono')->nullable()->after('profile_photo_path');
+            $table->boolean('access_panel')->default(false)->after('telefono');
+            $table->boolean('is_root')->default(false)->after('access_panel');
             $table->softDeletes()->after('updated_at');
         });
     }

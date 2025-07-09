@@ -3,8 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    //return view('inicio');
-    return redirect('/dashboard');
+    return view('inicio');
 })->name('web.index');
 
 Route::middleware([

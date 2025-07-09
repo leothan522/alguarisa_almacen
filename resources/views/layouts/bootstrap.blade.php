@@ -167,7 +167,7 @@
 
                                 <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.png') }}" alt="Logo Gobernación Guárico">
 
-                                <div class="text-center @if(\Illuminate\Support\Facades\Route::currentRouteName() == 'web.index') mt-5 @endif">
+                                <div class="text-center @if(\Illuminate\Support\Facades\Route::currentRouteName() == 'web.index') mt-5 pt-5 @endif">
                                     <a href="{{ route('web.index') }}" onclick="verCargando()">
                                         <img class="img-fluid @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'web.index') mt-5 @endif @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'register') mt-sm-5 @else mt-sm-1 @endif" src="{{ asset('img/logo_alguarisa.png') }}" alt="Logo Alguarisa">
                                     </a>

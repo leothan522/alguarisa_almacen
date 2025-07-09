@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\AccessPanel;
 use App\Http\Middleware\UserAdmin;
 use App\Models\User;
 use Filament\Http\Middleware\Authenticate;
@@ -55,7 +56,7 @@ class DashboardPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                UserAdmin::class,
+                AccessPanel::class,
                 'verified',
             ])
             ->authMiddleware([

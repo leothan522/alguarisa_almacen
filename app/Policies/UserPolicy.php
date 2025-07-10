@@ -36,7 +36,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $model->id != $user->id && ($user->hasRole('admin') || $user->is_root);
+        return $model->id != $user->id && !$model->is_root && ($user->hasRole('admin') || $user->is_root);
     }
 
     /**
@@ -44,7 +44,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return $model->id != $user->id && ($user->hasRole('admin') || $user->is_root);
+        return $model->id != $user->id && !$model->is_root && ($user->hasRole('admin') || $user->is_root);
     }
 
     /**
@@ -60,6 +60,6 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return $model->id != $user->id && ($user->hasRole('admin') || $user->is_root);
+        return $model->id != $user->id && !$model->is_root && ($user->hasRole('admin') || $user->is_root);
     }
 }

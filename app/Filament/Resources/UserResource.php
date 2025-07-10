@@ -15,6 +15,7 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -123,7 +124,7 @@ class UserResource extends Resource
                         ])
                         ->hidden(function (User $record): bool {
                             $response = true;
-                            if ($record->id != Auth::id()) {
+                            if ($record->id != Auth::id() && !$record->is_root) {
                                 $response = false;
                             }
                             return $response;
@@ -171,9 +172,23 @@ class UserResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    //Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function (Collection $records) {
+                            foreach ($records as $record) {
+                                $i = 0;
+                                do {
+                                    $repeat = Str::repeat('*', ++$i);
+                                    $email = $repeat . $record->email;
+                                    $existe = User::withTrashed()->where('email', $email)->first();
+                                } while ($existe);
+                                $record->update(['email' => $email]);
+                            }
+                        }),
                 ]),
-            ]);
+            ])
+            ->checkIfRecordIsSelectableUsing(
+                fn(User $record): bool => $record->id != Auth::id() && !$record->is_root
+            );
     }
 
     public static function getRelations(): array

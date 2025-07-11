@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Http\Middleware\AccessPanel;
 use App\Http\Middleware\UserAdmin;
 use App\Models\User;
@@ -67,7 +68,8 @@ class DashboardPanelProvider extends PanelProvider
             ->plugins([
                 FilamentEditProfilePlugin::make()
                     ->shouldRegisterNavigation(false)
-                    ->shouldShowDeleteAccountForm(false)
+                    ->shouldShowDeleteAccountForm(false),
+                FilamentSpatieRolesPermissionsPlugin::make()
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()

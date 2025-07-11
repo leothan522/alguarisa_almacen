@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Policies\PermissionPolicy;
+use App\Policies\RolePolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,5 +36,8 @@ class AppServiceProvider extends ServiceProvider
                 return Route::get('/'.env('APP_ASSET_LIVEWIRE', '').'/livewire/livewire.js', $handle);
             });
         }
+        //Políticas de roles y permisos
+        Gate::policy(Role::class, RolePolicy::class);
+        Gate::policy(Permission::class, PermissionPolicy::class);
     }
 }

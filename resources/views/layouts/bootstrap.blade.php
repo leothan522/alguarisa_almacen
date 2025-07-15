@@ -7,7 +7,7 @@
     <meta name="author" content="Ing. Yonathan Castillo">
     <meta name="generator" content="Bootstrap v5.3.7">
 
-    <title>{{ config('app.name') }} | @yield('title', 'ALGUARISA')</title>
+    <title>@yield('title', 'Alguarisa') - {{ config('app.name', 'Laravel') }}</title>
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicons/apple-icon-57x57.png') }}">

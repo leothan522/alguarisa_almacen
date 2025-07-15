@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }} | @yield('title', 'ALGUARISA')</title>
+        <title>@yield('title', 'Alguarisa') - {{ config('app.name', 'Laravel') }}</title>
 
         <!-- Favicons -->
         <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicons/apple-icon-57x57.png') }}">

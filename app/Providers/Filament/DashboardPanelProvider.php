@@ -66,15 +66,16 @@ class DashboardPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->favicon(asset('favicons/favicon-32x32.png'))
             ->plugins([
-                FilamentEditProfilePlugin::make()
+                /*FilamentEditProfilePlugin::make()
                     ->shouldRegisterNavigation(false)
-                    ->shouldShowDeleteAccountForm(false),
+                    ->shouldShowDeleteAccountForm(false),*/
                 FilamentSpatieRolesPermissionsPlugin::make()
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
                 ->label(fn() => \auth()->user()->name)
-                ->url(fn(): string => EditProfilePage::getUrl())
+                //->url(fn(): string => EditProfilePage::getUrl())
+                ->url(fn(): string => url('user/profile'))
             ]);
     }
 }

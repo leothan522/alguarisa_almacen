@@ -3,6 +3,7 @@
 @section('title', 'Verificar correo electrónico')
 
 @section('content')
+
     <form class="needs-validation" method="POST" action="{{ route('verification.send') }}" novalidate>
         @csrf
 
@@ -33,11 +34,12 @@
     </form>
 
     <div class="d-flex align-items-center justify-content-between">
-        <a class="text-muted mb-0 me-2" href="{{ route('profile.show') }}" onclick="verCargando()">{{ __('Edit Profile') }}</a>
-        <form method="POST" action="{{ route('logout') }}" onsubmit="verCargando()">
+        <a class="text-muted mb-0 me-2" href="{{ route('profile.show') }}" onclick="verCargandoAuth(this)">{{ __('Edit Profile') }}</a>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="verCargandoAuth()">
             @csrf
             <button type="submit" class="btn btn-link text-muted">{{ __('Log Out') }}</button>
         </form>
     </div>
 
 @endsection
+

@@ -7,7 +7,7 @@
     <meta name="author" content="Ing. Yonathan Castillo">
     <meta name="generator" content="Bootstrap v5.3.7">
 
-    <title>@yield('title', 'Alguarisa') - {{ config('app.name') }}</title>
+    <title>{{ config('app.name') }} | @yield('title', 'ALGUARISA')</title>
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicons/apple-icon-57x57.png') }}">
@@ -44,27 +44,27 @@
             }
         }
 
-        *{
+        * {
             font-family: "Poppins", sans-serif;
             font-weight: 400;
             font-style: normal;
         }
 
-        .text_title{
-            color: rgba(8,23,44,1);
+        .text_title {
+            color: rgba(8, 23, 44, 1);
             font-weight: bold;
         }
 
 
         .gradient-custom-2 {
             /* fallback for old browsers */
-            background: rgb(18,58,108);
+            background: rgb(18, 58, 108);
 
             /* Chrome 10-25, Safari 5.1-6 */
-            background: -webkit-radial-gradient(circle, rgba(18,58,108,1) 0%, rgba(8,23,44,1) 100%);
+            background: -webkit-radial-gradient(circle, rgba(18, 58, 108, 1) 0%, rgba(8, 23, 44, 1) 100%);
 
             /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-            background: radial-gradient(circle, rgba(18,58,108,1) 0%, rgba(8,23,44,1) 100%);
+            background: radial-gradient(circle, rgba(18, 58, 108, 1) 0%, rgba(8, 23, 44, 1) 100%);
         }
 
         @media (min-width: 768px) {
@@ -72,6 +72,7 @@
                 height: 100vh !important;
             }
         }
+
         @media (min-width: 769px) {
             .gradient-custom-2 {
                 border-top-right-radius: .3rem;
@@ -80,7 +81,7 @@
         }
 
 
-        .gobernacion{
+        .gobernacion {
             display: block;
             position: absolute;
             height: 100px;
@@ -89,7 +90,7 @@
             top: 3%;
         }
 
-        .gobernacion_start{
+        .gobernacion_start {
             display: block;
             position: absolute;
             height: 100px;
@@ -141,7 +142,7 @@
     </style>
     <script type="application/javascript">
         //Script para ejecurar el preloader
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             document.querySelector('#preloader').style.display = 'none';
             document.querySelector('.container').style.display = 'block';
         });
@@ -165,35 +166,31 @@
                         <div class="col-lg-6">
                             <div class="card-body p-md-5 mx-md-4 position-relative" id="card_body">
 
-                                <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.png') }}" alt="Logo Gobernación Guárico">
+                                <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.png') }}"
+                                     alt="Logo Gobernación Guárico">
 
-                                <div class="text-center @if(\Illuminate\Support\Facades\Route::currentRouteName() == 'web.index') mt-5 pt-5 @endif">
-                                    <a href="{{ route('web.index') }}" onclick="verCargando()">
-                                        <img class="img-fluid @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'web.index') mt-5 @endif @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'register') mt-sm-5 @else mt-sm-1 @endif" src="{{ asset('img/logo_alguarisa.png') }}" alt="Logo Alguarisa">
+                                <div
+                                    class="text-center @if(\Illuminate\Support\Facades\Route::currentRouteName() == 'web.index') mt-5 pt-5 @endif">
+                                    <a href="{{ route('web.index') }}" onclick="verCargandoAuth(this)">
+                                        <img
+                                            class="img-fluid @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'web.index') mt-5 @endif @if(\Illuminate\Support\Facades\Route::currentRouteName() != 'register') mt-sm-5 @else mt-sm-1 @endif"
+                                            src="{{ asset('img/logo_alguarisa.png') }}" alt="Logo Alguarisa">
                                     </a>
-                                    <h6 class="mt-1 mb-4 pb-1 text_title"><strong>Dirección de Tecnología y Sistemas.</strong></h6>
+                                    <h6 class="mt-1 mb-4 pb-1 text_title"><strong>Dirección de Tecnología y
+                                            Sistemas.</strong></h6>
                                 </div>
 
                                 @yield('content')
 
-                                {{--<div class="text-center pt-1 mb-5 pb-1">
-                                    @auth
-                                        <a class="text-muted" href="{{ route('profile.show') }}">{{ __('Profile') }}</a>
-                                        <a class="text-muted ms-3" href="{{ url('/dashboard') }}">Dashboard</a>
-                                    @else
-                                        <a class="text-muted" href="{{ route('login') }}">{{ __('Log in') }}</a>
-                                        @if (Route::has('register'))
-                                            <a class="text-muted ms-3" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                        @endif
-                                    @endauth
-                                </div>--}}
-
                             </div>
                         </div>
-                        <div class="col-lg-6 d-none d-lg-flex align-items-center gradient-custom-2" style="min-height: 70vh">
-                            <img class="gobernacion" src="{{ asset('img/logo_gobernacion_white.png') }}" alt="Logo Gobernación Guárico">
+                        <div class="col-lg-6 d-none d-lg-flex align-items-center gradient-custom-2"
+                             style="min-height: 70vh">
+                            <img class="gobernacion" src="{{ asset('img/logo_gobernacion_white.png') }}"
+                                 alt="Logo Gobernación Guárico">
                             <div class="text-white px-3 py-4 p-md-5 mx-md-4">
-                                <img class="img-fluid rounded-2 border border-light" src="{{ asset('img/logo_tecnologia.png') }}" alt="Logo Tecnología Alguarisa">
+                                <img class="img-fluid rounded-2 border border-light"
+                                     src="{{ asset('img/logo_tecnologia.png') }}" alt="Logo Tecnología Alguarisa">
                             </div>
                         </div>
                     </div>
@@ -220,7 +217,7 @@
                 if (!form.checkValidity()) {
                     event.preventDefault()
                     event.stopPropagation()
-                }else {
+                } else {
                     form.classList.add('opacity-50');
                     document.querySelector(".verCargando").classList.remove('d-none');
                 }
@@ -229,9 +226,20 @@
         })
     })()
 
-    function verCargando() {
-        document.querySelector("#card_body").classList.add('opacity-50');
-        document.querySelector(".verCargando").classList.remove('d-none');
+    function verCargandoAuth(enlace) {
+        event.preventDefault();
+        const card = document.querySelector("#card_body");
+        const spinner = document.querySelector(".verCargando");
+
+        card.classList.add('opacity-50');
+        spinner.classList.remove('d-none');
+
+        setTimeout(function () {
+            card.classList.remove('opacity-50');
+            spinner.classList.add('d-none');
+            //alert(enlace.href)
+            window.location.href = enlace.href;
+        }, 1000)
     }
 
     console.log('Hi!')

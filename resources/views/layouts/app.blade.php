@@ -31,7 +31,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/sweetalert2.js'])
 
         <!-- Styles -->
         @livewireStyles
@@ -60,5 +60,8 @@
         @stack('modals')
 
         @livewireScripts
+
+        @include('layouts.sweetAlert2')
+
     </body>
 </html>

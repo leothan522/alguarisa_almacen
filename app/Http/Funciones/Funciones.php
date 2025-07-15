@@ -1,6 +1,11 @@
 <?php
 //Funciones Personalizadas para el Proyecto
 
+function sweetAlert2(array $parametros = []): void
+{
+    session()->flash('sweetAlert2', $parametros);
+}
+
 function formatoMillares($cantidad, $decimal = 2): string
 {
     if (!is_numeric($cantidad)){

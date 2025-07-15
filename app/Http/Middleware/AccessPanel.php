@@ -18,6 +18,11 @@ class AccessPanel
     {
         if (Auth::check()){
             if (!Auth::user()->access_panel && !Auth::user()->is_root){
+                sweetAlert2([
+                    'icon' => 'info',
+                    'text' => 'No tienes acceso al Dashboard',
+                    'timer' => 3000,
+                ]);
                 return redirect()->route('home');
             }
         }

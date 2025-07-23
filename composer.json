@@ -5,6 +5,12 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Yonathan Castillo",
+            "email": "leothan522@gmail.com"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "althinect/filament-spatie-roles-permissions": "^2.3",

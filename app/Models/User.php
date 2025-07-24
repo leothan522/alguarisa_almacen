@@ -75,6 +75,6 @@ class User extends Authenticatable implements MustVerifyEmail, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->profile_photo_path ? asset('storage/'.$this->profile_photo_path) : null;
+        return $this->profile_photo_path ? verImagen($this->profile_photo_path) : null;
     }
 }

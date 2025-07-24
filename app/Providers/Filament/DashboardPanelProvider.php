@@ -4,8 +4,6 @@ namespace App\Providers\Filament;
 
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Http\Middleware\AccessPanel;
-use App\Http\Middleware\UserAdmin;
-use App\Models\User;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -21,10 +19,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
-use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -66,15 +61,11 @@ class DashboardPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->favicon(asset('favicons/favicon-32x32.png'))
             ->plugins([
-                /*FilamentEditProfilePlugin::make()
-                    ->shouldRegisterNavigation(false)
-                    ->shouldShowDeleteAccountForm(false),*/
                 FilamentSpatieRolesPermissionsPlugin::make()
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
                 ->label(fn() => \auth()->user()->name)
-                //->url(fn(): string => EditProfilePage::getUrl())
                 ->url(fn(): string => url('user/profile'))
             ]);
     }

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0056b3">
+    <meta name="robots" content="noindex">
+    <title>Sin conexión · ALGUARISA</title>
+    <style>
+        :root {
+            --color-primario: #0056b3;     /* Azul institucional */
+            --color-fondo: #f4f6f8;         /* Fondo claro */
+            --color-texto: #1e2a78;         /* Azul oscuro */
+            --color-secundario: #6c757d;    /* Gris neutro */
+            --color-acento: #f57c00;        /* Naranja cálido */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-fondo);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .offline-card {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            max-width: 420px;
+            width: 90%;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: aparecer 0.6s ease-out forwards;
+        }
+
+        .titulo-identidad {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-secundario);
+            margin-bottom: 1.2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--color-texto);
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--color-secundario);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-reintentar {
+            display: inline-block;
+            background-color: var(--color-acento);
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @keyframes aparecer {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="offline-card">
+    <div class="titulo-identidad">
+        ALGUARISA
+    </div>
+    <h1>Sin conexión a Internet</h1>
+    <p>No pudimos cargar la aplicación.<br />Por favor, verifica tu conexión y vuelve a intentarlo.</p>
+    <a href="./" class="btn-reintentar">Reintentar</a>
+</div>
+</body>
+</html>

@@ -25,6 +25,14 @@ class DashboardPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $widgets = [
+            AccountWidget::class,
+        ];
+
+        if (config('app.filament_info_widget')) {
+            $widgets[] = FilamentInfoWidget::class;
+        }
+
         return $panel
             ->default()
             ->id('dashboard')
@@ -38,10 +46,7 @@ class DashboardPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
-            ])
+            ->widgets($widgets)
             ->middleware(middleware: [
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

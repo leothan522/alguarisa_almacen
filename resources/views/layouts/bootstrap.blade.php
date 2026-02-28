@@ -68,7 +68,7 @@
 
         @media (max-height: 650px){
             #scale {
-                transform: scale(0.95); /* Reduce el tamaño al 95% */
+                transform: scale(0.80); /* Reduce el tamaño al 95% */
             }
         }
 

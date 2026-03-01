@@ -1,31 +1,55 @@
-<x-layouts::auth :title="__('Forgot password')">
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
+@extends('layouts.bootstrap')
 
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+@section('title', __('Forgot your password?'))
 
-        <form method="POST" action="{{ route('password.email') }}" class="flex flex-col gap-6">
-            @csrf
+@section('content')
+    <form class="needs-validation mb-3 mb-sm-auto" method="POST" action="{{ route('password.email') }}" novalidate>
+        @csrf
 
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                type="email"
-                required
-                autofocus
-                placeholder="email@example.com"
-            />
-
-            <flux:button variant="primary" type="submit" class="w-full" data-test="email-password-reset-link-button">
-                {{ __('Email password reset link') }}
-            </flux:button>
-        </form>
-
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
-            <span>{{ __('Or, return to') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+        <div class="mb-4">
+            <p class="fs-6 d-flex" style="text-align: justify !important;">
+                <small class="text-muted">{{ __('Enter your email to receive a password reset link') }}</small>
+            </p>
         </div>
-    </div>
-</x-layouts::auth>
+
+        @if (session('status'))
+            <div class="mb-4">
+                <p class="fs-6 d-flex text-success fw-normal" style="text-align: justify !important;">
+                    <small>{{ session('status') }}</small>
+                </p>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div>
+                <ul class="fs-6 text-danger fw-normal">
+                    @foreach ($errors->all() as $error)
+                        <li><small>{{ $error }}</small></li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="form-floating mb-3 has-validation">
+            <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}"
+                   placeholder="name@example.com" required autofocus/>
+            <label for="email">{{ __('Email') }}</label>
+            <div class="invalid-feedback">
+                Por favor ingrese su {{ __('Email') }}.
+            </div>
+        </div>
+
+        <div class="text-center pt-1 pb-1 d-grid gap-2">
+            <button type="submit" class="btn shadow text-white btn-block  gradient-custom-2">{{ __('Email password reset link') }}</button>
+        </div>
+
+        <div x-data class="d-flex align-items-center justify-content-center mt-4">
+            @if (Route::has('register'))
+                <p class="mb-0 me-2">{{ __('Or, return to') }}</p>
+                <a href="{{ route('register') }}" class="text-muted" @click="mostrarPreloader()">{{ __('log in') }}</a>
+            @endif
+        </div>
+
+    </form>
+
+@endsection

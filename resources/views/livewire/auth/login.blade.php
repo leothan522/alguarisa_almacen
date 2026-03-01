@@ -71,8 +71,8 @@
 
         <div x-data class="d-flex align-items-center justify-content-center">
             @if (Route::has('register'))
-                <p class="mb-0 me-2">¿No tienes una cuenta?</p>
-                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-sm" @click="mostrarPreloader()">{{ __('Register') }}</a>
+                <p class="mb-0 me-2">{{ __('Don\'t have an account?') }}</p>
+                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-sm" @click="mostrarPreloader()">{{ __('Sign up') }}</a>
             @endif
         </div>
 

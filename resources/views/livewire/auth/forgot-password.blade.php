@@ -44,10 +44,8 @@
         </div>
 
         <div x-data class="d-flex align-items-center justify-content-center mt-4">
-            @if (Route::has('register'))
-                <p class="mb-0 me-2">{{ __('Or, return to') }}</p>
-                <a href="{{ route('register') }}" class="text-muted" @click="mostrarPreloader()">{{ __('log in') }}</a>
-            @endif
+            <p class="mb-0 me-2">{{ __('Or, return to') }}</p>
+            <a href="{{ route('login') }}" class="text-muted" @click="mostrarPreloader()">{{ __('log in') }}</a>
         </div>
 
     </form>

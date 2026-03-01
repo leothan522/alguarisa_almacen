@@ -9,3 +9,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+Route::get('/instalar-app', function () {
+    // $qrAndroid = qrCodeGenerate(\route('descargar-app.android'), null, null, 'qr-android-download');
+    $qrIos = qrCodeGenerate(\route('home'), null, null, 'qr-ios-download');
+
+    return view('descargar-app')
+        // ->with('qrAndroid', $qrAndroid)
+        ->with('qrIos', $qrIos);
+})->name('instalar-app');

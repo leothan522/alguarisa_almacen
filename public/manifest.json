@@ -1,6 +1,6 @@
 {
     "name": "Alimentos del Guárico S.A.",
-    "short_name": "Alguarisa",
+    "short_name": "Almacen ALGUARISA",
     "description": "Plataforma de organización de Alimentos del Guárico S.A.",
     "icons": [
         {
@@ -28,7 +28,7 @@
             "purpose": "maskable"
         }
     ],
-    "theme_color": "#ffffff",
+    "theme_color": "#123A6C",
     "background_color": "#ffffff",
     "display": "standalone",
     "scope": "./",

@@ -1,6 +1,6 @@
 @extends('layouts.bootstrap')
 
-@section('title', __('Welcome')." - ". config('app.name', 'Laravel'))
+@section('title', __('Welcome'))
 
 @section('content')
 
@@ -13,6 +13,7 @@
             @if (Route::has('register'))
                 <a class="text-muted ms-3" href="{{ route('register') }}" @click="mostrarPreloader()">{{ __('Register') }}</a>
             @endif
+            <a class="text-muted ms-3 text-nowrap" href="{{ route('instalar-app') }}" @click="mostrarPreloader">Instalar App</a>
         @endauth
     </div>
 

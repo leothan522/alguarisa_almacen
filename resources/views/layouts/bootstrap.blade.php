@@ -126,7 +126,7 @@
             height: 100px;
             width: 100px;
             left: 3%;
-            top: 7%;
+            top: 3%;
         }
 
 
@@ -148,7 +148,7 @@
                         <div class="col-lg-6 d-flex align-items-center">
                             <div class="card-body p-md-5 mx-md-4" id="card_body">
 
-                                <img class="gobernacion_start d-lg-none" src="{{ asset('img/logo_gobernacion.png') }}" alt="Logo Gobernación Guárico">
+                                <img class="gobernacion_start d-lg-none @if(\Illuminate\Support\Facades\Route::currentRouteName() == 'home') mt-2 @endif" src="{{ asset('img/logo_gobernacion.png') }}" alt="Logo Gobernación Guárico">
 
                                 <div class="row d-sm-block d-md-none" style="min-height: 50px;">&nbsp;</div>
 

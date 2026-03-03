@@ -59,14 +59,26 @@ class DashboardPanelProvider extends PanelProvider
             ->userMenuItems([
                 Action::make('settings')
                     ->label(__('Settings'))
-                    ->url(fn (): string => route('profile.edit'))
-                    ->icon(Heroicon::OutlinedCog),
-                'logout' => fn (Action $action) => $action->label(__('Log out'))->icon(Heroicon::ArrowRightStartOnRectangle),
+                    ->url(fn(): string => route('profile.edit'))
+                    ->icon(Heroicon::OutlinedCog)
+                    ->extraAttributes(['onclick' => "Alpine.store('loader').show()"]),
+                'logout' => fn(Action $action) => $action
+                    ->label(__('Log out'))
+                    ->icon(Heroicon::ArrowRightStartOnRectangle)
+                    ->extraAttributes(['onclick' => "Alpine.store('loader').show()"]),
             ])
             ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn (): string => view('filament.footer')
+                fn(): string => view('filament.footer')
+            )
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn(): string => view('filament.loader-css')
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn(): string => view('filament.loader-html')
             );
     }
 

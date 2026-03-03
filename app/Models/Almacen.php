@@ -18,4 +18,10 @@ class Almacen extends Model
     {
         return $this->hasMany(Recepcion::class, 'almacenes_id', 'id');
     }
+
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(Stock::class, 'almacenes_id', 'id');
+    }
+
 }

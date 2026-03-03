@@ -17,4 +17,9 @@ class Plan extends Model
         return $this->hasMany(Recepcion::class, 'planes_id', 'id');
     }
 
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(Stock::class, 'planes_id', 'id');
+    }
+
 }

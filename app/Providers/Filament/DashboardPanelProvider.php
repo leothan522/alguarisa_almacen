@@ -12,6 +12,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -62,7 +63,11 @@ class DashboardPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedCog),
                 'logout' => fn (Action $action) => $action->label(__('Log out'))->icon(Heroicon::ArrowRightStartOnRectangle),
             ])
-            ->sidebarCollapsibleOnDesktop();
+            ->sidebarCollapsibleOnDesktop()
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => view('filament.footer')
+            );
     }
 
     protected function widget(): array

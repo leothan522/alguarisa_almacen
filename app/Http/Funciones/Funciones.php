@@ -198,7 +198,7 @@ function fechaEnLetras($fecha, $isoFormat = null): string
     return \Carbon\Carbon::parse($fecha)->isoFormat($format);
 }
 
-/*function numSizeCodigo(): int
+function numSizeCodigo(): int
 {
     $num = 6;
     $parametro = \App\Models\Parametro::where('nombre', 'size_codigo')->first();
@@ -209,7 +209,7 @@ function fechaEnLetras($fecha, $isoFormat = null): string
     }
 
     return $num;
-}*/
+}
 
 function formatearNumeroWidget($valor): string
 {

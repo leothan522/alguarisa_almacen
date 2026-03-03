@@ -15,6 +15,7 @@ class PlanSeeder extends Seeder
         Plan::create([
             'nombre' => 'Bodega móvil',
             'unidad_medida' => 'KG',
+            'cuspal' => true,
         ]);
 
         Plan::create([

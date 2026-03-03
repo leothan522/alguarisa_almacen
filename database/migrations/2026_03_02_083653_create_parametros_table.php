@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('planes', function (Blueprint $table) {
+        Schema::create('parametros', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
-            $table->string('unidad_medida')->default('KG');
-            $table->boolean('cuspal')->default(false);
+            $table->bigInteger('valor_id')->nullable();
+            $table->text('valor_texto')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('planes');
+        Schema::dropIfExists('parametros');
     }
 };

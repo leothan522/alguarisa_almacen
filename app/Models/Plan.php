@@ -10,7 +10,7 @@ class Plan extends Model
 {
     use SoftDeletes;
     protected $table = 'planes';
-    protected $fillable = ['nombre', 'unidad_medida'];
+    protected $fillable = ['nombre', 'unidad_medida', 'cuspal'];
 
     public function recepciones(): HasMany
     {

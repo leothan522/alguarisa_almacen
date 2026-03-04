@@ -6,12 +6,15 @@ use App\Models\Responsable;
 use App\Models\Rubro;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Str;
@@ -45,7 +48,7 @@ class RecepcionForm
                                             ->label('Unidad')
                                             ->options([
                                                 'KG' => 'KG',
-                                                'UND' => 'UND',
+                                                'LT' => 'LT',
                                             ])
                                             ->required(),
                                     ])
@@ -55,18 +58,36 @@ class RecepcionForm
                                     ->getOptionLabelFromRecordUsing(fn (Rubro $record): string => Str::upper($record->nombre))
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(callback: function (?string $state, ?string $old, Set $set) {
+                                        $rubro = Rubro::find($state);
+                                        if ($rubro) {
+                                            $set('peso_unitario', $rubro->peso_unitario);
+                                            $set('rubros_nombre', $rubro->nombre);
+                                            $set('rubros_unidad_medida', $rubro->unidad_medida);
+                                        }
+                                    }),
                                 DatePicker::make('fecha_fabricacion'),
                                 DatePicker::make('fecha_vencimiento'),
                                 TextInput::make('cantidad_unidades')
                                     ->label('Cantidad')
                                     ->integer()
-                                    ->required(),
+                                    ->required()
+                                    ->live(onBlur: true),
                                 TextInput::make('peso_unitario')
                                     ->label('Peso Unitario')
-                                    ->suffix('Total: 0,00')
                                     ->numeric()
-                                    ->required(),
+                                    ->step(0.01)
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->suffix(function (Get $get): string {
+                                        $cantidad = $get('cantidad_unidades');
+                                        $peso = $get('peso_unitario');
+                                        $total = $cantidad * $peso;
+
+                                        return 'Total: '.formatoMillares($total).' KG';
+                                    }),
                                 Select::make('tipo_adquisicion')
                                     ->label('Tipo adquisición')
                                     ->options([
@@ -74,7 +95,8 @@ class RecepcionForm
                                         'propia' => 'PROPIA',
                                     ])
                                     ->required(),
-
+                                Hidden::make('rubros_nombre'),
+                                Hidden::make('rubros_unidad_medida'),
                             ])
                             ->columns(3)
                             ->columnSpanFull(),

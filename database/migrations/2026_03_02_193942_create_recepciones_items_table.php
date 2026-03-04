@@ -25,7 +25,6 @@ return new class extends Migration
             $table->foreign('recepciones_id')->references('id')->on('recepciones')->cascadeOnDelete();
             $table->foreign('rubros_id')->references('id')->on('rubros')->nullOnDelete();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

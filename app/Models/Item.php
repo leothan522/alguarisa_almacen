@@ -16,6 +16,7 @@ class Item extends Model
         'rubros_unidad_medida',
         'cantidad_unidades',
         'peso_unitario',
+        'total',
         'fecha_fabricacion',
         'fecha_vencimiento',
         'tipo_adquisicion',

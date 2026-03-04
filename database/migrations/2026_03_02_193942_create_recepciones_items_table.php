@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('rubros_unidad_medida')->nullable();
             $table->integer('cantidad_unidades')->nullable();
             $table->decimal('peso_unitario', 12);
+            $table->decimal('total', 12)->nullable();
             $table->date('fecha_fabricacion')->nullable();
             $table->date('fecha_vencimiento')->nullable();
             $table->string('tipo_adquisicion')->default('asignacion');

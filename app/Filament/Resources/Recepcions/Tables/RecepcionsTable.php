@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Recepcions\Tables;
 
+use App\Models\Recepcion;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -23,50 +25,26 @@ class RecepcionsTable
                     ->date()
                     ->sortable(),
                 TextColumn::make('hora')
-                    ->time()
-                    ->sortable(),
-                TextColumn::make('almacenes_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('planes_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jefes_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jefes_nombre')
-                    ->searchable(),
-                TextColumn::make('jefes_cedula')
-                    ->searchable(),
-                TextColumn::make('responsables_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->time('h:i a'),
+                TextColumn::make('plan.nombre'),
                 TextColumn::make('responsables_nombre')
+                    ->label('Responsable')
+                    ->description(fn (Recepcion $record): string => $record->responsable->telefono ?? '-')
                     ->searchable(),
-                TextColumn::make('responsables_cedula')
-                    ->searchable(),
-                TextColumn::make('responsables_telefono')
-                    ->searchable(),
-                TextColumn::make('responsables_empresa')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('items_sum_total')
+                    ->label('Total')
+                    ->sum('items', 'total')
+                    ->numeric()
+                    ->suffix(' KG')
+                    ->alignEnd(),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

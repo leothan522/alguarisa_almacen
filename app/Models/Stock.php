@@ -15,10 +15,8 @@ class Stock extends Model
         'planes_id',
         'rubros_id',
         'asignacion_cantidad',
-        'asignacion_peso',
         'asignacion_total',
         'propia_cantidad',
-        'propia_peso',
         'propia_total',
         'total',
     ];

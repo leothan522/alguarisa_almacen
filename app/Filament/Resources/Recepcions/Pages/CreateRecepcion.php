@@ -31,4 +31,15 @@ class CreateRecepcion extends CreateRecord
 
         return $data;
     }
+
+    protected function afterCreate(): void
+    {
+        // $this->record es la instancia de Recepcion recién creada
+        $this->record->sincronizarStock();
+    }
+
+    protected function afterSave(): void
+    {
+        $this->record->sincronizarStock();
+    }
 }

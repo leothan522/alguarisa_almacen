@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Recepcion;
+use App\Observers\RecepcionObserver;
 use Carbon\CarbonImmutable;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse;
 use Illuminate\Support\Facades\Date;
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        Recepcion::observe(RecepcionObserver::class);
     }
 
     /**

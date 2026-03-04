@@ -57,4 +57,45 @@ class Recepcion extends Model
     {
         return $this->hasMany(Item::class, 'recepciones_id', 'id');
     }
+
+    public function sincronizarStock(): void
+    {
+        // Obtenemos los rubros directamente de la tabla de items para este registro
+        $rubrosIds = \DB::table('recepciones_items')
+            ->where('recepciones_id', $this->id) // Usamos el nombre correcto de tu FK
+            ->pluck('rubros_id')
+            ->unique();
+
+        foreach ($rubrosIds as $rubroId) {
+            // Buscamos o creamos el Stock por Plan y Rubro
+            $stock = \App\Models\Stock::firstOrNew([
+                'planes_id' => $this->planes_id,
+                'rubros_id' => $rubroId,
+                'almacenes_id' => $this->almacenes_id ?? 1,
+            ]);
+
+            // Cálculo sumando TODOS los movimientos de este Rubro en este Plan
+            $totales = \DB::table('recepciones_items')
+                ->join('recepciones', 'recepciones_items.recepciones_id', '=', 'recepciones.id')
+                ->where('recepciones.planes_id', $this->planes_id)
+                ->where('recepciones_items.rubros_id', $rubroId)
+                ->whereNull('recepciones.deleted_at')
+                ->selectRaw("
+                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN cantidad_unidades ELSE 0 END) as asig_cant,
+                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as asig_total,
+                SUM(CASE WHEN tipo_adquisicion = 'propia' THEN cantidad_unidades ELSE 0 END) as prop_cant,
+                SUM(CASE WHEN tipo_adquisicion = 'propia' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as prop_total
+            ")
+                ->first();
+
+            // Mapeo exacto a tus columnas de la tabla 'stocks'
+            $stock->fill([
+                'asignacion_cantidad' => $totales->asig_cant ?? 0,
+                'asignacion_total' => $totales->asig_total ?? 0,
+                'propia_cantidad' => $totales->prop_cant ?? 0,
+                'propia_total' => $totales->prop_total ?? 0,
+                'total' => ($totales->asig_total ?? 0) + ($totales->prop_total ?? 0),
+            ])->save();
+        }
+    }
 }

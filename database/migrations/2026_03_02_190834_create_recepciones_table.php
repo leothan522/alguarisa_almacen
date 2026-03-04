@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('numero');
             $table->date('fecha');
             $table->time('hora');
-            $table->text('observacion');
+            $table->text('observacion')->nullable();
             $table->bigInteger('almacenes_id')->unsigned();
             $table->bigInteger('planes_id')->unsigned();
             $table->bigInteger('jefes_id')->unsigned()->nullable();

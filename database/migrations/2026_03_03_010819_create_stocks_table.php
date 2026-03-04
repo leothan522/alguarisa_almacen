@@ -17,10 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('planes_id');
             $table->unsignedBigInteger('rubros_id');
             $table->integer('asignacion_cantidad')->nullable();
-            $table->decimal('asignacion_peso', 12)->nullable();
             $table->decimal('asignacion_total', 12)->nullable();
             $table->integer('propia_cantidad')->nullable();
-            $table->decimal('propia_peso', 12)->nullable();
             $table->decimal('propia_total', 12)->nullable();
             $table->decimal('total', 12)->nullable();
             $table->foreign('almacenes_id')->references('id')->on('almacenes')->cascadeOnDelete();

@@ -19,6 +19,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class ParametroResource extends Resource
@@ -32,6 +33,17 @@ class ParametroResource extends Resource
     protected static ?int $navigationSort = 99;
 
     protected static ?string $recordTitleAttribute = 'nombre';
+
+    protected static ?int $globalSearchSort = 99;
+
+    public static function getGlobalSearchResultUrl(Model $record): ?string
+    {
+        // Usamos los parámetros nativos de Filament 5 para abrir el modal automáticamente
+        return self::getUrl('index', [
+            'tableAction' => 'edit', // Nombre de la acción en tu método table()
+            'tableActionRecord' => $record->getKey(), // El ID del registro
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -94,7 +106,7 @@ class ParametroResource extends Resource
     public static function getWidgets(): array
     {
         return [
-            ParametroWidget::class
+            ParametroWidget::class,
         ];
     }
 }

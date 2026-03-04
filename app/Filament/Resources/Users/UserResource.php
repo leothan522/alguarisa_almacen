@@ -29,6 +29,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use UnitEnum;
@@ -48,6 +50,30 @@ class UserResource extends Resource
     protected static ?string $slug = 'usuarios';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
+    {
+        return Str::ucwords($record->name);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return ['Email' => $record->email];
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): ?string
+    {
+        // Usamos los parámetros nativos de Filament 5 para abrir el modal automáticamente
+        return self::getUrl('index', [
+            'tableAction' => 'edit', // Nombre de la acción en tu método table()
+            'tableActionRecord' => $record->getKey(), // El ID del registro
+        ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -93,7 +119,7 @@ class UserResource extends Resource
                     ])
                     ->dense()
                     ->columnSpanFull(),
-                Text::make(fn (User $record): string => $record->login_count.' Visitas')
+                Text::make(fn(User $record): string => $record->login_count . ' Visitas')
                     ->size(TextSize::Medium)
                     ->badge()
                     ->icon(Heroicon::OutlinedFlag)
@@ -111,15 +137,15 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('user')
                     ->label(__('User'))
-                    ->default(fn (User $record): string => Str::ucwords($record->name))
-                    ->description(fn (User $record): string => Str::lower($record->email))
+                    ->default(fn(User $record): string => Str::ucwords($record->name))
+                    ->description(fn(User $record): string => Str::lower($record->email))
                     ->wrap()
-                    ->icon(fn (User $record): Heroicon => match (self::getEstatus($record)) {
+                    ->icon(fn(User $record): Heroicon => match (self::getEstatus($record)) {
                         'activo' => Heroicon::OutlinedShieldCheck,
                         'inactivo' => Heroicon::OutlinedNoSymbol,
                         default => Heroicon::OutlinedClock
                     })
-                    ->iconColor(fn (User $record): string => match (self::getEstatus($record)) {
+                    ->iconColor(fn(User $record): string => match (self::getEstatus($record)) {
                         'activo' => 'success',
                         'inactivo' => 'danger',
                         default => 'gray'
@@ -127,7 +153,7 @@ class UserResource extends Resource
                     ->hiddenFrom('md'),
                 TextColumn::make('name')
                     ->label(__('Name'))
-                    ->formatStateUsing(fn (string $state): string => Str::ucwords($state))
+                    ->formatStateUsing(fn(string $state): string => Str::ucwords($state))
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('email')
@@ -136,13 +162,13 @@ class UserResource extends Resource
                     ->visibleFrom('md'),
                 IconColumn::make('estatus')
                     ->label('Estatus')
-                    ->default(fn (User $record): string => self::getEstatus($record))
-                    ->icon(fn (string $state): Heroicon => match ($state) {
+                    ->default(fn(User $record): string => self::getEstatus($record))
+                    ->icon(fn(string $state): Heroicon => match ($state) {
                         'activo' => Heroicon::OutlinedShieldCheck,
                         'inactivo' => Heroicon::OutlinedNoSymbol,
                         default => Heroicon::OutlinedClock
                     })
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'activo' => 'success',
                         'inactivo' => 'danger',
                         default => 'gray'
@@ -162,7 +188,7 @@ class UserResource extends Resource
                     ->visibleFrom('md'),
                 ToggleColumn::make('is_active')
                     ->alignCenter()
-                    ->disabled(fn (User $record): bool => $record->is_root)
+                    ->disabled(fn(User $record): bool => $record->is_root)
                     ->visibleFrom('md'),
             ])
             ->filters([
@@ -187,8 +213,8 @@ class UserResource extends Resource
                             $record->save();
                         })
                         ->modalWidth(Width::ExtraSmall)
-                        ->hidden(fn (User $record): bool => self::isDisabled($record))
-                        ->disabled(fn (User $record): bool => self::isDisabled($record)),
+                        ->hidden(fn(User $record): bool => self::isDisabled($record))
+                        ->disabled(fn(User $record): bool => self::isDisabled($record)),
                     Action::make('validar_email')
                         ->label('Verificar Email')
                         ->icon(Heroicon::CheckCircle)
@@ -197,8 +223,8 @@ class UserResource extends Resource
                             $record->save();
                         })
                         ->requiresConfirmation()
-                        ->hidden(fn (User $record): bool => ! is_null($record->email_verified_at))
-                        ->disabled(fn (User $record): bool => self::isDisabled($record)),
+                        ->hidden(fn(User $record): bool => !is_null($record->email_verified_at))
+                        ->disabled(fn(User $record): bool => self::isDisabled($record)),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
@@ -241,6 +267,6 @@ class UserResource extends Resource
 
     protected static function isDisabled($record): bool
     {
-        return (auth()->id() == $record->id) || ! isAdmin() || $record->is_root;
+        return (auth()->id() == $record->id) || !isAdmin() || $record->is_root;
     }
 }

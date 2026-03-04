@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\AccessPanel;
+use App\Http\Middleware\UserActive;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -51,6 +53,8 @@ class DashboardPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 'verified',
+                AccessPanel::class,
+                UserActive::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -59,10 +63,10 @@ class DashboardPanelProvider extends PanelProvider
             ->userMenuItems([
                 Action::make('settings')
                     ->label(__('Settings'))
-                    ->url(fn(): string => route('profile.edit'))
+                    ->url(fn (): string => route('profile.edit'))
                     ->icon(Heroicon::OutlinedCog)
                     ->extraAttributes(['onclick' => "Alpine.store('loader').show()"]),
-                'logout' => fn(Action $action) => $action
+                'logout' => fn (Action $action) => $action
                     ->label(__('Log out'))
                     ->icon(Heroicon::ArrowRightStartOnRectangle)
                     ->extraAttributes(['onclick' => "Alpine.store('loader').show()"]),
@@ -70,15 +74,15 @@ class DashboardPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn(): string => view('filament.footer')
+                fn (): string => view('filament.footer')
             )
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
-                fn(): string => view('filament.loader-css')
+                fn (): string => view('filament.loader-css')
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn(): string => view('filament.loader-html')
+                fn (): string => view('filament.loader-html')
             );
     }
 

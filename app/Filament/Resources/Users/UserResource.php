@@ -126,9 +126,8 @@ class UserResource extends Resource
                     ->badge()
                     ->icon(Heroicon::OutlinedFlag)
                     ->hiddenOn('create'),
-                Hidden::make('access_panel')
-                    ->default(true)
-                    ->disabledOn('edit'),
+                Toggle::make('access_panel')
+                    ->default(true),
             ]);
     }
 

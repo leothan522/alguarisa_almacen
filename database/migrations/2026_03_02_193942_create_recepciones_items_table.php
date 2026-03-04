@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('recepciones_id');
             $table->unsignedBigInteger('rubros_id')->nullable();
-            $table->string('rubros_nombre');
-            $table->string('rubros_unidad_medida');
-            $table->integer('cantidad_unidades');
+            $table->string('rubros_nombre')->nullable();
+            $table->string('rubros_unidad_medida')->nullable();
+            $table->integer('cantidad_unidades')->nullable();
             $table->decimal('peso_unitario', 12);
             $table->date('fecha_fabricacion')->nullable();
             $table->date('fecha_vencimiento')->nullable();

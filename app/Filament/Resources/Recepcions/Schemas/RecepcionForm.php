@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\Recepcions\Schemas;
 
 use App\Models\Responsable;
+use App\Models\Rubro;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -52,12 +54,12 @@ class RecepcionForm
                                     ->label('Teléfono')
                                     ->tel()
                                     ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
-                                TextInput::make('empresa')
+                                TextInput::make('empresa'),
                             ])
                             ->createOptionAction(function (Action $action) {
                                 return $action->modalWidth(Width::ExtraSmall);
                             })
-                            ->getOptionLabelFromRecordUsing(fn(Responsable $record): string => Str::upper(formatoMillares($record->cedula, 0) . " " . $record->nombre))
+                            ->getOptionLabelFromRecordUsing(fn (Responsable $record): string => Str::upper(formatoMillares($record->cedula, 0).' '.$record->nombre))
                             ->searchable(['nombre', 'cedula'])
                             ->preload()
                             ->required(),
@@ -65,8 +67,60 @@ class RecepcionForm
                     ->compact(),
                 Section::make('Rubros')
                     ->schema([
+                        Repeater::make('items')
+                            ->label('Rubros')
+                            ->hiddenLabel()
+                            ->relationship()
+                            ->schema([
+                                Select::make('rubros_id')
+                                    ->relationship(name: 'rubro', titleAttribute: 'nombre')
+                                    ->createOptionForm([
+                                        TextInput::make('nombre')
+                                            ->label('Rubro')
+                                            ->required(),
+                                        TextInput::make('peso_unitario')
+                                            ->label('Peso Unitario')
+                                            ->numeric()
+                                            ->required(),
+                                        Select::make('unidad_medida')
+                                            ->label('Unidad')
+                                            ->options([
+                                                'KG' => 'KG',
+                                                'UND' => 'UND',
+                                            ])
+                                            ->required(),
+                                    ])
+                                    ->createOptionAction(callback: function (Action $action) {
+                                        return $action->modalWidth(Width::ExtraSmall);
+                                    })
+                                    ->getOptionLabelFromRecordUsing(fn (Rubro $record): string => Str::upper($record->nombre))
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(),
+                                DatePicker::make('fecha_fabricacion'),
+                                DatePicker::make('fecha_vencimiento'),
+                                TextInput::make('cantidad_unidades')
+                                    ->label('Cantidad')
+                                    ->integer()
+                                    ->required(),
+                                TextInput::make('peso_unitario')
+                                    ->label('Peso Unitario')
+                                    ->suffix('Total: 0,00')
+                                    ->numeric()
+                                    ->required(),
+                                Select::make('tipo_adquisicion')
+                                    ->label('Tipo adquisición')
+                                    ->options([
+                                        'asignacion' => 'ASIGNACIÓN',
+                                        'propia' => 'PROPIA',
+                                    ])
+                                    ->required(),
 
+                            ])
+                            ->columns(3)
+                            ->columnSpanFull(),
                     ])
+                    ->compact()
                     ->columns()
                     ->columnSpanFull(),
                 Section::make('Observación')

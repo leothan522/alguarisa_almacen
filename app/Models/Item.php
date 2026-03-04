@@ -26,4 +26,10 @@ class Item extends Model
     {
         return $this->belongsTo(Recepcion::class, 'recepciones_id', 'id');
     }
+
+    public function rubro(): BelongsTo
+    {
+        return $this->belongsTo(Rubro::class, 'rubros_id', 'id');
+    }
+
 }

@@ -17,4 +17,9 @@ class Rubro extends Model
         return $this->hasMany(Stock::class, 'rubros_id', 'id');
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(Item::class, 'rubros_id', 'id');
+    }
+
 }

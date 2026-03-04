@@ -23,6 +23,8 @@ class RecepcionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
 
+    protected static ?string $slug = 'Recepciones';
+
     protected static ?string $modelLabel = 'Recepción';
 
     protected static ?string $pluralModelLabel = 'Recepciones';

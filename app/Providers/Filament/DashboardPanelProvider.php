@@ -71,6 +71,7 @@ class DashboardPanelProvider extends PanelProvider
                     ->icon(Heroicon::ArrowRightStartOnRectangle)
                     ->extraAttributes(['onclick' => "Alpine.store('loader').show()"]),
             ])
+            ->resourceCreatePageRedirect('index')
             ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::BODY_END,

@@ -9,8 +9,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Plan extends Model
 {
     use SoftDeletes;
+
     protected $table = 'planes';
-    protected $fillable = ['nombre', 'unidad_medida', 'cuspal'];
+
+    protected $fillable = [
+        'codigo',
+        'nombre',
+        'unidad_medida',
+        'cuspal'];
 
     public function recepciones(): HasMany
     {
@@ -21,5 +27,4 @@ class Plan extends Model
     {
         return $this->hasMany(Stock::class, 'planes_id', 'id');
     }
-
 }

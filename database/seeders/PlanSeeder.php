@@ -13,12 +13,14 @@ class PlanSeeder extends Seeder
     public function run(): void
     {
         Plan::create([
+            'codigo' => 'BM',
             'nombre' => 'Bodega móvil',
             'unidad_medida' => 'KG',
             'cuspal' => true,
         ]);
 
         Plan::create([
+            'codigo' => 'MC',
             'nombre' => 'Módulos CLAP',
             'unidad_medida' => 'UND',
         ]);

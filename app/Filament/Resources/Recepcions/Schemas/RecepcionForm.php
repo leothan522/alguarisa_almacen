@@ -38,7 +38,7 @@ class RecepcionForm
                 Section::make('¿Quien entrega? ')
                     ->schema([
                         Select::make('responsables_id')
-                            ->relationship(name: 'responsable', titleAttribute: 'nombre', ignoreRecord: true)
+                            ->relationship(name: 'responsable', titleAttribute: 'nombre')
                             ->createOptionForm([
                                 TextInput::make('cedula')
                                     ->label('Cédula')
@@ -63,6 +63,12 @@ class RecepcionForm
                             ->required(),
                     ])
                     ->compact(),
+                Section::make('Rubros')
+                    ->schema([
+
+                    ])
+                    ->columns()
+                    ->columnSpanFull(),
                 Section::make('Observación')
                     ->schema([
                         Textarea::make('observacion')

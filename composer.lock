@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "74c8c10536af3e38b70ba1262a54bb64",
+    "content-hash": "e0f27a8ff63159cec0d59b6510ac2a9b",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -617,6 +617,61 @@
                 }
             ],
             "time": "2024-07-16T11:13:48+00:00"
+        },
+        {
+            "name": "codedge/laravel-fpdf",
+            "version": "1.12.3",
+            "source": {
+                "type": "git",
+                "url": "https://codeberg.org/codedge/laravel-fpdf",
+                "reference": "98b01bc4c61f2ec70a5ec120106507961481d593"
+            },
+            "require": {
+                "illuminate/support": "^11.0 || ^12.0",
+                "php": "~8.3 || ~8.4"
+            },
+            "require-dev": {
+                "ergebnis/composer-normalize": "^2.39",
+                "orchestra/testbench": "^9.0 || ^10.0",
+                "phpunit/phpunit": "^10.5 || ^11.5.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Fpdf": "Codedge\\Fpdf\\Facades\\Fpdf"
+                    },
+                    "providers": [
+                        "Codedge\\Fpdf\\FpdfServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Codedge\\Fpdf\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Holger Lösken",
+                    "email": "holger.loesken@codedge.de"
+                }
+            ],
+            "description": "Laravel package to include Fpdf. It ships with Fpdf 1.86.",
+            "keywords": [
+                "fpdf",
+                "laravel",
+                "pdf"
+            ],
+            "support": {
+                "issues": "https://github.com/codedge/laravel-fpdf/issues",
+                "source": "https://github.com/codedge/laravel-fpdf"
+            },
+            "time": "2025-03-14T15:54:58+00:00"
         },
         {
             "name": "codezero/browser-locale",

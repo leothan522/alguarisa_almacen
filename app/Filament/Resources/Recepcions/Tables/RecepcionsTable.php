@@ -25,26 +25,26 @@ class RecepcionsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn(Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
-                    ->default(fn(Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
-                    ->description(fn(Recepcion $record): string => $record->plan->nombre)
+                    ->default(fn (Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
+                    ->description(fn (Recepcion $record): string => $record->plan->nombre)
                     ->hiddenFrom('md')
-                    ->icon(fn(Recepcion $record): Heroicon => match (self::getEstatus($record)) {
+                    ->icon(fn (Recepcion $record): Heroicon => match (self::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_sealed' => Heroicon::OutlinedCheckBadge,
                         default => Heroicon::OutlinedClock
                     })
-                    ->iconColor(fn(Recepcion $record): string => match (self::getEstatus($record)) {
+                    ->iconColor(fn (Recepcion $record): string => match (self::getEstatus($record)) {
                         'is_complete' => 'success',
                         'is_sealed' => 'info',
                         default => 'gray'
                     }),
                 TextColumn::make('fecha')
                     ->date()
-                    ->description(fn(Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
+                    ->description(fn (Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('numero')
@@ -56,8 +56,8 @@ class RecepcionsTable
                     ->visibleFrom('md'),
                 TextColumn::make('responsables_nombre')
                     ->label('Entrega')
-                    ->description(fn(Recepcion $record): string => $record->responsables_telefono ?? '-')
-                    ->formatStateUsing(fn(string $state): string => Str::upper($state))
+                    ->description(fn (Recepcion $record): string => $record->responsables_telefono ?? '-')
+                    ->formatStateUsing(fn (string $state): string => Str::upper($state))
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('items_sum_total')
@@ -68,13 +68,13 @@ class RecepcionsTable
                     ->alignEnd(),
                 IconColumn::make('estatus')
                     ->label('Estatus')
-                    ->default(fn(Recepcion $record): string => self::getEstatus($record))
-                    ->icon(fn(string $state): Heroicon => match ($state) {
+                    ->default(fn (Recepcion $record): string => self::getEstatus($record))
+                    ->icon(fn (string $state): Heroicon => match ($state) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_sealed' => Heroicon::OutlinedCheckBadge,
                         default => Heroicon::OutlinedClock
                     })
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'is_complete' => 'success',
                         'is_sealed' => 'info',
                         default => 'gray'
@@ -89,6 +89,11 @@ class RecepcionsTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    Action::make('export-pdf')
+                        ->label('Imprimir')
+                        ->icon(Heroicon::OutlinedPrinter)
+                        ->url(fn (Recepcion $record): string => route('dashboard.export-pdf.recepcion', $record->id))
+                        ->openUrlInNewTab(),
                     EditAction::make(),
                 ]),
             ])

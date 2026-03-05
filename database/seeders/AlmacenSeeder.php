@@ -16,7 +16,7 @@ class AlmacenSeeder extends Seeder
     public function run(): void
     {
         Almacen::create([
-            'nombre' => 'Almacen Principal',
+            'nombre' => 'Almacén Principal',
             'is_main' => true,
         ]);
     }

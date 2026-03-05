@@ -230,3 +230,14 @@ function noDisponibleNotification(): void
         ->warning()
         ->send();
 }
+
+function modelNotFound(string $mensaje = 'El registro no existe.'): \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+{
+    // Devolvemos un JS simple que Alpine o el navegador entiendan
+    return response("
+            <script>
+                alert('".$mensaje."');
+                window.close();
+            </script>
+        ")->header('Content-Type', 'text/html');
+}

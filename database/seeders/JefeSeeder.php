@@ -13,7 +13,7 @@ class JefeSeeder extends Seeder
     public function run(): void
     {
         Jefe::create([
-            'nombre' => 'JORGE L. LADERA P.',
+            'nombre' => 'JORGE L. LADERA P',
             'cedula' => 'V-20.183.087',
             'is_main' => true,
         ]);

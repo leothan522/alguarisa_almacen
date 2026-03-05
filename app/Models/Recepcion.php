@@ -33,6 +33,7 @@ class Recepcion extends Model
         'image_documento',
         'image_1',
         'image_2',
+        'pdf_expediente',
     ];
 
     public function almacen(): BelongsTo

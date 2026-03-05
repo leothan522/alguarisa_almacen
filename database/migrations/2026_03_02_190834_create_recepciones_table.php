@@ -32,6 +32,7 @@ return new class extends Migration
             $table->text('image_documento')->nullable();
             $table->text('image_1')->nullable();
             $table->text('image_2')->nullable();
+            $table->text('pdf_expediente')->nullable();
             $table->foreign('almacenes_id')->references('id')->on('almacenes')->cascadeOnDelete();
             $table->foreign('planes_id')->references('id')->on('planes')->cascadeOnDelete();
             $table->foreign('jefes_id')->references('id')->on('jefes')->nullOnDelete();

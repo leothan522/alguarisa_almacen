@@ -28,6 +28,8 @@ class Recepcion extends Model
         'responsables_cedula',
         'responsables_telefono',
         'responsables_empresa',
+        'is_sealed',
+        'is_complete',
         'image_documento',
         'image_1',
         'image_2',

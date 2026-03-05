@@ -20,7 +20,8 @@ class ParametroWidget extends Widget implements HasSchemas
         return $schema
             ->constantState([
                 'parametros' => [
-                    'ejemplo_nombre' => 'valor_id = null, valor_texto = string',
+                    'size_codigo' => 'valor_id = size, valor_texto = null',
+                    'numero_recepcion' => 'valor_id = numero, valor_texto = formato',
                 ],
             ])
             ->components([

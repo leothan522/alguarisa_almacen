@@ -72,6 +72,7 @@ class DashboardPanelProvider extends PanelProvider
                     ->extraAttributes(['onclick' => "Alpine.store('loader').show()"]),
             ])
             ->resourceCreatePageRedirect('index')
+            ->resourceEditPageRedirect('index')
             ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::BODY_END,

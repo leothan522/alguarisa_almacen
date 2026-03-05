@@ -27,6 +27,8 @@ return new class extends Migration
             $table->string('responsables_cedula');
             $table->string('responsables_telefono')->nullable();
             $table->string('responsables_empresa')->nullable();
+            $table->boolean('is_sealed')->default(false);
+            $table->boolean('is_complete')->default(false);
             $table->text('image_documento')->nullable();
             $table->text('image_1')->nullable();
             $table->text('image_2')->nullable();

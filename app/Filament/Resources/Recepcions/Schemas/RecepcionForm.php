@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Recepcions\Schemas;
 
+use App\Models\Parametro;
+use App\Models\Recepcion;
 use App\Models\Responsable;
 use App\Models\Rubro;
 use Filament\Actions\Action;
@@ -37,16 +39,37 @@ class RecepcionForm
         return Section::make('Datos Básicos')
             ->schema([
                 TextInput::make('numero')
+                    ->default(function (): string {
+                        $num = 1;
+                        $formato = '';
+                        $parametro = Parametro::where('nombre', 'numero_recepcion')->first();
+                        if ($parametro) {
+                            $formato = $parametro->valor_texto;
+                            $num = $parametro->valor_id > 0 ? $parametro->valor_id : $num;
+                        }
+                        $i = 0;
+                        do {
+                            $num = $num + $i;
+                            $codigo = $formato.cerosIzquierda($num, numSizeCodigo());
+                            $existe = Recepcion::where('numero', $codigo)->exists();
+                            $i++;
+                        } while ($existe);
+
+                        return $codigo;
+                    })
+                    ->unique()
                     ->required(),
                 Select::make('planes_id')
                     ->label('Plan')
                     ->relationship(name: 'plan', titleAttribute: 'nombre')
-                    ->required(),
+                    ->required()
+                    ->disabledOn('edit'),
                 DatePicker::make('fecha')
                     ->default(now())
                     ->required(),
                 TimePicker::make('hora')
                     ->default(now())
+                    ->seconds(false)
                     ->required(),
             ])
             ->compact()
@@ -158,6 +181,7 @@ class RecepcionForm
                                 $peso = $get('peso_unitario');
                                 $total = $cantidad * $peso;
                                 $set('total', $total);
+
                                 return 'Total: '.formatoMillares($total).' KG';
                             }),
                         Select::make('tipo_adquisicion')

@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class RecepcionsTable
@@ -22,26 +23,28 @@ class RecepcionsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
-                    ->default(fn(Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
-                    ->description(fn(Recepcion $record): string => formatoMillares($record->items()->sum('total')) . " KG")
+                    ->default(fn (Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
+                    ->description(fn (Recepcion $record): string => formatoMillares($record->items()->sum('total')).' KG')
                     ->hiddenFrom('md'),
+                TextColumn::make('fecha')
+                    ->date()
+                    ->description(fn (Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
+                    ->searchable()
+                    ->visibleFrom('md'),
                 TextColumn::make('numero')
                     ->label('Número')
                     ->searchable()
-                    ->visibleFrom('md'),
-                TextColumn::make('fecha')
-                    ->date()
-                    ->description(fn(Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
-                    ->searchable()
+                    ->alignCenter()
                     ->visibleFrom('md'),
                 TextColumn::make('plan.nombre'),
                 TextColumn::make('responsables_nombre')
                     ->label('Entrega')
-                    ->description(fn(Recepcion $record): string => $record->responsable->telefono ?? '-')
-                    ->formatStateUsing(fn(string $state): string => Str::upper($state))
+                    ->description(fn (Recepcion $record): string => $record->responsable->telefono ?? '-')
+                    ->formatStateUsing(fn (string $state): string => Str::upper($state))
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('items_sum_total')
@@ -53,7 +56,7 @@ class RecepcionsTable
                     ->visibleFrom('md'),
             ])
             ->filters([
-                
+
                 TrashedFilter::make(),
             ])
             ->recordActions([

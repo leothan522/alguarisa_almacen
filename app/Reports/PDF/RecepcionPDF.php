@@ -28,7 +28,7 @@ class RecepcionPDF extends InventarioReport
 
         $this->SetFont('Times', 'B', 9);
         $this->SetTextColor(0, 0, 0);
-        $this->SetFillColor(0, 176, 80);
+        $this->SetFillColor(161, 208, 73);
         $this->Cell(7, 10, verUtf8('N.º'), 1, 0, 'C', 1);
         $this->Cell(20, 10, verUtf8('F.F.'), 1, 0, 'C', 1);
         $this->Cell(20, 10, verUtf8('F.V.'), 1, 0, 'C', 1);

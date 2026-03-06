@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Recepcions\Schemas;
 use App\Filament\Resources\Recepcions\Tables\RecepcionsTable;
 use App\Models\Recepcion;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -14,6 +15,8 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 class RecepcionInfoList
 {
@@ -63,27 +66,42 @@ class RecepcionInfoList
                     ->columnSpanFull(),
                 Fieldset::make('Memoria Fotográfica')
                     ->schema([
-                        ImageEntry::make('image_documento')
-                            ->hiddenLabel()
-                            ->disk('public')
-                            ->visibility('public')
-                            ->imageSize(200)
-                            ->alignCenter(),
-                        ImageEntry::make('image_1')
-                            ->hiddenLabel()
-                            ->disk('public')
-                            ->visibility('public')
-                            ->imageSize(200)
-                            ->alignCenter(),
-                        ImageEntry::make('image_2')
-                            ->hiddenLabel()
-                            ->disk('public')
-                            ->visibility('public')
-                            ->imageSize(200)
-                            ->alignCenter(),
+                        self::makeImageEntry('image_documento'),
+                        self::makeImageEntry('image_1'),
+                        self::makeImageEntry('image_2'),
                     ])
                     ->columns(3)
                     ->columnSpanFull()
             ]);
     }
+
+    protected static function makeImageEntry(string $name): ImageEntry
+    {
+        return ImageEntry::make($name)
+            ->hiddenLabel()
+            ->disk('public')
+            ->visibility('public')
+            ->imageSize(200)
+            ->alignCenter()
+            ->extraImgAttributes([
+                'class' => 'md:cursor-zoom-in md:hover:opacity-80 transition shadow-md rounded-xl',
+                // Solo permitimos el evento si la pantalla es de escritorio (>= 768px)
+                'x-on:click' => 'window.innerWidth < 768 ? $event.stopImmediatePropagation() : null',
+            ])
+            // Definimos la acción que abre el modal
+            ->action(
+                Action::make('viewImage')
+                    ->modalHeading('Vista Previa')
+                    ->modalSubmitAction(false) // No necesitamos botón de guardado
+                    ->modalCancelActionLabel('Cerrar')
+                    ->modalContent(fn ($record) => new HtmlString('
+                    <div class="flex justify-center items-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <img src="' . Storage::url($record->$name) . '"
+                             class="max-w-full h-auto rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700"
+                             style="max-height: 80vh; object-fit: contain;" />
+                    </div>
+                '))
+            );
+    }
+
 }

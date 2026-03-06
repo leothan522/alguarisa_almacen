@@ -31,6 +31,8 @@ class RecepcionController extends Controller
         $responsable_telefono = Str::upper($recepcion->responsables_telefono ?? '_____________________');
         $recepcion_numero = Str::upper($recepcion->numero) ?? '__________';
         $recepcion_observacion = Str::upper($recepcion->observacion);
+        $recepcion_plan = $recepcion->plan->nombre;
+        $recepcion_planCodigo = $recepcion->plan->codigo;
 
 
         // Obtenemos los rubros como array
@@ -48,9 +50,12 @@ class RecepcionController extends Controller
         $pdf->family = 'Times';
         $pdf->headerTitle = 'ACTA DE CONTROL PERCEPTIVO';
         $pdf->headerSubtitle = 'RECEPCIÓN DE RUBROS';
+        $pdf->footerImprecionDerecha = $recepcion_plan;
         $pdf->texto = $texto;
         $pdf->codigo = $recepcion_numero;
         $pdf->observacion = $recepcion_observacion ?? '';
+        $pdf->planCodigo = $recepcion_planCodigo;
+
         $pdf->AliasNbPages(); // Necesario para el pie de página
 
         // Contenido

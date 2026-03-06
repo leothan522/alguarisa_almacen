@@ -30,6 +30,8 @@ class RecepcionController extends Controller
         $responsable_empresa = Str::upper($recepcion->responsables_empresa ?? '_____________________');
         $responsable_telefono = Str::upper($recepcion->responsables_telefono ?? '_____________________');
         $recepcion_numero = Str::upper($recepcion->numero) ?? '__________';
+        $recepcion_observacion = Str::upper($recepcion->observacion);
+
 
         // Obtenemos los rubros como array
         $rubros = $recepcion->items->toArray();
@@ -48,6 +50,7 @@ class RecepcionController extends Controller
         $pdf->headerSubtitle = 'RECEPCIÓN DE RUBROS';
         $pdf->texto = $texto;
         $pdf->codigo = $recepcion_numero;
+        $pdf->observacion = $recepcion_observacion ?? '';
         $pdf->AliasNbPages(); // Necesario para el pie de página
 
         // Contenido
@@ -65,9 +68,6 @@ class RecepcionController extends Controller
             for ($i = 0; $i < $filasRestantes; $i++) {
                 $this->dibujarFilaVacia($pdf, ++$num);
             }
-
-            // Espacio después de la tabla en cada página
-            $pdf->Ln(5);
         }
 
         return response($pdf->Output('I', 'recepcion-001.pdf'), 200)

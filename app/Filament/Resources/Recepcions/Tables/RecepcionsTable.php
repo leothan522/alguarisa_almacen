@@ -96,13 +96,14 @@ class RecepcionsTable
             ->recordActions([
                 ActionGroup::make([
                     self::actionExportPdf(),
-                    ViewAction::make(),
+                    ViewAction::make()
+                    ->label('Ver Fotos'),
                     self::actionValidarRecepcion(),
-                    self::actionRevertirRecepcion(),
                     self::actionSubirExpediente(),
                     self::actionVerExpediente(),
-                    self::actionRevertirExpediente(),
                     EditAction::make(),
+                    self::actionRevertirRecepcion(),
+                    self::actionRevertirExpediente(),
                 ]),
             ])
             ->toolbarActions([
@@ -242,7 +243,7 @@ class RecepcionsTable
     protected static function actionSubirExpediente()
     {
         return Action::make('subir-expediente')
-            ->label('Subir Expediente PDF')
+            ->label('Subir Expediente')
             ->icon(Heroicon::OutlinedDocumentArrowUp)
             ->color('success')
             ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete)
@@ -298,7 +299,7 @@ class RecepcionsTable
     {
         return Action::make('ver-expediente')
             ->label('Ver Expediente')
-            ->icon(Heroicon::OutlinedEye)
+            ->icon(Heroicon::OutlinedDocumentCheck)
             ->color('gray')
             ->visible(fn (Recepcion $record): bool => $record->is_complete)
             ->modalWidth(Width::FiveExtraLarge)

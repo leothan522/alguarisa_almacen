@@ -6,6 +6,7 @@ use App\Filament\Resources\Recepcions\Pages\CreateRecepcion;
 use App\Filament\Resources\Recepcions\Pages\EditRecepcion;
 use App\Filament\Resources\Recepcions\Pages\ListRecepcions;
 use App\Filament\Resources\Recepcions\Schemas\RecepcionForm;
+use App\Filament\Resources\Recepcions\Schemas\RecepcionInfoList;
 use App\Filament\Resources\Recepcions\Tables\RecepcionsTable;
 use App\Models\Recepcion;
 use BackedEnum;
@@ -65,5 +66,10 @@ class RecepcionResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return RecepcionInfoList::configure($schema);
     }
 }

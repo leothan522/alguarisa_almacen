@@ -241,3 +241,26 @@ function modelNotFound(string $mensaje = 'El registro no existe.'): \Illuminate\
             </script>
         ")->header('Content-Type', 'text/html');
 }
+
+function renderFotoItem($path, $titulo): string
+{
+    if (! $path) {
+        return '<div class="flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg h-64 text-gray-400 italic text-sm">Sin foto: '.$titulo.'</div>';
+    }
+
+    $url = \Illuminate\Support\Facades\Storage::url($path);
+
+    return '
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-gray-600 text-center">'.$titulo.'</p>
+            <div class="bg-black rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                <a href="'.$url.'" target="_blank">
+                    <img src="'.$url.'"
+                         class="w-full h-auto object-contain hover:opacity-90 transition"
+                         style="max-height: 50vh;"
+                         alt="'.$titulo.'" />
+                </a>
+            </div>
+        </div>
+    ';
+}

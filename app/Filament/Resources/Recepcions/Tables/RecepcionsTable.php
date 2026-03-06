@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
@@ -22,6 +23,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class RecepcionsTable
@@ -94,10 +96,12 @@ class RecepcionsTable
             ->recordActions([
                 ActionGroup::make([
                     self::actionExportPdf(),
+                    ViewAction::make(),
                     self::actionValidarRecepcion(),
                     self::actionRevertirRecepcion(),
                     self::actionSubirExpediente(),
-                    self::revertirExpediente(),
+                    self::actionVerExpediente(),
+                    self::actionRevertirExpediente(),
                     EditAction::make(),
                 ]),
             ])
@@ -113,7 +117,7 @@ class RecepcionsTable
             ]);
     }
 
-    protected static function getEstatus(Recepcion $record): string
+    public static function getEstatus(Recepcion $record): string
     {
         $validado = $record->is_sealed ?? false;
         $response = 'default';
@@ -265,7 +269,7 @@ class RecepcionsTable
             ->modalWidth(Width::Small);
     }
 
-    protected static function revertirExpediente()
+    protected static function actionRevertirExpediente()
     {
         return Action::make('revertir-expediente')
             ->label('Revertir Expediente')
@@ -280,7 +284,7 @@ class RecepcionsTable
                 self::borrarFotos($pdfPath);
                 $record->update([
                     'pdf_expediente' => null,
-                    'is_complete' => false
+                    'is_complete' => false,
                 ]);
                 Notification::make()
                     ->title('Expediente eliminado')
@@ -288,5 +292,27 @@ class RecepcionsTable
                     ->warning()
                     ->send();
             });
+    }
+
+    protected static function actionVerExpediente()
+    {
+        return Action::make('ver-expediente')
+            ->label('Ver Expediente')
+            ->icon(Heroicon::OutlinedEye)
+            ->color('gray')
+            ->visible(fn (Recepcion $record): bool => $record->is_complete)
+            ->modalWidth(Width::FiveExtraLarge)
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Cerrar')
+            ->modalContent(fn (Recepcion $record) => new HtmlString('
+                <div style="height: 75vh;">
+                    <iframe
+                        src="'.Storage::url($record->pdf_expediente).'"
+                        width="100%"
+                        height="100%"
+                        style="border: none; border-radius: 8px;">
+                    </iframe>
+                </div>
+            '));
     }
 }

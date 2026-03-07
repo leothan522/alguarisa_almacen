@@ -10,6 +10,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\FileUpload;
@@ -97,20 +98,24 @@ class RecepcionsTable
                 ActionGroup::make([
                     self::actionExportPdf(),
                     ViewAction::make()
-                    ->label('Ver Fotos'),
+                        ->label('Ver Fotos'),
                     self::actionValidarRecepcion(),
                     self::actionSubirExpediente(),
                     self::actionVerExpediente(),
                     EditAction::make(),
                     self::actionRevertirRecepcion(),
                     self::actionRevertirExpediente(),
+                    RestoreAction::make(),
                 ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
+                    ForceDeleteBulkAction::make()
+                        ->authorizeIndividualRecords('forceDelete'),
+                    RestoreBulkAction::make()
+                        ->authorizeIndividualRecords('restore'),
                 ]),
                 Action::make('actualizar')
                     ->icon(Heroicon::ArrowPath)
@@ -139,7 +144,8 @@ class RecepcionsTable
             ->label('Imprimir')
             ->icon(Heroicon::OutlinedPrinter)
             ->url(fn (Recepcion $record): string => route('dashboard.export-pdf.recepcion', $record->id))
-            ->openUrlInNewTab();
+            ->openUrlInNewTab()
+            ->visible(fn(Recepcion $record): bool => !$record->deleted_at);
     }
 
     protected static function actionValidarRecepcion()
@@ -199,7 +205,7 @@ class RecepcionsTable
                     ->send();
             })
             ->modalWidth(Width::Small)
-            ->visible(fn ($record) => ! $record->is_sealed);
+            ->visible(fn ($record) => ! $record->is_sealed && !$record->deleted_at && self::isVisible());
     }
 
     protected static function borrarFotos($fotoPath): void
@@ -218,7 +224,7 @@ class RecepcionsTable
             ->requiresConfirmation()
             ->modalHeading('¿Revertir esta recepción?')
             ->modalDescription('Se eliminarán las fotos del servidor y la recepción volverá a estar pendiente.')
-            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete)
+            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete && self::isVisible())
             ->action(function (Recepcion $record) {
                 $fotoDocumento = $record->image_documento;
                 $fotoImage1 = $record->image_1;
@@ -246,7 +252,7 @@ class RecepcionsTable
             ->label('Subir Expediente')
             ->icon(Heroicon::OutlinedDocumentArrowUp)
             ->color('success')
-            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete)
+            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete && self::isVisible())
             ->schema([
                 FileUpload::make('pdf_expediente')
                     ->label('Expediente Escaneado (PDF)')
@@ -279,7 +285,7 @@ class RecepcionsTable
             ->requiresConfirmation()
             ->modalHeading('¿Eliminar el expediente cargado?')
             ->modalDescription('El archivo PDF se borrará permanentemente del servidor y podrás subir uno nuevo.')
-            ->visible(fn (Recepcion $record): bool => $record->is_complete)
+            ->visible(fn (Recepcion $record): bool => $record->is_complete && self::isVisible())
             ->action(function (Recepcion $record) {
                 $pdfPath = $record->pdf_expediente;
                 self::borrarFotos($pdfPath);
@@ -297,7 +303,7 @@ class RecepcionsTable
 
     protected static function actionVerExpediente()
     {
-        return Action::make('ver-expediente')
+        return Action::make('abrir-expediente')
             ->label('Ver Expediente')
             ->icon(Heroicon::OutlinedDocumentCheck)
             ->color('gray')
@@ -315,5 +321,10 @@ class RecepcionsTable
                     </iframe>
                 </div>
             '));
+    }
+
+    protected static function isVisible(): bool
+    {
+        return isAdmin() || auth()->user()->hasRole('almacen');
     }
 }

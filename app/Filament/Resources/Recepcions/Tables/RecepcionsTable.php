@@ -92,6 +92,27 @@ class RecepcionsTable
             ->filters([
                 SelectFilter::make('plan')
                     ->relationship('plan', 'nombre'),
+                SelectFilter::make('estatus')
+                    ->label('Estatus')
+                    ->options([
+                        'pendiente' => 'Pendientes',
+                        'validado' => 'Validados',
+                        'completa' => 'Completos',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            function (Builder $query, $value) {
+                                return match ($value) {
+                                    'pendiente' => $query->where('is_sealed', false)
+                                        ->where('is_complete', false),
+                                    'validado' => $query->where('is_sealed', true),
+                                    'completa' => $query->where('is_complete', true),
+                                    default => $query,
+                                };
+                            }
+                        );
+                    }),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -145,7 +166,7 @@ class RecepcionsTable
             ->icon(Heroicon::OutlinedPrinter)
             ->url(fn (Recepcion $record): string => route('dashboard.export-pdf.recepcion', $record->id))
             ->openUrlInNewTab()
-            ->visible(fn(Recepcion $record): bool => !$record->deleted_at);
+            ->visible(fn (Recepcion $record): bool => ! $record->deleted_at);
     }
 
     protected static function actionValidarRecepcion()
@@ -163,7 +184,7 @@ class RecepcionsTable
                     ->directory('images-recepciones')
                     ->visibility('public')
                     ->required()
-                    ->maxSize(15360)
+                    ->maxSize(2048)
                     // --- AJUSTE PARA FORMATO CARTA / VERTICAL ---
                     // Mantenemos 1200 de ancho pero damos más margen al alto
                     ->automaticallyResizeImagesToWidth('1200')
@@ -177,7 +198,7 @@ class RecepcionsTable
                     ->directory('images-recepciones')
                     ->visibility('public')
                     ->required()
-                    ->maxSize(15360)
+                    ->maxSize(2048)
                     ->automaticallyResizeImagesToWidth('1200')
                     ->automaticallyResizeImagesToHeight('1200')
                     ->automaticallyResizeImagesMode('inset'),
@@ -188,7 +209,7 @@ class RecepcionsTable
                     ->disk('public')
                     ->directory('images-recepciones')
                     ->visibility('public')
-                    ->maxSize(15360)
+                    ->maxSize(2048)
                     ->automaticallyResizeImagesToWidth('1200')
                     ->automaticallyResizeImagesToHeight('1200')
                     ->automaticallyResizeImagesMode('inset'),
@@ -205,7 +226,7 @@ class RecepcionsTable
                     ->send();
             })
             ->modalWidth(Width::Small)
-            ->visible(fn ($record) => ! $record->is_sealed && !$record->deleted_at && self::isVisible());
+            ->visible(fn ($record) => ! $record->is_sealed && ! $record->deleted_at && self::isVisible());
     }
 
     protected static function borrarFotos($fotoPath): void

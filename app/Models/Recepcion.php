@@ -101,4 +101,16 @@ class Recepcion extends Model
             ])->save();
         }
     }
+
+    public function getTotalUnidadesAttribute()
+    {
+        // Asegúrate de que 'items' sea el nombre exacto de la relación
+        return $this->items()->sum('cantidad_unidades');
+    }
+
+    public function getTotalPesoAttribute()
+    {
+        return $this->items()->sum('total');
+    }
+
 }

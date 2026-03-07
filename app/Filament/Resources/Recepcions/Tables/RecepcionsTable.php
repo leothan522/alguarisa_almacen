@@ -28,32 +28,36 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class RecepcionsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn(Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
-                    ->default(fn(Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
-                    ->description(fn(Recepcion $record): string => $record->plan->nombre)
+                    ->default(fn (Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
+                    ->description(fn (Recepcion $record): string => $record->plan->nombre)
                     ->hiddenFrom('md')
-                    ->icon(fn(Recepcion $record): Heroicon => match (self::getEstatus($record)) {
+                    ->icon(fn (Recepcion $record): Heroicon => match (self::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_sealed' => Heroicon::OutlinedCheckBadge,
                         default => Heroicon::OutlinedClock
                     })
-                    ->iconColor(fn(Recepcion $record): string => match (self::getEstatus($record)) {
+                    ->iconColor(fn (Recepcion $record): string => match (self::getEstatus($record)) {
                         'is_complete' => 'success',
                         'is_sealed' => 'info',
                         default => 'gray'
                     }),
                 TextColumn::make('fecha')
                     ->date()
-                    ->description(fn(Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
+                    ->description(fn (Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('numero')
@@ -65,8 +69,8 @@ class RecepcionsTable
                     ->visibleFrom('md'),
                 TextColumn::make('responsables_nombre')
                     ->label('Entrega')
-                    ->description(fn(Recepcion $record): string => $record->responsables_telefono ?? '-')
-                    ->formatStateUsing(fn(string $state): string => Str::upper($state))
+                    ->description(fn (Recepcion $record): string => $record->responsables_telefono ?? '-')
+                    ->formatStateUsing(fn (string $state): string => Str::upper($state))
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('items_sum_total')
@@ -77,13 +81,13 @@ class RecepcionsTable
                     ->alignEnd(),
                 IconColumn::make('estatus')
                     ->label('Estatus')
-                    ->default(fn(Recepcion $record): string => self::getEstatus($record))
-                    ->icon(fn(string $state): Heroicon => match ($state) {
+                    ->default(fn (Recepcion $record): string => self::getEstatus($record))
+                    ->icon(fn (string $state): Heroicon => match ($state) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_sealed' => Heroicon::OutlinedCheckBadge,
                         default => Heroicon::OutlinedClock
                     })
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'is_complete' => 'success',
                         'is_sealed' => 'info',
                         default => 'gray'
@@ -121,6 +125,7 @@ class RecepcionsTable
                     RestoreBulkAction::make()
                         ->authorizeIndividualRecords('restore'),
                 ]),
+                self::actionExportExcel(),
                 Action::make('actualizar')
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),
@@ -147,9 +152,9 @@ class RecepcionsTable
         return Action::make('export-pdf')
             ->label('Imprimir')
             ->icon(Heroicon::OutlinedPrinter)
-            ->url(fn(Recepcion $record): string => route('dashboard.export-pdf.recepcion', $record->id))
+            ->url(fn (Recepcion $record): string => route('dashboard.export-pdf.recepcion', $record->id))
             ->openUrlInNewTab()
-            ->visible(fn(Recepcion $record): bool => !$record->deleted_at);
+            ->visible(fn (Recepcion $record): bool => ! $record->deleted_at);
     }
 
     protected static function actionValidarRecepcion()
@@ -209,7 +214,7 @@ class RecepcionsTable
                     ->send();
             })
             ->modalWidth(Width::Small)
-            ->visible(fn($record) => !$record->is_sealed && !$record->deleted_at && self::isVisible());
+            ->visible(fn ($record) => ! $record->is_sealed && ! $record->deleted_at && self::isVisible());
     }
 
     protected static function borrarFotos($fotoPath): void
@@ -228,7 +233,7 @@ class RecepcionsTable
             ->requiresConfirmation()
             ->modalHeading('¿Revertir esta recepción?')
             ->modalDescription('Se eliminarán las fotos del servidor y la recepción volverá a estar pendiente.')
-            ->visible(fn(Recepcion $record): bool => $record->is_sealed && !$record->is_complete && self::isVisible())
+            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete && self::isVisible())
             ->action(function (Recepcion $record) {
                 $fotoDocumento = $record->image_documento;
                 $fotoImage1 = $record->image_1;
@@ -256,7 +261,7 @@ class RecepcionsTable
             ->label('Subir Expediente')
             ->icon(Heroicon::OutlinedDocumentArrowUp)
             ->color('success')
-            ->visible(fn(Recepcion $record): bool => $record->is_sealed && !$record->is_complete && self::isVisible())
+            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete && self::isVisible())
             ->schema([
                 FileUpload::make('pdf_expediente')
                     ->label('Expediente Escaneado (PDF)')
@@ -289,7 +294,7 @@ class RecepcionsTable
             ->requiresConfirmation()
             ->modalHeading('¿Eliminar el expediente cargado?')
             ->modalDescription('El archivo PDF se borrará permanentemente del servidor y podrás subir uno nuevo.')
-            ->visible(fn(Recepcion $record): bool => $record->is_complete && self::isVisible())
+            ->visible(fn (Recepcion $record): bool => $record->is_complete && self::isVisible())
             ->action(function (Recepcion $record) {
                 $pdfPath = $record->pdf_expediente;
                 self::borrarFotos($pdfPath);
@@ -311,14 +316,14 @@ class RecepcionsTable
             ->label('Ver Expediente')
             ->icon(Heroicon::OutlinedDocumentCheck)
             ->color('gray')
-            ->visible(fn(Recepcion $record): bool => $record->is_complete)
+            ->visible(fn (Recepcion $record): bool => $record->is_complete)
             ->modalWidth(Width::FiveExtraLarge)
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Cerrar')
-            ->modalContent(fn(Recepcion $record) => new HtmlString('
+            ->modalContent(fn (Recepcion $record) => new HtmlString('
                 <div style="height: 75vh;">
                     <iframe
-                        src="' . Storage::url($record->pdf_expediente) . '"
+                        src="'.Storage::url($record->pdf_expediente).'"
                         width="100%"
                         height="100%"
                         style="border: none; border-radius: 8px;">
@@ -333,8 +338,8 @@ class RecepcionsTable
             ->label('Estatus')
             ->options([
                 'pendiente' => 'Pendientes',
-                'validado' => 'Validados',
-                'completa' => 'Completos',
+                'validado' => 'Validadas',
+                'completa' => 'Completas',
             ])
             ->query(function (Builder $query, array $data): Builder {
                 return $query->when(
@@ -373,15 +378,62 @@ class RecepcionsTable
                 );
             })
             ->indicateUsing(function (array $data): ?string {
-                if (!$data['mes']){
+                if (! $data['mes']) {
                     return null;
                 }
-                return 'Mes '. Carbon::parse($data['mes'])->translatedFormat('F Y');
+
+                return 'Mes '.Carbon::parse($data['mes'])->translatedFormat('F Y');
             });
     }
 
     protected static function isVisible(): bool
     {
         return isAdmin() || auth()->user()->hasRole('almacen');
+    }
+
+    protected static function actionExportExcel()
+    {
+        return ExportBulkAction::make()->exports([
+            ExcelExport::make()
+                ->withColumns([
+                    Column::make('fecha')
+                        ->heading('FECHA')
+                        ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('d/m/Y'))
+                        ->format(NumberFormat::FORMAT_DATE_DDMMYYYY),
+                    Column::make('hora')
+                        ->heading('Hora')
+                        ->formatStateUsing(fn ($state) => Carbon::parse($state)->translatedFormat('h:i a'))
+                        ->format(NumberFormat::FORMAT_DATE_TIME1),
+                    Column::make('numero')
+                        ->heading('NÚMERO')
+                        // ->formatStateUsing(fn($state) => '="' . $state . '"')
+                        ->format(NumberFormat::FORMAT_TEXT),
+                    Column::make('plan.nombre')
+                        ->heading('PLAN'),
+                    Column::make('responsables_nombre')
+                        ->heading('ENTREGA')
+                        ->formatStateUsing(fn ($state) => Str::upper($state)),
+                    Column::make('responsables_cedula')
+                        ->heading('CÉDULA')
+                        ->format(NumberFormat::FORMAT_NUMBER),
+                    Column::make('responsables_telefono')
+                        ->heading('TELÉFONO')
+                        ->format(NumberFormat::FORMAT_TEXT),
+                    Column::make('is_sealed')
+                        ->heading('ESTATUS')
+                        ->formatStateUsing(fn (Recepcion $record) => match (self::getEstatus($record)) {
+                            'is_sealed' => 'VALIDADA',
+                            'is_complete' => 'COMPLETA',
+                            default => 'PENDIENTE'
+                        }),
+                    Column::make('total_unidades')
+                        ->heading('UNIDADES')
+                        ->format(NumberFormat::FORMAT_NUMBER),
+                    Column::make('total_peso')
+                        ->heading('PESO TOTAL (KG)')
+                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                ])
+                ->modifyQueryUsing(fn (Builder $query) => $query->with('items')->orderBy('fecha')),
+        ]);
     }
 }

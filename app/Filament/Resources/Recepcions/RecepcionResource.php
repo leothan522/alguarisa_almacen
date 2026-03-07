@@ -10,11 +10,13 @@ use App\Filament\Resources\Recepcions\Schemas\RecepcionInfoList;
 use App\Filament\Resources\Recepcions\Tables\RecepcionsTable;
 use App\Models\Recepcion;
 use BackedEnum;
+use Carbon\Carbon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
@@ -30,9 +32,23 @@ class RecepcionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Recepciones';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Almacen';
+    protected static string|UnitEnum|null $navigationGroup = 'Almacén';
 
     protected static ?string $recordTitleAttribute = 'numero';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['numero', 'fecha'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Fecha' => Carbon::parse($record->fecha)->translatedFormat('M d, Y'),
+            'Plan' => $record->plan->nombre,
+            'Total' => formatoMillares($record->total_peso).' KG',
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

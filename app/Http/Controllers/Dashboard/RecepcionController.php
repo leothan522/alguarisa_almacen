@@ -84,10 +84,12 @@ class RecepcionController extends Controller
      */
     private function dibujarFila($pdf, $item, $num)
     {
+        $fabricacion = $item['fecha_fabricacion'] ? getFecha($item['fecha_fabricacion'], 'd/m/Y') : '';
+        $vencimiento = $item['fecha_vencimiento'] ? getFecha($item['fecha_vencimiento'], 'd/m/Y') : '';
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, verUtf8($num), 1, 0, 'C');
-        $pdf->Cell(20, 10, verUtf8(getFecha($item['fecha_fabricacion'], 'd/m/Y')), 1, 0, 'C'); // Aquí iría $item['f_fab']
-        $pdf->Cell(20, 10, verUtf8(getFecha($item['fecha_vencimiento'], 'd/m/Y')), 1, 0, 'C'); // Aquí iría $item['f_venc']
+        $pdf->Cell(20, 10, verUtf8($fabricacion), 1, 0, 'C'); // Aquí iría $item['f_fab']
+        $pdf->Cell(20, 10, verUtf8($vencimiento), 1, 0, 'C'); // Aquí iría $item['f_venc']
         $pdf->Cell(73, 10, verUtf8(Str::upper($item['rubros_nombre'])), 1, 0, 'C');
         $pdf->SetFont('Times', 'B', 11);
         $pdf->Cell(20, 10, verUtf8(formatoMillares($item['cantidad_unidades'], 0)), 1, 0, 'C');

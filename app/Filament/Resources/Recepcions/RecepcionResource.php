@@ -34,6 +34,8 @@ class RecepcionResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Almacén';
 
+    protected static ?int $navigationSort = 81;
+
     protected static ?string $recordTitleAttribute = 'numero';
 
     public static function getGloballySearchableAttributes(): array

@@ -16,6 +16,8 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -78,12 +80,34 @@ class RecepcionsTable
                     ->formatStateUsing(fn (string $state): string => Str::upper($state))
                     ->searchable()
                     ->visibleFrom('md'),
+                TextColumn::make('items_sum_cantidad_unidades')
+                    ->label('Unidades')
+                    ->sum('items', 'cantidad_unidades')
+                    ->numeric()
+                    ->suffix(' UND')
+                    ->alignEnd()
+                    ->visibleFrom('md'),
+                TextColumn::make('total_movil')
+                    ->label('Total')
+                    ->default(fn (Recepcion $record) => $record->items()->sum('total'))
+                    ->description(fn (Recepcion $record): string => formatoMillares($record->items()->sum('cantidad_unidades'), 0).' UND')
+                    ->numeric(decimalPlaces: 2)
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Medium)
+                    ->color('violet')
+                    ->suffix(' KG')
+                    ->alignEnd()
+                    ->hiddenFrom('md'),
                 TextColumn::make('items_sum_total')
                     ->label('Total')
                     ->sum('items', 'total')
-                    ->numeric()
+                    ->numeric(decimalPlaces: 2)
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Medium)
+                    ->color('violet')
                     ->suffix(' KG')
-                    ->alignEnd(),
+                    ->alignEnd()
+                    ->visibleFrom('md'),
                 IconColumn::make('estatus')
                     ->label('Estatus')
                     ->default(fn (Recepcion $record): string => self::getEstatus($record))
@@ -279,6 +303,7 @@ class RecepcionsTable
                     ->helperText('Asegúrate de que todos los documentos estén en un solo PDF.')
                     ->getUploadedFileNameForStorageUsing(function (Recepcion $record, $file): string {
                         $prefix = Str::slug("Expediente-{$record->numero}-Recepcion");
+
                         return (string) \str($prefix.'.'.$file->getClientOriginalExtension());
                     }),
             ])
@@ -355,8 +380,7 @@ class RecepcionsTable
                     </iframe>
                 </div>
                 ");
-            })
-            /*->modalContent(fn(Recepcion $record) => new HtmlString('
+            })/*->modalContent(fn(Recepcion $record) => new HtmlString('
                 <div style="height: 75vh;">
                     <iframe
                         src="' . Storage::url($record->pdf_expediente) . '"
@@ -365,7 +389,7 @@ class RecepcionsTable
                         style="border: none; border-radius: 8px;">
                     </iframe>
                 </div>
-            '))*/;
+            '))*/ ;
     }
 
     protected static function filterEstatus()

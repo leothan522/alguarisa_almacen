@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Recepcions\Pages;
 
 use App\Filament\Resources\Recepcions\RecepcionResource;
+use App\Models\Almacen;
+use App\Models\Jefe;
+use App\Models\Responsable;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
@@ -19,6 +22,11 @@ class EditRecepcion extends EditRecord
             ForceDeleteAction::make(),
             RestoreAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return RecepcionResource::dataPersonalizada($data);
     }
 
     protected function afterCreate(): void

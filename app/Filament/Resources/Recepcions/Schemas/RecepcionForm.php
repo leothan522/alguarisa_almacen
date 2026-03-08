@@ -20,6 +20,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Str;
+use function Laravel\Prompts\form;
 
 class RecepcionForm
 {
@@ -82,22 +83,12 @@ class RecepcionForm
             ->schema([
                 Select::make('responsables_id')
                     ->relationship(name: 'responsable', titleAttribute: 'nombre')
-                    ->createOptionForm([
-                        TextInput::make('cedula')
-                            ->label('Cédula')
-                            ->integer()
-                            ->unique()
-                            ->required(),
-                        TextInput::make('nombre')
-                            ->label('Nombre y Apellido')
-                            ->required(),
-                        TextInput::make('telefono')
-                            ->label('Teléfono')
-                            ->tel()
-                            ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
-                        TextInput::make('empresa'),
-                    ])
+                    ->createOptionForm(self::formResponsable())
                     ->createOptionAction(function (Action $action) {
+                        return $action->modalWidth(Width::ExtraSmall);
+                    })
+                    ->editOptionForm(self::formResponsable())
+                    ->editOptionAction(function (Action $action){
                         return $action->modalWidth(Width::ExtraSmall);
                     })
                     ->getOptionLabelFromRecordUsing(fn (Responsable $record): string => Str::upper(formatoMillares($record->cedula, 0).' '.$record->nombre))
@@ -202,5 +193,24 @@ class RecepcionForm
             ->compact()
             ->columns()
             ->columnSpanFull();
+    }
+
+    protected static function formResponsable(): array
+    {
+        return [
+            TextInput::make('cedula')
+                ->label('Cédula')
+                ->integer()
+                ->unique()
+                ->required(),
+            TextInput::make('nombre')
+                ->label('Nombre y Apellido')
+                ->required(),
+            TextInput::make('telefono')
+                ->label('Teléfono')
+                ->tel()
+                ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
+            TextInput::make('empresa'),
+        ];
     }
 }

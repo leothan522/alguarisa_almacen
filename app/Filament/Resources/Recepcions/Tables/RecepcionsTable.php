@@ -76,6 +76,7 @@ class RecepcionsTable
                     ->searchable(),
                 TextColumn::make('responsables_nombre')
                     ->label('Entrega')
+                    ->wrap()
                     ->description(fn (Recepcion $record): string => $record->responsables_telefono ?? '-')
                     ->formatStateUsing(fn (string $state): string => Str::upper($state))
                     ->searchable()

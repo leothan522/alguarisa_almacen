@@ -33,7 +33,8 @@ class StockModulosClapOverview extends StatsOverviewWidget
                 ->description("{$this->almacen->nombre}")
                 ->descriptionIcon(Heroicon::OutlinedHome)
                 ->color('primary')
-                ->chart([5, 8, 12, 10, 20, 15, 25]),
+                ->chart([5, 8, 12, 10, 20, 15, 25])
+                ->url(route('filament.dashboard.resources.stocks.index').'?filters[planes_id][value]=2'),
         ];
     }
 }

@@ -32,7 +32,8 @@ class StockOverview extends StatsOverviewWidget
                 ->description("{$this->almacen->nombre} (".formatoMillares($this->unidadesTotales, 0).' UND)')
                 ->descriptionIcon(Heroicon::OutlinedHome)
                 ->color('primary')
-                ->chart([5, 8, 12, 10, 20, 15, 25]),
+                ->chart([5, 8, 12, 10, 20, 15, 25])
+                ->url(route('filament.dashboard.resources.stocks.index').'?filters[planes_id][value]=1'),
 
             Stat::make('Asignación', formatoMillares($this->totalAsignacion).' '.($this->plan->unidad_medida ?? 'UND'))
                 ->description(formatoMillares($this->cantidadAsignacion, 0).' Unidades asignadas')

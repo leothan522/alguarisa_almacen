@@ -279,7 +279,7 @@ class RecepcionsTable
                 Notification::make()
                     ->title('Recepción revertida')
                     ->body('Las fotos fueron eliminadas y el estado se ha restablecido.')
-                    ->success()
+                    ->warning()
                     ->send();
             });
     }

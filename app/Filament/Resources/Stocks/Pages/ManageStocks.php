@@ -13,7 +13,7 @@ class ManageStocks extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-
+            //
         ];
     }
 }

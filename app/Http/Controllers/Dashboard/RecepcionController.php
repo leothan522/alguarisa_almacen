@@ -94,7 +94,7 @@ class RecepcionController extends Controller
         $pdf->SetFont('Times', 'B', 11);
         $pdf->Cell(20, 10, verUtf8(formatoMillares($item['cantidad_unidades'], 0)), 1, 0, 'C');
         $pdf->Cell(20, 10, verUtf8(formatoMillares($item['peso_unitario'])), 1, 0, 'C');
-        $pdf->Cell(30, 10, verUtf8((formatoMillares($item['total'])).' KG'), 1, 1, 'C');
+        $pdf->Cell(30, 10, verUtf8((formatoMillares($item['total'])).' '.$item['rubros_unidad_medida']), 1, 1, 'C');
     }
 
     /**

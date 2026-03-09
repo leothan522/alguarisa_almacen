@@ -118,7 +118,7 @@ class StockResource extends Resource
                                 TextEntry::make('asignacion_total')
                                     ->label('Peso Total Asignación')
                                     ->numeric(decimalPlaces: 2)
-                                    ->suffix(' KG')
+                                    ->suffix(fn(Stock $record):string => ' '.$record->rubro->unidad_medida)
                                     ->alignCenter()
                                     ->size(TextSize::Large)
                                     ->weight(FontWeight::Black)
@@ -139,7 +139,7 @@ class StockResource extends Resource
                                 TextEntry::make('propia_total')
                                     ->label('Peso Total Propio')
                                     ->numeric(decimalPlaces: 2)
-                                    ->suffix(' KG')
+                                    ->suffix(fn(Stock $record):string => ' '.$record->rubro->unidad_medida)
                                     ->alignCenter()
                                     ->size(TextSize::Large)
                                     ->weight(FontWeight::Black)
@@ -167,9 +167,9 @@ class StockResource extends Resource
 
                             // TOTAL PESO (Tu dato estrella)
                             TextEntry::make('total')
-                                ->label('TOTAL KILOGRAMOS')
+                                ->label('PESO TOTAL')
                                 ->numeric(decimalPlaces: 2)
-                                ->suffix(' KG')
+                                ->suffix(fn(Stock $record):string => ' '.$record->rubro->unidad_medida)
                                 ->color('violet') // Tu color insignia para el stock real
                                 ->weight(FontWeight::Black)
                                 ->size(TextSize::Large)
@@ -214,34 +214,36 @@ class StockResource extends Resource
                 TextColumn::make('asignacion_total')
                     ->label('Asignación')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' KG')
+                    ->suffix(fn(Stock $record):string => ' '.$record->rubro->unidad_medida)
                     ->sortable()
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('propia_total')
                     ->label('Propio')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' KG')
+                    ->suffix(fn(Stock $record):string => ' '.$record->rubro->unidad_medida)
                     ->sortable()
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
+                    ->label('Peso Total')
                     ->default(fn(Stock $record) => $record->total)
                     ->description(fn(Stock $record): string => formatoMillares($record->asignacion_cantidad + $record->propia_cantidad, 0) . ' UND')
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' KG')
+                    ->suffix(fn(Stock $record):string => ' '.$record->rubro->unidad_medida)
                     ->sortable()
                     ->alignEnd()
                     ->hiddenFrom('md'),
                 TextColumn::make('total')
+                    ->label('Peso Total')
                     ->numeric(decimalPlaces: 2)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
-                    ->suffix(' KG')
+                    ->suffix(fn(Stock $record):string => ' '.$record->rubro->unidad_medida)
                     ->sortable()
                     ->alignCenter()
                     ->visibleFrom('md'),
@@ -293,24 +295,27 @@ class StockResource extends Resource
                     Column::make('rubro.nombre')
                         ->heading('RUBRO')
                         ->formatStateUsing(fn($state) => Str::upper($state)),
+                    Column::make('rubro.unidad_medida')
+                        ->heading('UNIDAD')
+                        ->formatStateUsing(fn($state) => Str::upper($state)),
                     Column::make('asignacion_cantidad')
                         ->heading('ASIGNACIÓN (UND)')
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('asignacion_total')
-                        ->heading('ASIGNACIÓN (KG)')
+                        ->heading('ASIGNACIÓN (PESO)')
                         ->format(NumberFormat::FORMAT_NUMBER_00),
                     Column::make('propia_cantidad')
                         ->heading('PROPIO (UND)')
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('propia_total')
-                        ->heading('PROPIO (KG)')
+                        ->heading('PROPIO (PESO)')
                         ->format(NumberFormat::FORMAT_NUMBER_00),
                     Column::make('created_at')
-                        ->heading('TOTAL (UND)')
+                        ->heading('TOTAL UNIDADES')
                         ->formatStateUsing(fn(Stock $record) => $record->asignacion_cantidad + $record->propia_cantidad)
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('total')
-                        ->heading('TOTAL (KG)')
+                        ->heading('PESO TOTAL')
                         ->format(NumberFormat::FORMAT_NUMBER_00),
                 ]),
             // ->modifyQueryUsing(fn(Builder $query) => $query->with('items')->orderBy('fecha')),

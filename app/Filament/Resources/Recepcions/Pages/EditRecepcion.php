@@ -24,14 +24,6 @@ class EditRecepcion extends EditRecord
                         'numero' => $numero,
                     ]);
                 }),
-            ForceDeleteAction::make(),
-            RestoreAction::make()
-                ->before(function (Recepcion $record) {
-                    $numero = Str::replace('*', '', $record->numero);
-                    $record->update([
-                        'numero' => $numero,
-                    ]);
-                }),
         ];
     }
 

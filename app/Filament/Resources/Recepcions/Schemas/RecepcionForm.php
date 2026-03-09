@@ -173,8 +173,8 @@ class RecepcionForm
                                 $peso = $get('peso_unitario');
                                 $total = $cantidad * $peso;
                                 $set('total', $total);
-
-                                return 'Total: '.formatoMillares($total).' KG';
+                                $unidad = $get('rubros_unidad_medida') ?? 'KG';
+                                return 'Total: '.formatoMillares($total).' '.$unidad;
                             }),
                         Select::make('tipo_adquisicion')
                             ->label('Tipo adquisición')

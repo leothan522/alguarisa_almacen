@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -72,7 +73,7 @@ class RecepcionsTable
                 TextColumn::make('responsables_cedula')
                     ->label('Cédula')
                     ->numeric()
-                    ->visibleFrom('xl')
+                    ->visibleFrom('2xl')
                     ->searchable(),
                 TextColumn::make('responsables_nombre')
                     ->label('Entrega')
@@ -89,7 +90,7 @@ class RecepcionsTable
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
-                    ->label('Total')
+                    ->label('Peso Total')
                     ->default(fn (Recepcion $record) => $record->items()->sum('total'))
                     ->description(fn (Recepcion $record): string => formatoMillares($record->items()->sum('cantidad_unidades'), 0).' UND')
                     ->numeric(decimalPlaces: 2)
@@ -100,7 +101,7 @@ class RecepcionsTable
                     ->alignEnd()
                     ->hiddenFrom('md'),
                 TextColumn::make('items_sum_total')
-                    ->label('Total')
+                    ->label('Peso Total')
                     ->sum('items', 'total')
                     ->numeric(decimalPlaces: 2)
                     ->weight(FontWeight::Bold)
@@ -143,13 +144,19 @@ class RecepcionsTable
                     EditAction::make(),
                     self::actionRevertirRecepcion(),
                     self::actionRevertirExpediente(),
-                    RestoreAction::make(),
+                    RestoreAction::make()
+                        ->before(function (Recepcion $record) {
+                            $numero = Str::replace('*', '', $record->numero);
+                            $record->update([
+                                'numero' => $numero,
+                            ]);
+                        }),
                 ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                    /*DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),*/
                     ForceDeleteBulkAction::make()
                         ->authorizeIndividualRecords('forceDelete'),
                     RestoreBulkAction::make()

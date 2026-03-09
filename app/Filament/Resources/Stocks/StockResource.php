@@ -323,6 +323,7 @@ class StockResource extends Resource
     {
         return ExportBulkAction::make()->exports([
             ExcelExport::make()
+                ->withFilename('stocks-export')
                 ->withColumns([
                     Column::make('plan.nombre')
                         ->heading('PLAN')

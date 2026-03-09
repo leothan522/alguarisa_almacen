@@ -112,5 +112,4 @@ class Recepcion extends Model
     {
         return $this->items()->sum('total');
     }
-
 }

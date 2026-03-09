@@ -20,7 +20,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Str;
-use function Laravel\Prompts\form;
 
 class RecepcionForm
 {
@@ -88,7 +87,7 @@ class RecepcionForm
                         return $action->modalWidth(Width::ExtraSmall);
                     })
                     ->editOptionForm(self::formResponsable())
-                    ->editOptionAction(function (Action $action){
+                    ->editOptionAction(function (Action $action) {
                         return $action->modalWidth(Width::ExtraSmall);
                     })
                     ->getOptionLabelFromRecordUsing(fn (Responsable $record): string => Str::upper(formatoMillares($record->cedula, 0).' '.$record->nombre))
@@ -125,6 +124,8 @@ class RecepcionForm
                             ->createOptionForm([
                                 TextInput::make('nombre')
                                     ->label('Rubro')
+                                    ->maxLength(255)
+                                    ->unique()
                                     ->required(),
                                 TextInput::make('peso_unitario')
                                     ->label('Peso Unitario')

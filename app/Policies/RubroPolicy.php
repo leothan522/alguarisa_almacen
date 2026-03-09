@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\Recepcion;
+use App\Models\Rubro;
 use App\Models\User;
 
-class RecepcionPolicy
+class RubroPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -18,7 +18,7 @@ class RecepcionPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Recepcion $recepcion): bool
+    public function view(User $user, Rubro $rubro): bool
     {
         return true;
     }
@@ -34,27 +34,25 @@ class RecepcionPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Recepcion $recepcion): bool
+    public function update(User $user, Rubro $rubro): bool
     {
-        $edit = ! $recepcion->is_sealed && ! $recepcion->is_complete && ! $recepcion->deleted_at;
-
-        return (isAdmin() || $user->hasRole('almacen') )&& $edit;
+        return isAdmin() || $user->hasRole('almacen');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Recepcion $recepcion): bool
+    public function delete(User $user, Rubro $rubro): bool
     {
-        $delete = ! $recepcion->is_sealed && ! $recepcion->is_complete;
+        $hasRelations = $rubro->items()->exists() || $rubro->stocks()->exists();
 
-        return (isAdmin() || $user->hasRole('almacen')) && $delete;
+        return (isAdmin() || $user->hasRole('almacen')) && ! $hasRelations;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Recepcion $recepcion): bool
+    public function restore(User $user, Rubro $rubro): bool
     {
         return isAdmin() || $user->hasRole('almacen');
     }
@@ -62,10 +60,10 @@ class RecepcionPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Recepcion $recepcion): bool
+    public function forceDelete(User $user, Rubro $rubro): bool
     {
-        $delete = ! $recepcion->is_sealed && ! $recepcion->is_complete;
+        $hasRelations = $rubro->items()->exists() || $rubro->stocks()->exists();
 
-        return isAdmin() && $delete;
+        return isAdmin() && ! $hasRelations;
     }
 }

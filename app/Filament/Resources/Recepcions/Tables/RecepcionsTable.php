@@ -189,7 +189,7 @@ class RecepcionsTable
 
     protected static function actionValidarRecepcion()
     {
-        return Action::make('validar-recepcion')
+        return Action::make('subir-fotos')
             ->label('Validar Recepción')
             ->color('info')
             ->icon(Heroicon::OutlinedCheckBadge)
@@ -456,6 +456,7 @@ class RecepcionsTable
     {
         return ExportBulkAction::make()->exports([
             ExcelExport::make()
+                ->withFilename('recepciones-export')
                 ->withColumns([
                     Column::make('fecha')
                         ->heading('FECHA')

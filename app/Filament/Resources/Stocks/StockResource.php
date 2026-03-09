@@ -255,7 +255,7 @@ class StockResource extends Resource
                 ActionGroup::make([
                     ViewAction::make()
                         ->modalHeading('Ver Detalles')
-                        ->modalWidth(Width::FitContent),
+                        ->modalWidth(Width::ExtraLarge),
                 ]),
             ])
             ->toolbarActions([

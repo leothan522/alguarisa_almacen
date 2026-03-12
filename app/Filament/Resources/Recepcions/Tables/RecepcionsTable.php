@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Recepcions\Tables;
 
+use App\Models\Merma;
 use App\Models\Recepcion;
+use App\Models\Rubro;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -16,6 +18,8 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
@@ -138,12 +142,14 @@ class RecepcionsTable
                     self::actionExportPdf(),
                     ViewAction::make()
                         ->label('Ver Fotos'),
+                    self::actionCargarMerma(),
                     self::actionValidarRecepcion(),
                     self::actionSubirExpediente(),
                     self::actionVerExpediente(),
                     EditAction::make(),
                     self::actionRevertirRecepcion(),
                     self::actionRevertirExpediente(),
+                    self::actionRevertirMerma(),
                     RestoreAction::make()
                         ->before(function (Recepcion $record) {
                             $numero = Str::replace('*', '', $record->numero);
@@ -270,7 +276,7 @@ class RecepcionsTable
             ->requiresConfirmation()
             ->modalHeading('¿Revertir esta recepción?')
             ->modalDescription('Se eliminarán las fotos del servidor y la recepción volverá a estar pendiente.')
-            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete && self::isVisible())
+            ->visible(fn (Recepcion $record): bool => $record->is_sealed && ! $record->is_complete && self::isVisible() && ! self::existeMerma($record))
             ->action(function (Recepcion $record) {
                 $fotoDocumento = $record->image_documento;
                 $fotoImage1 = $record->image_1;
@@ -504,5 +510,108 @@ class RecepcionsTable
                 ])
                 ->modifyQueryUsing(fn (Builder $query) => $query->with('items')->orderBy('fecha')),
         ]);
+    }
+
+    protected static function actionCargarMerma()
+    {
+        return Action::make('merma-cargar')
+            ->label('Cargar Merma')
+            ->icon(Heroicon::OutlinedArchiveBoxArrowDown)
+            ->schema([
+                Select::make('rubros_id')
+                    ->label('Rubro')
+                    ->options(Rubro::query()->pluck('nombre', 'id')->map(fn ($nombre) => Str::upper($nombre)))
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                TextInput::make('total')
+                    ->label('Peso Total')
+                    ->numeric()
+                    ->step(0.01)
+                    ->required(),
+                Select::make('tipo_adquisicion')
+                    ->label('Tipo adquisición')
+                    ->options([
+                        'asignacion' => 'ASIGNACIÓN',
+                        'propia' => 'PROPIA',
+                    ])
+                    ->required(),
+            ])
+            ->action(function (array $data, Recepcion $record): void {
+                $recepciones_id = $record->id;
+                $almacenes_id = $record->almacenes_id;
+                $planes_id = $record->planes_id;
+                $rubros_id = $data['rubros_id'];
+                $total = $data['total'];
+                $tipo_asignacion = $data['tipo_adquisicion'];
+                $stock = Stock::where('almacenes_id', $almacenes_id)
+                    ->where('planes_id', $planes_id)
+                    ->where('rubros_id', $rubros_id)->first();
+                if ($stock) {
+                    Merma::create([
+                        'recepciones_id' => $recepciones_id,
+                        'almacenes_id' => $almacenes_id,
+                        'planes_id' => $planes_id,
+                        'rubros_id' => $rubros_id,
+                        'tipo_adquisicion' => $tipo_asignacion,
+                        'total' => $total,
+                    ]);
+                    $peso_asignacion = $stock->asignacion_total;
+                    $peso_propia = $stock->propia_total;
+                    if ($tipo_asignacion == 'asignacion') {
+                        $peso_asignacion = $peso_asignacion + $total;
+                    } else {
+                        $peso_propia = $peso_propia + $total;
+                    }
+                    $stock->asignacion_total = $peso_asignacion;
+                    $stock->propia_total = $peso_propia;
+                    $stock->total = $peso_asignacion + $peso_propia;
+                    $stock->save();
+                }
+            })
+            ->modalWidth(Width::Small)
+            ->hidden(fn (Recepcion $record): bool => (self::existeMerma($record) || ! $record->is_sealed) || $record->is_complete);
+    }
+
+    protected static function actionRevertirMerma()
+    {
+        return Action::make('sacar-merma')
+            ->label('Revertir Merma')
+            ->icon(Heroicon::OutlinedArrowPath)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->action(function (Recepcion $record): void {
+                $merma = Merma::where('recepciones_id', $record->id)->first();
+                if ($merma) {
+                    $almacenes_id = $merma->almacenes_id;
+                    $planes_id = $merma->planes_id;
+                    $rubros_id = $merma->rubros_id;
+                    $total = $merma->total;
+                    $tipo_asignacion = $merma->tipo_adquisicion;
+                    $stock = Stock::where('almacenes_id', $almacenes_id)
+                        ->where('planes_id', $planes_id)
+                        ->where('rubros_id', $rubros_id)->first();
+                    if ($stock) {
+                        $peso_asignacion = $stock->asignacion_total;
+                        $peso_propia = $stock->propia_total;
+                        if ($tipo_asignacion == 'asignacion') {
+                            $peso_asignacion = $peso_asignacion - $total;
+                        } else {
+                            $peso_propia = $peso_propia - $total;
+                        }
+                        $stock->asignacion_total = $peso_asignacion;
+                        $stock->propia_total = $peso_propia;
+                        $stock->total = $peso_asignacion + $peso_propia;
+                        $stock->save();
+                    }
+                    $merma->delete();
+                }
+            })
+            ->visible(fn (Recepcion $record): bool => self::existeMerma($record) && ! $record->is_complete);
+    }
+
+    protected static function existeMerma(Recepcion $record): bool
+    {
+        return Merma::where('recepciones_id', $record->id)->exists();
     }
 }

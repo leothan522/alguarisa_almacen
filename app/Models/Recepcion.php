@@ -112,4 +112,10 @@ class Recepcion extends Model
     {
         return $this->items()->sum('total');
     }
+
+    public function mermas(): HasMany
+    {
+        return $this->hasMany(Merma::class, 'recepciones_id', 'id');
+    }
+
 }

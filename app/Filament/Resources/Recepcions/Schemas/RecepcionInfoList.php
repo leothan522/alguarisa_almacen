@@ -30,12 +30,12 @@ class RecepcionInfoList
                             ->label('Estatus')
                             ->default(true)
                             ->size(IconSize::ExtraLarge)
-                            ->icon(fn(Recepcion $record): Heroicon => match (RecepcionsTable::getEstatus($record)) {
+                            ->icon(fn (Recepcion $record): Heroicon => match (RecepcionsTable::getEstatus($record)) {
                                 'is_complete' => Heroicon::OutlinedDocumentCheck,
                                 'is_sealed' => Heroicon::OutlinedCheckBadge,
                                 default => Heroicon::OutlinedClock
                             })
-                            ->color(fn(Recepcion $record): string => match (RecepcionsTable::getEstatus($record)) {
+                            ->color(fn (Recepcion $record): string => match (RecepcionsTable::getEstatus($record)) {
                                 'is_complete' => 'success',
                                 'is_sealed' => 'info',
                                 default => 'gray'
@@ -43,24 +43,38 @@ class RecepcionInfoList
                         TextEntry::make('fecha')
                             ->label('Fecha y Hora')
                             ->date()
-                            ->belowContent(fn(Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
+                            ->belowContent(fn (Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
                             ->color('primary')
                             ->weight(FontWeight::Bold)
                             ->copyable(),
                         TextEntry::make('numero')
                             ->label('Número y Plan')
-                            ->belowContent(fn(Recepcion $record): string => $record->plan->nombre)
+                            ->belowContent(fn (Recepcion $record): string => $record->plan->nombre)
                             ->color('primary')
                             ->weight(FontWeight::Bold)
                             ->copyable(),
                         TextEntry::make('total')
                             ->label('Recepción Total')
-                            ->default(fn(Recepcion $record): string => formatoMillares($record->items->sum('total')) . " KG")
+                            ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total')).' KG')
                             ->color('primary')
                             ->size(TextSize::Large)
                             ->weight(FontWeight::ExtraBold)
-                            ->belowContent(fn(Recepcion $record): string => formatoMillares($record->items->sum('cantidad_unidades'), 0) . " UND")
+                            ->belowContent(fn (Recepcion $record): string => formatoMillares($record->items->sum('cantidad_unidades'), 0).' UND')
                             ->copyable(),
+                        TextEntry::make('mermas.total')
+                            ->label('Merma')
+                            ->formatStateUsing(fn ($state) => formatoMillares($state).' KG')
+                            ->color('primary')
+                            ->size(TextSize::Large)
+                            ->weight(FontWeight::ExtraBold)
+                            ->visible(fn (Recepcion $record): bool => self::exiteMerma($record)),
+                        TextEntry::make('totalGuia')
+                            ->label('Todal Guía')
+                            ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total') + $record->mermas->sum('total')).' KG')
+                            ->color('primary')
+                            ->size(TextSize::Large)
+                            ->weight(FontWeight::ExtraBold)
+                            ->visible(fn (Recepcion $record): bool => self::exiteMerma($record)),
                     ])
                     ->columns(4)
                     ->columnSpanFull(),
@@ -71,7 +85,7 @@ class RecepcionInfoList
                         self::makeImageEntry('image_2'),
                     ])
                     ->columns(3)
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -96,7 +110,7 @@ class RecepcionInfoList
                     ->modalCancelActionLabel('Cerrar')
                     ->modalContent(fn ($record) => new HtmlString('
                     <div class="flex justify-center items-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                        <img src="' . Storage::url($record->$name) . '"
+                        <img src="'.Storage::url($record->$name).'"
                              class="max-w-full h-auto rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700"
                              style="max-height: 80vh; object-fit: contain;" />
                     </div>
@@ -104,4 +118,8 @@ class RecepcionInfoList
             );
     }
 
+    protected static function exiteMerma(Recepcion $record): bool
+    {
+        return $record->has('mermas')->exists();
+    }
 }

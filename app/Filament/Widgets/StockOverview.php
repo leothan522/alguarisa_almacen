@@ -12,6 +12,8 @@ class StockOverview extends StatsOverviewWidget
 {
     use CalcularStockTrait;
 
+    protected static bool $isLazy = false;
+
     protected function getStats(): array
     {
         $this->codigoPlan = 'BM';

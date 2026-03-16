@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\Despacho;
 use App\Models\Parametro;
+use App\Models\Plan;
 use App\Models\Recepcion;
 use App\Models\Responsable;
 use Filament\Actions\Action;
@@ -18,15 +19,19 @@ use Illuminate\Support\Str;
 
 trait AlmacenSchemas
 {
-    protected static function sectionDatos($recepcion = true)
+    public static bool $recepcion = true;
+
+    public static ?int $plan = null;
+
+    protected static function sectionDatos()
     {
         return Section::make('Datos Básicos')
             ->schema([
                 TextInput::make('numero')
-                    ->default(function () use ($recepcion): string {
+                    ->default(function (): string {
                         $num = 1;
                         $formato = '';
-                        $nombre = $recepcion ? 'numero_recepcion' : 'numero_despacho';
+                        $nombre = self::$recepcion ? 'numero_recepcion' : 'numero_despacho';
                         $parametro = Parametro::where('nombre', $nombre)->first();
                         if ($parametro) {
                             $formato = $parametro->valor_texto;
@@ -36,7 +41,7 @@ trait AlmacenSchemas
                         do {
                             $num = $num + $i;
                             $codigo = $formato.cerosIzquierda($num, numSizeCodigo());
-                            $existe = $recepcion ? Recepcion::where('numero', $codigo)->exists() : Despacho::where('numero', $codigo)->exists();
+                            $existe = self::$recepcion ? Recepcion::where('numero', $codigo)->exists() : Despacho::where('numero', $codigo)->exists();
                             $i++;
                         } while ($existe);
 
@@ -48,7 +53,9 @@ trait AlmacenSchemas
                     ->label('Plan')
                     ->relationship(name: 'plan', titleAttribute: 'nombre')
                     ->required()
-                    ->disabledOn('edit'),
+                    ->disabledOn('edit')
+                    ->default(self::$plan)
+                    ->disableOptionWhen(fn (string $value): bool => $value != self::$plan && ! self::$recepcion),
                 DatePicker::make('fecha')
                     ->default(now())
                     ->required(),
@@ -63,7 +70,7 @@ trait AlmacenSchemas
 
     protected static function sectionResponsable()
     {
-        return Section::make('¿Quien entrega? ')
+        return Section::make(fn (): string => self::$recepcion ? '¿Quien entrega?' : '¿Quien recibe?')
             ->schema([
                 Select::make('responsables_id')
                     ->relationship(name: 'responsable', titleAttribute: 'nombre')
@@ -112,6 +119,11 @@ trait AlmacenSchemas
                 ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
             TextInput::make('empresa'),
         ];
+    }
+
+    protected static function getPlan($codigo): mixed
+    {
+        return Plan::where('codigo', $codigo)->first()?->id;
     }
 
 }

@@ -11,9 +11,12 @@ class BodegaMovilForm
 
     public static function configure(Schema $schema): Schema
     {
+        self::$recepcion = false;
+        self::$plan = self::getPlan('BM');
+
         return $schema
             ->components([
-                self::sectionDatos(false),
+                self::sectionDatos(),
                 self::sectionResponsable(),
                 self::sectionObservacion(),
             ]);

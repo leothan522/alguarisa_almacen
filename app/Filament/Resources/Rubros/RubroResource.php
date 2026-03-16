@@ -43,7 +43,7 @@ class RubroResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Almacén';
 
-    protected static ?int $navigationSort = 82;
+    protected static ?int $navigationSort = 83;
 
     protected static ?string $recordTitleAttribute = 'nombre';
 

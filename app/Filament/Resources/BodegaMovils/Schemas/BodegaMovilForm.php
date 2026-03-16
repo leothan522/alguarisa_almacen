@@ -13,11 +13,13 @@ class BodegaMovilForm
     {
         self::$recepcion = false;
         self::$plan = self::getPlan('BM');
+        self::$repeatRelation = 'detalles';
 
         return $schema
             ->components([
                 self::sectionDatos(),
                 self::sectionResponsable(),
+                self::sectionRubros(),
                 self::sectionObservacion(),
             ]);
     }

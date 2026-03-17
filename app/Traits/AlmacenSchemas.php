@@ -2,12 +2,15 @@
 
 namespace App\Traits;
 
+use App\Models\Almacen;
 use App\Models\Despacho;
 use App\Models\Parametro;
 use App\Models\Plan;
 use App\Models\Recepcion;
 use App\Models\Responsable;
 use App\Models\Rubro;
+use App\Models\Stock;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -70,6 +73,8 @@ trait AlmacenSchemas
                     ->default(now())
                     ->seconds(false)
                     ->required(),
+                Hidden::make('almacenes_id')
+                    ->default(fn () => Almacen::where('is_main', 1)->first()?->id),
             ])
             ->compact()
             ->columns();
@@ -148,7 +153,8 @@ trait AlmacenSchemas
                             ->label('Cantidad')
                             ->integer()
                             ->required()
-                            ->live(onBlur: true),
+                            ->live(onBlur: true)
+                            ->rules(self::rulesCantidad()),
                         TextInput::make('peso_unitario')
                             ->label('Peso Unitario')
                             ->numeric()
@@ -163,7 +169,8 @@ trait AlmacenSchemas
                                 $unidad = $get('rubros_unidad_medida') ?? 'KG';
 
                                 return 'Total: '.formatoMillares($total).' '.$unidad;
-                            }),
+                            })
+                            ->rules(self::rulesPeso()),
                         self::$recepcion ? self::selectTipoAdquisicion() : null,
                         Hidden::make('rubros_nombre'),
                         Hidden::make('rubros_unidad_medida'),
@@ -223,5 +230,93 @@ trait AlmacenSchemas
                 'propia' => 'PROPIA',
             ])
             ->required();
+    }
+
+    protected static function rulesCantidad(): array
+    {
+        return [
+            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                // Solo validar si no es una recepción
+                if (! self::$recepcion) {
+                    $rubroId = $get('rubros_id');
+                    // Usamos '../' para salir del Repeater y buscar en el formulario padre
+                    // Si el Repeater está dentro de una Section, podrías necesitar '../../'
+                    $almacenId = $get('../../almacenes_id');
+                    $planId = $get('../../planes_id');
+                    $tipoAdquisicion = $get('tipo_adquisicion');
+
+                    if (! $rubroId) {
+                        return;
+                    }
+
+                    // Buscamos el registro de stock para ese rubro y almacén
+                    $stock = Stock::where('rubros_id', $rubroId)
+                        ->where('planes_id', $planId)
+                        ->where('almacenes_id', $almacenId)
+                        ->first();
+
+                    $disponible = 0;
+                    if ($stock) {
+                        if ($tipoAdquisicion == 'asignacion') {
+                            $disponible = $stock->asignacion_cantidad - $stock->despacho_asignacion_cantidad;
+                        } else {
+                            $disponible = $stock->propia_cantidad - $stock->despacho_propia_cantidad;
+                        }
+                    }
+
+                    if ($value > $disponible) {
+                        $fail("Stock insuficiente. Hay {$disponible} unidades disponibles.");
+                    }
+                }
+            },
+        ];
+    }
+
+    protected static function rulesPeso(): array
+    {
+        return [
+            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                // Solo validar si no es una recepción
+                if (! self::$recepcion) {
+                    $rubroId = $get('rubros_id');
+                    // Usamos '../' para salir del Repeater y buscar en el formulario padre
+                    // Si el Repeater está dentro de una Section, podrías necesitar '../../'
+                    $almacenId = $get('../../almacenes_id');
+                    $planId = $get('../../planes_id');
+                    $tipoAdquisicion = $get('tipo_adquisicion');
+                    $total = $get('total');
+
+                    if (! $rubroId) {
+                        return;
+                    }
+
+                    // Buscamos el registro de stock para ese rubro y almacén
+                    $stock = Stock::where('rubros_id', $rubroId)
+                        ->where('planes_id', $planId)
+                        ->where('almacenes_id', $almacenId)
+                        ->first();
+
+                    $disponible = 0.00; // Inicializamos como float
+
+                    if ($stock) {
+                        if ($tipoAdquisicion == 'asignacion') {
+                            // Calculamos y redondeamos a 2 decimales
+                            $disponible = round($stock->asignacion_total - $stock->despacho_asignacion_total, 2);
+                        } else {
+                            $disponible = round($stock->propia_total - $stock->despacho_propia_total, 2);
+                        }
+                    }
+
+                    // Convertimos el valor entrante a float para una comparación precisa
+                    if (round((float) $total, 2) > $disponible) {
+                        $unidad = $stock?->rubro?->unidad_medida ?? '';
+                        // Formateamos el número para el mensaje (ej: 50,00)
+                        $disponibleFormateado = number_format($disponible, 2, ',', '.');
+
+                        $fail("Stock insuficiente. Hay {$disponibleFormateado} {$unidad} disponibles.");
+                    }
+                }
+            },
+        ];
     }
 }

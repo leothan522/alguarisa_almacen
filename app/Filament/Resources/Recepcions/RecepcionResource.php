@@ -96,8 +96,6 @@ class RecepcionResource extends Resource
 
     public static function dataPersonalizada($data)
     {
-        $data['almacenes_id'] = Almacen::where('is_main', 1)->first()->id;
-
         $jefe = Jefe::where('is_main', 1)->first();
         $data['jefes_id'] = $jefe->id;
         $data['jefes_nombre'] = $jefe->nombre;

@@ -120,8 +120,8 @@ class Recepcion extends Model
                 'propia_total' => $finalPropPeso,
 
                 'total' => $finalAsigPeso + $finalPropPeso,
-                'stock_cantidad' => ($totalesItems->asig_cant ?? 0 + $totalesItems->prop_cant ?? 0) - ($stock->despacho_asignacion_cantidad ?? 0 + $stock->despacho_propia_cantidad ?? 0),
-                'stock_total' => ($finalAsigPeso + $finalPropPeso) - ($stock->despacho_total ?? 0),
+                'stock_cantidad' => ($totalesItems->asig_cant + $totalesItems->prop_cant) - ($stock->despacho_asignacion_cantidad + $stock->despacho_propia_cantidad),
+                'stock_total' => ($finalAsigPeso + $finalPropPeso) - ($stock->despacho_total),
             ])->save();
         }
     }

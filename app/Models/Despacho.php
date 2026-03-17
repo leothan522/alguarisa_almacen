@@ -100,7 +100,7 @@ class Despacho extends Model
 
                 // 'total' se mantiene como la suma de recepciones (Entradas)
                 // 'stock_total' es el balance neto actual
-                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - ($totalesDespacho->asig_cant ?? 0 + $totalesDespacho->prop_cant ?? 0),
+                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - ($totalesDespacho->asig_cant + $totalesDespacho->prop_cant),
                 'stock_total' => $stock->total - $despachoPesoTotal,
             ]);
         }

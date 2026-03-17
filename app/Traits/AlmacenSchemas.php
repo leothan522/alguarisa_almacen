@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\Almacen;
 use App\Models\Despacho;
+use App\Models\Detalle;
 use App\Models\Parametro;
 use App\Models\Plan;
 use App\Models\Recepcion;
@@ -232,13 +233,14 @@ trait AlmacenSchemas
                 'asignacion' => 'ASIGNACIÓN',
                 'propia' => 'PROPIA',
             ])
+            ->live()
             ->required();
     }
 
     protected static function rulesCantidad(): array
     {
         return [
-            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+            fn (Get $get, ?Detalle $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
                 // Solo validar si no es una recepción
                 if (! self::$recepcion) {
                     $rubroId = $get('rubros_id');
@@ -267,6 +269,16 @@ trait AlmacenSchemas
                         }
                     }
 
+                    // --- LÓGICA DE EDICIÓN INTELIGENTE ---
+                    if ($record) {
+                        // Solo sumamos si el rubro y el tipo de adquisición NO han cambiado en el formulario.
+                        // Si cambiaron, validamos contra el stock real del nuevo rubro/tipo.
+                        if ($record->rubros_id == $rubroId && $record->tipo_adquisicion === $tipoAdquisicion) {
+                            // IMPORTANTE: Usamos cantidad_unidades porque estamos en rulesCantidad
+                            $disponible += (int) $record->cantidad_unidades;
+                        }
+                    }
+
                     if ($value > $disponible) {
                         $fail("Stock insuficiente. Hay {$disponible} unidades disponibles.");
                     }
@@ -278,7 +290,7 @@ trait AlmacenSchemas
     protected static function rulesPeso(): array
     {
         return [
-            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+            fn (Get $get, ?Detalle $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
                 // Solo validar si no es una recepción
                 if (! self::$recepcion) {
                     $rubroId = $get('rubros_id');
@@ -310,10 +322,18 @@ trait AlmacenSchemas
                         }
                     }
 
-                    // Convertimos el valor entrante a float para una comparación precisa
-                    if (round((float) $total, 2) > $disponible) {
+                    // --- LÓGICA DE EDICIÓN INTELIGENTE ---
+                    if ($record) {
+                        // SOLO devolvemos el stock si el rubro Y el tipo son los mismos que ya estaban grabados.
+                        // Si el usuario cambió el rubro en el Select, el disponible debe ser el stock real
+                        // de ese nuevo rubro, sin sumarle lo del rubro anterior.
+                        if ($record->rubros_id == $rubroId && $record->tipo_adquisicion === $tipoAdquisicion) {
+                            $disponible += (float) $record->total; // o cantidad_unidades
+                        }
+                    }
+
+                    if ($total > $disponible) {
                         $unidad = $stock?->rubro?->unidad_medida ?? '';
-                        // Formateamos el número para el mensaje (ej: 50,00)
                         $disponibleFormateado = number_format($disponible, 2, ',', '.');
 
                         $fail("Stock insuficiente. Hay {$disponibleFormateado} {$unidad} disponibles.");

@@ -121,6 +121,9 @@ class RecepcionInfoList
 
     protected static function exiteMerma(Recepcion $record): bool
     {
-        return $record->has('mermas')->exists();
+        // Verificamos si la relación mermas tiene algún registro
+        return $record->mermas()->exists();
+        // O si prefieres usar la colección ya cargada en memoria:
+        // return $record->mermas->count() > 0;
     }
 }

@@ -35,7 +35,17 @@ class EditBodegaMovil extends EditRecord
 
     protected function afterSave(): void
     {
-        $this->record->sincronizarStock();
+        /// Esta es la clave:
+        // Buscamos todos los registros de stock que pertenecen a este despacho
+        // y a este plan, incluso si el detalle ya no existe en 'despachos_detalles'
+
+        $rubrosEnStock = \App\Models\Stock::where('planes_id', $this->record->planes_id)
+            ->where('almacenes_id', $this->record->almacenes_id)
+            ->pluck('rubros_id')
+            ->toArray();
+
+        // Sincronizamos todos los rubros que alguna vez tocaron este stock
+        $this->record->sincronizarStock($rubrosEnStock);
     }
 
 }

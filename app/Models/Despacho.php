@@ -58,23 +58,25 @@ class Despacho extends Model
         return $this->hasMany(Detalle::class, 'despachos_id', 'id');
     }
 
-    public function sincronizarStock(): void
+    public function sincronizarStock(array $idsAdicionales = []): void
     {
-        // 1. Obtenemos los rubros involucrados en este despacho
-        $rubrosIds = \DB::table('despachos_detalles')
+        // 1. Obtenemos los rubros que actualmente están en el despacho
+        $idsActuales = \DB::table('despachos_detalles')
             ->where('despachos_id', $this->id)
             ->pluck('rubros_id')
-            ->unique();
+            ->toArray();
 
-        foreach ($rubrosIds as $rubroId) {
-            // 2. Buscamos el registro de Stock
+        // 2. Unimos con los IDs que pasamos manualmente (los que se borraron)
+        $todosLosIds = array_unique(array_merge($idsActuales, $idsAdicionales));
+
+        foreach ($todosLosIds as $rubroId) {
             $stock = Stock::firstOrCreate([
                 'planes_id' => $this->planes_id,
                 'rubros_id' => $rubroId,
                 'almacenes_id' => $this->almacenes_id,
             ]);
 
-            // 3. Calculamos totales de despachos (Salidas)
+            // Calculamos totales. Si el detalle se borró, este SUM dará 0.
             $totalesDespacho = \DB::table('despachos_detalles')
                 ->join('despachos', 'despachos_detalles.despachos_id', '=', 'despachos.id')
                 ->where('despachos.planes_id', $this->planes_id)
@@ -88,19 +90,20 @@ class Despacho extends Model
             ")
                 ->first();
 
-            $despachoPesoTotal = ($totalesDespacho->asig_peso ?? 0) + ($totalesDespacho->prop_peso ?? 0);
+            $asigCant = $totalesDespacho->asig_cant ?? 0;
+            $asigPeso = $totalesDespacho->asig_peso ?? 0;
+            $propCant = $totalesDespacho->prop_cant ?? 0;
+            $propPeso = $totalesDespacho->prop_peso ?? 0;
+            $despachoPesoTotal = $asigPeso + $propPeso;
 
-            // 4. Actualizamos el registro de Stock
             $stock->update([
-                'despacho_asignacion_cantidad' => $totalesDespacho->asig_cant ?? 0,
-                'despacho_asignacion_total' => $totalesDespacho->asig_peso ?? 0,
-                'despacho_propia_cantidad' => $totalesDespacho->prop_cant ?? 0,
-                'despacho_propia_total' => $totalesDespacho->prop_peso ?? 0,
+                'despacho_asignacion_cantidad' => $asigCant,
+                'despacho_asignacion_total' => $asigPeso,
+                'despacho_propia_cantidad' => $propCant,
+                'despacho_propia_total' => $propPeso,
                 'despacho_total' => $despachoPesoTotal,
-
-                // 'total' se mantiene como la suma de recepciones (Entradas)
-                // 'stock_total' es el balance neto actual
-                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - ($totalesDespacho->asig_cant + $totalesDespacho->prop_cant),
+                // Recalcular el balance neto
+                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - ($asigCant + $propCant),
                 'stock_total' => $stock->total - $despachoPesoTotal,
             ]);
         }

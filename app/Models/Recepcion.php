@@ -61,8 +61,9 @@ class Recepcion extends Model
         return $this->hasMany(Item::class, 'recepciones_id', 'id');
     }
 
-    public function sincronizarStock(): void
+    public function sincronizarStock(?array $idsManuales = []): void
     {
+        // Capturamos rubros de items y mermas actuales
         $rubrosItems = \DB::table('recepciones_items')
             ->where('recepciones_id', $this->id)
             ->pluck('rubros_id');
@@ -71,16 +72,20 @@ class Recepcion extends Model
             ->where('recepciones_id', $this->id)
             ->pluck('rubros_id');
 
-        $rubrosIds = $rubrosItems->merge($rubrosMermas)->unique();
+        // Unimos con los IDs manuales (los que pudieron ser borrados)
+        $rubrosIds = $rubrosItems->merge($rubrosMermas)
+            ->merge($idsManuales)
+            ->unique()
+            ->filter(); // Elimina nulos
 
         foreach ($rubrosIds as $rubroId) {
-            $stock = Stock::firstOrNew([
+            $stock = Stock::firstOrCreate([
                 'planes_id' => $this->planes_id,
                 'rubros_id' => $rubroId,
                 'almacenes_id' => $this->almacenes_id ?? 1,
             ]);
 
-            // 1. Totales de Items (Cantidades y Pesos)
+            // 1. Totales de Items
             $totalesItems = \DB::table('recepciones_items')
                 ->join('recepciones', 'recepciones_items.recepciones_id', '=', 'recepciones.id')
                 ->where('recepciones.planes_id', $this->planes_id)
@@ -94,7 +99,7 @@ class Recepcion extends Model
             ")
                 ->first();
 
-            // 2. Totales de Mermas (Solo Pesos, según tu modelo Merma)
+            // 2. Totales de Mermas
             $totalesMermas = \DB::table('recepciones_mermas')
                 ->join('recepciones', 'recepciones_mermas.recepciones_id', '=', 'recepciones.id')
                 ->where('recepciones.planes_id', $this->planes_id)
@@ -106,23 +111,23 @@ class Recepcion extends Model
             ")
                 ->first();
 
-            // Cálculo Final
+            $asigCant = $totalesItems->asig_cant ?? 0;
+            $propCant = $totalesItems->prop_cant ?? 0;
             $finalAsigPeso = ($totalesItems->asig_peso ?? 0) + ($totalesMermas->asig_merma ?? 0);
             $finalPropPeso = ($totalesItems->prop_peso ?? 0) + ($totalesMermas->prop_merma ?? 0);
+            $totalEntradaPeso = $finalAsigPeso + $finalPropPeso;
 
-            $stock->fill([
-                // Sincronizamos las cantidades (unidades)
-                'asignacion_cantidad' => $totalesItems->asig_cant ?? 0,
-                'propia_cantidad' => $totalesItems->prop_cant ?? 0,
-
-                // Sincronizamos los totales (pesos) incluyendo mermas
+            $stock->update([
+                'asignacion_cantidad' => $asigCant,
+                'propia_cantidad' => $propCant,
                 'asignacion_total' => $finalAsigPeso,
                 'propia_total' => $finalPropPeso,
+                'total' => $totalEntradaPeso,
 
-                'total' => $finalAsigPeso + $finalPropPeso,
-                'stock_cantidad' => ($totalesItems->asig_cant + $totalesItems->prop_cant) - ($stock->despacho_asignacion_cantidad + $stock->despacho_propia_cantidad),
-                'stock_total' => ($finalAsigPeso + $finalPropPeso) - ($stock->despacho_total),
-            ])->save();
+                // BALANCE NETO: Entradas actuales - Despachos registrados
+                'stock_cantidad' => ($asigCant + $propCant) - ($stock->despacho_asignacion_cantidad + $stock->despacho_propia_cantidad),
+                'stock_total' => $totalEntradaPeso - ($stock->despacho_total ?? 0),
+            ]);
         }
     }
 

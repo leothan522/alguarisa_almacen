@@ -4,11 +4,9 @@ namespace App\Filament\Resources\Recepcions\Pages;
 
 use App\Filament\Resources\Recepcions\RecepcionResource;
 use App\Models\Recepcion;
+use App\Models\Stock;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Str;
 
 class EditRecepcion extends EditRecord
 {
@@ -40,6 +38,13 @@ class EditRecepcion extends EditRecord
 
     protected function afterSave(): void
     {
-        $this->record->sincronizarStock();
+        // Obtenemos todos los rubros que ya existen en el stock para este plan/almacén
+        // Esto garantiza que si un rubro fue borrado del repeater, se recalcule a 0
+        $rubrosEnStock = Stock::where('planes_id', $this->record->planes_id)
+            ->where('almacenes_id', $this->record->almacenes_id)
+            ->pluck('rubros_id')
+            ->toArray();
+
+        $this->record->sincronizarStock($rubrosEnStock);
     }
 }

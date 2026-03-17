@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Recepcions\Tables;
 use App\Models\Merma;
 use App\Models\Recepcion;
 use App\Models\Rubro;
-use App\Models\Stock;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -539,19 +538,19 @@ class RecepcionsTable
             ])
             ->action(function (array $data, Recepcion $record): void {
                 Merma::create([
-                    'recepciones_id'   => $record->id,
-                    'almacenes_id'     => $record->almacenes_id,
-                    'planes_id'        => $record->planes_id,
-                    'rubros_id'        => $data['rubros_id'],
+                    'recepciones_id' => $record->id,
+                    'almacenes_id' => $record->almacenes_id,
+                    'planes_id' => $record->planes_id,
+                    'rubros_id' => $data['rubros_id'],
                     'tipo_adquisicion' => $data['tipo_adquisicion'],
-                    'total'            => $data['total'],
+                    'total' => $data['total'],
                 ]);
 
                 // Llamamos al método centralizado para que recalcule todo correctamente
                 $record->sincronizarStock();
             })
             ->modalWidth(Width::Small)
-            ->hidden(fn (Recepcion $record): bool => (self::existeMerma($record) || ! $record->is_sealed) || $record->is_complete);
+            ->hidden(fn (Recepcion $record): bool => (self::existeMerma($record) || ! $record->is_sealed) || $record->is_complete || $record->plan->codigo != 'BM');
     }
 
     protected static function actionRevertirMerma()

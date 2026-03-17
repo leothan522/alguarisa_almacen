@@ -93,6 +93,7 @@ class RecepcionInfoList
     {
         return ImageEntry::make($name)
             ->hiddenLabel()
+            ->defaultImageUrl(asset('img/placeholder.jpg'))
             ->disk('public')
             ->visibility('public')
             ->imageSize(200)
@@ -110,9 +111,9 @@ class RecepcionInfoList
                     ->modalCancelActionLabel('Cerrar')
                     ->modalContent(fn ($record) => new HtmlString('
                     <div class="flex justify-center items-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                        <img src="'.Storage::url($record->$name).'"
+                        <img src="'.verImagen($record->$name).'"
                              class="max-w-full h-auto rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700"
-                             style="max-height: 80vh; object-fit: contain;" />
+                             style="max-height: 80vh; object-fit: contain;" alt="" />
                     </div>
                 '))
             );

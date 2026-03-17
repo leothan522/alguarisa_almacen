@@ -4,9 +4,9 @@ namespace App\Filament\Resources\BodegaMovils\Pages;
 
 use App\Filament\Resources\BodegaMovils\BodegaMovilResource;
 use App\Filament\Resources\Recepcions\RecepcionResource;
+use App\Models\Despacho;
+use App\Models\Stock;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditBodegaMovil extends EditRecord
@@ -16,9 +16,13 @@ class EditBodegaMovil extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
+            DeleteAction::make()
+                ->before(function (Despacho $record) {
+                    $numero = '*'.$record->numero;
+                    $record->update([
+                        'numero' => $numero,
+                    ]);
+                }),
         ];
     }
 
@@ -35,11 +39,11 @@ class EditBodegaMovil extends EditRecord
 
     protected function afterSave(): void
     {
-        /// Esta es la clave:
+        // / Esta es la clave:
         // Buscamos todos los registros de stock que pertenecen a este despacho
         // y a este plan, incluso si el detalle ya no existe en 'despachos_detalles'
 
-        $rubrosEnStock = \App\Models\Stock::where('planes_id', $this->record->planes_id)
+        $rubrosEnStock = Stock::where('planes_id', $this->record->planes_id)
             ->where('almacenes_id', $this->record->almacenes_id)
             ->pluck('rubros_id')
             ->toArray();
@@ -47,5 +51,4 @@ class EditBodegaMovil extends EditRecord
         // Sincronizamos todos los rubros que alguna vez tocaron este stock
         $this->record->sincronizarStock($rubrosEnStock);
     }
-
 }

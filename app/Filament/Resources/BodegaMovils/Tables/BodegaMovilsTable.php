@@ -4,11 +4,12 @@ namespace App\Filament\Resources\BodegaMovils\Tables;
 
 use App\Models\Despacho;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
@@ -114,14 +115,25 @@ class BodegaMovilsTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),
+                    RestoreAction::make()
+                        ->before(function (Despacho $record) {
+                            $numero = Str::replace('*', '', $record->numero);
+                            $record->update([
+                                'numero' => $numero,
+                            ]);
+                        }),
                 ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make()
+                        ->authorizeIndividualRecords('forceDelete'),
+                    RestoreBulkAction::make()
+                        ->authorizeIndividualRecords('restore'),
                 ]),
+                Action::make('actualizar')
+                    ->icon(Heroicon::ArrowPath)
+                    ->iconButton(),
             ]);
     }
 

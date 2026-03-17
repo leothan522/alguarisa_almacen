@@ -160,8 +160,6 @@ class RecepcionsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    /*DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),*/
                     ForceDeleteBulkAction::make()
                         ->authorizeIndividualRecords('forceDelete'),
                     RestoreBulkAction::make()

@@ -28,7 +28,7 @@ class CreateBodegaMovil extends CreateRecord
             $parametro->save();
         } else {
             Parametro::create([
-                'nombre' => 'numero_recepcion',
+                'nombre' => 'numero_despacho',
                 'valor_id' => 2,
             ]);
         }

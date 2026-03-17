@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('responsables_cedula');
             $table->string('responsables_telefono')->nullable();
             $table->string('responsables_empresa')->nullable();
+            $table->boolean('is_merma')->default(false);
             $table->boolean('is_return')->default(false);
             $table->boolean('is_complete')->default(false);
             $table->text('pdf_expediente')->nullable();

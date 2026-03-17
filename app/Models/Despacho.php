@@ -28,6 +28,7 @@ class Despacho extends Model
         'responsables_cedula',
         'responsables_telefono',
         'responsables_empresa',
+        'is_merma',
         'is_return',
         'is_complete',
         'pdf_expediente',

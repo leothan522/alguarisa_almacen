@@ -2,10 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Recepcion;
+use App\Models\Despacho;
 use App\Models\User;
+use Illuminate\Auth\Access\Response;
 
-class RecepcionPolicy
+class DespachoPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -18,7 +19,7 @@ class RecepcionPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Recepcion $recepcion): bool
+    public function view(User $user, Despacho $despacho): bool
     {
         return true;
     }
@@ -34,9 +35,9 @@ class RecepcionPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Recepcion $recepcion): bool
+    public function update(User $user, Despacho $despacho): bool
     {
-        $edit = ! $recepcion->is_sealed && ! $recepcion->is_complete && ! $recepcion->deleted_at;
+        $edit = ! $despacho->is_return && ! $despacho->is_complete && ! $despacho->deleted_at;
 
         return (isAdmin() || $user->hasRole('almacen')) && $edit;
     }
@@ -44,9 +45,9 @@ class RecepcionPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Recepcion $recepcion): bool
+    public function delete(User $user, Despacho $despacho): bool
     {
-        $delete = ! $recepcion->is_sealed && ! $recepcion->is_complete;
+        $delete = ! $despacho->is_return && ! $despacho->is_complete;
 
         return (isAdmin() || $user->hasRole('almacen')) && $delete;
     }
@@ -54,7 +55,7 @@ class RecepcionPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Recepcion $recepcion): bool
+    public function restore(User $user, Despacho $despacho): bool
     {
         return isAdmin() || $user->hasRole('almacen');
     }
@@ -62,9 +63,9 @@ class RecepcionPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Recepcion $recepcion): bool
+    public function forceDelete(User $user, Despacho $despacho): bool
     {
-        $delete = ! $recepcion->is_sealed && ! $recepcion->is_complete;
+        $delete = ! $despacho->is_return && ! $despacho->is_complete;
 
         return isAdmin() && $delete;
     }

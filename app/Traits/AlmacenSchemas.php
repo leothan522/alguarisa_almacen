@@ -154,6 +154,7 @@ trait AlmacenSchemas
                         TextInput::make('cantidad_unidades')
                             ->label('Cantidad')
                             ->integer()
+                            ->minValue(1)
                             ->required()
                             ->live(onBlur: true)
                             ->rules(self::rulesCantidad()),

@@ -137,6 +137,8 @@ trait AlmacenSchemas
                             ->getOptionLabelFromRecordUsing(fn (Rubro $record): string => Str::upper($record->nombre))
                             ->searchable()
                             ->preload()
+                            ->distinct() // Asegura que el valor sea único en el contexto del Repeater
+                            ->disableOptionsWhenSelectedInSiblingRepeaterItems() // Deshabilita la opción en las otras filas
                             ->required()
                             ->live()
                             ->afterStateUpdated(callback: function (?string $state, ?string $old, Set $set) {

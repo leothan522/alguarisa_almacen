@@ -538,36 +538,17 @@ class RecepcionsTable
                     ->required(),
             ])
             ->action(function (array $data, Recepcion $record): void {
-                $recepciones_id = $record->id;
-                $almacenes_id = $record->almacenes_id;
-                $planes_id = $record->planes_id;
-                $rubros_id = $data['rubros_id'];
-                $total = $data['total'];
-                $tipo_asignacion = $data['tipo_adquisicion'];
-                $stock = Stock::where('almacenes_id', $almacenes_id)
-                    ->where('planes_id', $planes_id)
-                    ->where('rubros_id', $rubros_id)->first();
-                if ($stock) {
-                    Merma::create([
-                        'recepciones_id' => $recepciones_id,
-                        'almacenes_id' => $almacenes_id,
-                        'planes_id' => $planes_id,
-                        'rubros_id' => $rubros_id,
-                        'tipo_adquisicion' => $tipo_asignacion,
-                        'total' => $total,
-                    ]);
-                    $peso_asignacion = $stock->asignacion_total;
-                    $peso_propia = $stock->propia_total;
-                    if ($tipo_asignacion == 'asignacion') {
-                        $peso_asignacion = $peso_asignacion + $total;
-                    } else {
-                        $peso_propia = $peso_propia + $total;
-                    }
-                    $stock->asignacion_total = $peso_asignacion;
-                    $stock->propia_total = $peso_propia;
-                    $stock->total = $peso_asignacion + $peso_propia;
-                    $stock->save();
-                }
+                Merma::create([
+                    'recepciones_id'   => $record->id,
+                    'almacenes_id'     => $record->almacenes_id,
+                    'planes_id'        => $record->planes_id,
+                    'rubros_id'        => $data['rubros_id'],
+                    'tipo_adquisicion' => $data['tipo_adquisicion'],
+                    'total'            => $data['total'],
+                ]);
+
+                // Llamamos al método centralizado para que recalcule todo correctamente
+                $record->sincronizarStock();
             })
             ->modalWidth(Width::Small)
             ->hidden(fn (Recepcion $record): bool => (self::existeMerma($record) || ! $record->is_sealed) || $record->is_complete);
@@ -581,30 +562,17 @@ class RecepcionsTable
             ->color('danger')
             ->requiresConfirmation()
             ->action(function (Recepcion $record): void {
+                // Buscamos la merma asociada a esta recepción
                 $merma = Merma::where('recepciones_id', $record->id)->first();
+
                 if ($merma) {
-                    $almacenes_id = $merma->almacenes_id;
-                    $planes_id = $merma->planes_id;
-                    $rubros_id = $merma->rubros_id;
-                    $total = $merma->total;
-                    $tipo_asignacion = $merma->tipo_adquisicion;
-                    $stock = Stock::where('almacenes_id', $almacenes_id)
-                        ->where('planes_id', $planes_id)
-                        ->where('rubros_id', $rubros_id)->first();
-                    if ($stock) {
-                        $peso_asignacion = $stock->asignacion_total;
-                        $peso_propia = $stock->propia_total;
-                        if ($tipo_asignacion == 'asignacion') {
-                            $peso_asignacion = $peso_asignacion - $total;
-                        } else {
-                            $peso_propia = $peso_propia - $total;
-                        }
-                        $stock->asignacion_total = $peso_asignacion;
-                        $stock->propia_total = $peso_propia;
-                        $stock->total = $peso_asignacion + $peso_propia;
-                        $stock->save();
-                    }
+                    // 1. Eliminamos el registro de la tabla recepciones_mermas
                     $merma->delete();
+
+                    // 2. Ejecutamos la sincronización centralizada
+                    // Al no existir ya el registro de merma, el método sumará 0 en ese concepto
+                    // y el stock_total bajará automáticamente.
+                    $record->sincronizarStock();
                 }
             })
             ->visible(fn (Recepcion $record): bool => self::existeMerma($record) && ! $record->is_complete);

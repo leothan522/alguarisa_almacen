@@ -21,7 +21,7 @@ class CreateBodegaMovil extends CreateRecord
     protected function afterCreate(): void
     {
         // $this->record es la instancia de Recepcion recién creada
-        // $this->record->sincronizarStock();
+        $this->record->sincronizarStock();
         $parametro = Parametro::where('nombre', 'numero_despacho')->first();
         if ($parametro) {
             $parametro->increment('valor_id');
@@ -36,7 +36,7 @@ class CreateBodegaMovil extends CreateRecord
 
     protected function afterSave(): void
     {
-        // $this->record->sincronizarStock();
+        $this->record->sincronizarStock();
     }
 
 }

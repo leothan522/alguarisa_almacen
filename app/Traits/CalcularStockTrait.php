@@ -44,12 +44,13 @@ trait CalcularStockTrait
             ->where('planes_id', $this->plan->id);
 
         // 3. Cálculos de los totales
-        $this->totalGeneral = $query->sum('total');
-        $this->totalAsignacion = $query->sum('asignacion_total');
-        $this->totalPropia = $query->sum('propia_total');
+        $this->unidadesTotales = $query->sum('stock_cantidad');
+        $this->totalGeneral = $query->sum('stock_total');
+        $this->totalAsignacion = $query->sum('asignacion_total') - $query->sum('despacho_asignacion_total');
+        $this->totalPropia = $query->sum('propia_total') - $query->sum('despacho_propia_total');
         // Calculamos el total de unidades físicas para el plan
-        $this->cantidadAsignacion = $query->sum('asignacion_cantidad');
-        $this->cantidadPropia = $query->sum('propia_cantidad');
-        $this->unidadesTotales = $this->cantidadAsignacion + $this->cantidadPropia;
+        $this->cantidadAsignacion = $query->sum('asignacion_cantidad') - $query->sum('despacho_asignacion_cantidad');
+        $this->cantidadPropia = $query->sum('propia_cantidad') - $query->sum('despacho_propia_cantidad');
+
     }
 }

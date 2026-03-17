@@ -63,41 +63,65 @@ class Recepcion extends Model
 
     public function sincronizarStock(): void
     {
-        // Obtenemos los rubros directamente de la tabla de items para este registro
-        $rubrosIds = \DB::table('recepciones_items')
-            ->where('recepciones_id', $this->id) // Usamos el nombre correcto de tu FK
-            ->pluck('rubros_id')
-            ->unique();
+        $rubrosItems = \DB::table('recepciones_items')
+            ->where('recepciones_id', $this->id)
+            ->pluck('rubros_id');
+
+        $rubrosMermas = \DB::table('recepciones_mermas')
+            ->where('recepciones_id', $this->id)
+            ->pluck('rubros_id');
+
+        $rubrosIds = $rubrosItems->merge($rubrosMermas)->unique();
 
         foreach ($rubrosIds as $rubroId) {
-            // Buscamos o creamos el Stock por Plan y Rubro
-            $stock = \App\Models\Stock::firstOrNew([
+            $stock = Stock::firstOrNew([
                 'planes_id' => $this->planes_id,
                 'rubros_id' => $rubroId,
                 'almacenes_id' => $this->almacenes_id ?? 1,
             ]);
 
-            // Cálculo sumando TODOS los movimientos de este Rubro en este Plan
-            $totales = \DB::table('recepciones_items')
+            // 1. Totales de Items (Cantidades y Pesos)
+            $totalesItems = \DB::table('recepciones_items')
                 ->join('recepciones', 'recepciones_items.recepciones_id', '=', 'recepciones.id')
                 ->where('recepciones.planes_id', $this->planes_id)
                 ->where('recepciones_items.rubros_id', $rubroId)
                 ->whereNull('recepciones.deleted_at')
                 ->selectRaw("
                 SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN cantidad_unidades ELSE 0 END) as asig_cant,
-                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as asig_total,
+                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as asig_peso,
                 SUM(CASE WHEN tipo_adquisicion = 'propia' THEN cantidad_unidades ELSE 0 END) as prop_cant,
-                SUM(CASE WHEN tipo_adquisicion = 'propia' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as prop_total
+                SUM(CASE WHEN tipo_adquisicion = 'propia' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as prop_peso
             ")
                 ->first();
 
-            // Mapeo exacto a tus columnas de la tabla 'stocks'
+            // 2. Totales de Mermas (Solo Pesos, según tu modelo Merma)
+            $totalesMermas = \DB::table('recepciones_mermas')
+                ->join('recepciones', 'recepciones_mermas.recepciones_id', '=', 'recepciones.id')
+                ->where('recepciones.planes_id', $this->planes_id)
+                ->where('recepciones_mermas.rubros_id', $rubroId)
+                ->whereNull('recepciones.deleted_at')
+                ->selectRaw("
+                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN total ELSE 0 END) as asig_merma,
+                SUM(CASE WHEN tipo_adquisicion = 'propia' THEN total ELSE 0 END) as prop_merma
+            ")
+                ->first();
+
+            // Cálculo Final
+            $finalAsigPeso = ($totalesItems->asig_peso ?? 0) + ($totalesMermas->asig_merma ?? 0);
+            $finalPropPeso = ($totalesItems->prop_peso ?? 0) + ($totalesMermas->prop_merma ?? 0);
+
             $stock->fill([
-                'asignacion_cantidad' => $totales->asig_cant ?? 0,
-                'asignacion_total' => $totales->asig_total ?? 0,
-                'propia_cantidad' => $totales->prop_cant ?? 0,
-                'propia_total' => $totales->prop_total ?? 0,
-                'total' => ($totales->asig_total ?? 0) + ($totales->prop_total ?? 0),
+                // Sincronizamos las cantidades (unidades)
+                'asignacion_cantidad' => $totalesItems->asig_cant ?? 0,
+                'propia_cantidad' => $totalesItems->prop_cant ?? 0,
+
+                // Sincronizamos los totales (pesos) incluyendo mermas
+                'asignacion_total' => $finalAsigPeso,
+                'propia_total' => $finalPropPeso,
+
+                'total' => $finalAsigPeso + $finalPropPeso,
+                'stock_cantidad' => ($totalesItems->asig_cant ?? 0 + $totalesItems->prop_cant ?? 0) - ($stock->despacho_asignacion_cantidad ?? 0 + $stock->despacho_propia_cantidad ?? 0),
+                'stock_total' => ($finalAsigPeso + $finalPropPeso) - ($stock->despacho_total ?? 0),
             ])->save();
         }
     }
@@ -117,5 +141,4 @@ class Recepcion extends Model
     {
         return $this->hasMany(Merma::class, 'recepciones_id', 'id');
     }
-
 }

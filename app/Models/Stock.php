@@ -19,6 +19,13 @@ class Stock extends Model
         'propia_cantidad',
         'propia_total',
         'total',
+        'despacho_asignacion_cantidad',
+        'despacho_asignacion_total',
+        'despacho_propia_cantidad',
+        'despacho_propia_total',
+        'despacho_total',
+        'stock_cantidad',
+        'stock_total',
     ];
 
     public function almacen(): BelongsTo

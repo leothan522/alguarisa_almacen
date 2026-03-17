@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Despacho;
 use App\Models\Recepcion;
+use App\Observers\DespachoObserver;
 use App\Observers\RecepcionObserver;
 use Carbon\CarbonImmutable;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         Recepcion::observe(RecepcionObserver::class);
+        Despacho::observe(DespachoObserver::class);
     }
 
     /**

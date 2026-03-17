@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BodegaMovils\Pages;
 
 use App\Filament\Resources\BodegaMovils\BodegaMovilResource;
+use App\Filament\Resources\Recepcions\RecepcionResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
@@ -20,4 +21,21 @@ class EditBodegaMovil extends EditRecord
             RestoreAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return RecepcionResource::dataPersonalizada($data);
+    }
+
+    protected function afterCreate(): void
+    {
+        // $this->record es la instancia de Recepcion recién creada
+        $this->record->sincronizarStock();
+    }
+
+    protected function afterSave(): void
+    {
+        $this->record->sincronizarStock();
+    }
+
 }

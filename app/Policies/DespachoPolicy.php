@@ -37,7 +37,7 @@ class DespachoPolicy
      */
     public function update(User $user, Despacho $despacho): bool
     {
-        $edit = ! $despacho->is_return && ! $despacho->is_complete && ! $despacho->deleted_at;
+        $edit = ! $despacho->is_merma && ! $despacho->is_return && ! $despacho->is_complete && ! $despacho->deleted_at;
 
         return (isAdmin() || $user->hasRole('almacen')) && $edit;
     }

@@ -37,7 +37,7 @@ class DespachoController extends Controller
         $pdf->footerImprecionDerecha = $this->model_plan;
         $pdf->texto = $this->texto;
         $pdf->codigo = $this->model_numero;
-        $pdf->observacion = $despacho_observacion ?? '';
+        $pdf->observacion = $this->model_observacion ?? '';
         $pdf->planCodigo = $this->model_planCodigo;
 
         $pdf->AliasNbPages(); // Necesario para el pie de página
@@ -67,12 +67,13 @@ class DespachoController extends Controller
     private function dibujarFila($pdf, $item, $num)
     {
         $tipo = $item['tipo_adquisicion'] == 'asignacion' ? 'ASIGNACIÓN' : 'PROPIO';
+        $unidades = $item['cantidad_unidades'] ? formatoMillares($item['cantidad_unidades'], 0) : 'MERMA';
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, verUtf8($num), 1, 0, 'C');
         $pdf->Cell(35, 10, verUtf8($tipo), 1, 0, 'C');
         $pdf->Cell(78, 10, verUtf8(Str::upper($item['rubros_nombre'])), 1, 0, 'C');
         $pdf->SetFont('Times', 'B', 11);
-        $pdf->Cell(20, 10, verUtf8(formatoMillares($item['cantidad_unidades'], 0)), 1, 0, 'C');
+        $pdf->Cell(20, 10, verUtf8($unidades), 1, 0, 'C');
         $pdf->Cell(20, 10, verUtf8(formatoMillares($item['peso_unitario'])), 1, 0, 'C');
         $pdf->Cell(30, 10, verUtf8((formatoMillares($item['total'])).' '.$item['rubros_unidad_medida']), 1, 1, 'C');
     }

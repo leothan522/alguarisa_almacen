@@ -18,6 +18,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class BodegaMovilsTable
@@ -25,6 +26,7 @@ class BodegaMovilsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
@@ -68,14 +70,22 @@ class BodegaMovilsTable
                 TextColumn::make('detalles_sum_cantidad_unidades')
                     ->label('Unidades')
                     ->sum('detalles', 'cantidad_unidades')
-                    ->numeric()
-                    ->suffix(' UND')
+                    ->formatStateUsing(function ($state) {
+                        // Si el estado es 0, nulo o vacío, retornamos el texto especial
+                        if (! $state || $state == 0) {
+                            return 'MERMA';
+                        }
+
+                        // Si tiene valor, lo formateamos manualmente (ya que formatStateUsing anula el ->numeric())
+                        return formatoMillares($state, 0).' UND';
+                    })
+                    ->badge(fn (Despacho $record): bool => $record->is_merma)
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
                     ->label('Peso Total')
                     ->default(fn (Despacho $record) => $record->detalles()->sum('total'))
-                    ->description(fn (Despacho $record): string => formatoMillares($record->detalles()->sum('cantidad_unidades'), 0).' UND')
+                    ->description(fn (Despacho $record): string => $record->is_merma ? 'MERMA' : formatoMillares($record->detalles()->sum('cantidad_unidades'), 0).' UND')
                     ->numeric(decimalPlaces: 2)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
@@ -162,5 +172,4 @@ class BodegaMovilsTable
             ->openUrlInNewTab()
             ->visible(fn (Despacho $record): bool => ! $record->deleted_at);
     }
-
 }

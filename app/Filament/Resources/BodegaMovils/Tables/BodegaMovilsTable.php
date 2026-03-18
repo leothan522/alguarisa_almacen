@@ -114,6 +114,7 @@ class BodegaMovilsTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    self::actionExportPdf(),
                     EditAction::make(),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {
@@ -150,6 +151,16 @@ class BodegaMovilsTable
         }
 
         return $response;
+    }
+
+    protected static function actionExportPdf()
+    {
+        return Action::make('export-pdf')
+            ->label('Imprimir')
+            ->icon(Heroicon::OutlinedPrinter)
+            ->url(fn (Despacho $record): string => route('dashboard.export-pdf.despacho', $record->id))
+            ->openUrlInNewTab()
+            ->visible(fn (Despacho $record): bool => ! $record->deleted_at);
     }
 
 }

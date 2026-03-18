@@ -32,6 +32,7 @@ class Despacho extends Model
         'is_return',
         'is_complete',
         'pdf_expediente',
+        'parent_id',
     ];
 
     public function almacen(): BelongsTo
@@ -57,6 +58,16 @@ class Despacho extends Model
     public function detalles(): HasMany
     {
         return $this->hasMany(Detalle::class, 'despachos_id', 'id');
+    }
+
+    public function despachoOriginal(): BelongsTo
+    {
+        return $this->belongsTo(Despacho::class, 'parent_id');
+    }
+
+    public function devoluciones(): HasMany
+    {
+        return $this->hasMany(Despacho::class, 'parent_id');
     }
 
     public function sincronizarStock(array $idsAdicionales = []): void
@@ -103,6 +114,8 @@ class Despacho extends Model
             $propPeso = $totalesDespacho->prop_peso ?? 0;
             $despachoPesoTotal = $asigPeso + $propPeso;
 
+            $factor = $this->is_return ? -1 : 1; // Si es devolución, multiplicamos por -1 para que la resta sea una suma
+
             $stock->update([
                 'despacho_asignacion_cantidad' => $asigCant,
                 'despacho_asignacion_total' => $asigPeso,
@@ -110,8 +123,10 @@ class Despacho extends Model
                 'despacho_propia_total' => $propPeso,
                 'despacho_total' => $despachoPesoTotal,
                 // Recalcular el balance neto
-                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - ($asigCant + $propCant),
-                'stock_total' => $stock->total - $despachoPesoTotal,
+                //                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - ($asigCant + $propCant),
+                //                'stock_total' => $stock->total - $despachoPesoTotal,
+                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - (($asigCant + $propCant) * $factor),
+                'stock_total' => $stock->total - ($despachoPesoTotal * $factor),
             ]);
         }
     }

@@ -31,6 +31,7 @@ return new class extends Migration
             $table->boolean('is_return')->default(false);
             $table->boolean('is_complete')->default(false);
             $table->text('pdf_expediente')->nullable();
+            $table->foreignId('parent_id')->nullable()->constrained('despachos')->onDelete('cascade');
             $table->foreign('almacenes_id')->references('id')->on('almacenes')->cascadeOnDelete();
             $table->foreign('planes_id')->references('id')->on('planes')->cascadeOnDelete();
             $table->foreign('jefes_id')->references('id')->on('jefes')->nullOnDelete();

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
@@ -126,6 +127,8 @@ class BodegaMovilsTable
                 ActionGroup::make([
                     self::actionExportPdf(),
                     EditAction::make(),
+                    DeleteAction::make()
+                        ->visible(fn(Despacho $record): bool =>$record->is_merma),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {
                             $numero = Str::replace('*', '', $record->numero);

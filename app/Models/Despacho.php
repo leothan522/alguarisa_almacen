@@ -103,8 +103,8 @@ class Despacho extends Model
                 ->selectRaw("
                     SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN cantidad_unidades ELSE 0 END) as asig_cant,
                     SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN total ELSE 0 END) as asig_peso,
-                    SUM(CASE WHEN tipo_adquisicion = 'propia' THEN cantidad_unidades ELSE 0 END) as prop_cant,
-                    SUM(CASE WHEN tipo_adquisicion = 'propia' THEN total ELSE 0 END) as prop_peso
+                    SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN cantidad_unidades ELSE 0 END) as prop_cant,
+                    SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN total ELSE 0 END) as prop_peso
                 ")
                 ->first();
 

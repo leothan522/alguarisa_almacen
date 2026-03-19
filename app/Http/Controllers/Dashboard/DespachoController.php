@@ -66,7 +66,7 @@ class DespachoController extends Controller
 
     private function dibujarFila($pdf, $item, $num)
     {
-        $tipo = $item['tipo_adquisicion'] == 'asignacion' ? 'ASIGNACIÓN' : 'PROPIO';
+        $tipo = $item['tipo_adquisicion'] == 'asignacion' ? 'ASIGNACIÓN' : Str::upper($item['tipo_adquisicion']);
         $unidades = $item['cantidad_unidades'] ? formatoMillares($item['cantidad_unidades'], 0) : 'MERMA';
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, verUtf8($num), 1, 0, 'C');

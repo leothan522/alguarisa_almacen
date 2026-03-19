@@ -66,6 +66,10 @@ class ListBodegaMovils extends ListRecords
                     ->options([
                         'asignacion' => 'ASIGNACIÓN',
                         'propia' => 'PROPIA',
+                        'mercal' => 'MERCAL',
+                        'pdval' => 'PDVAL',
+                        'fundaproal' => 'FUNDAPROAL',
+                        'inn' => 'INN',
                     ])
                     ->required()
                     ->live(),

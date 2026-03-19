@@ -233,6 +233,10 @@ trait AlmacenSchemas
             ->options([
                 'asignacion' => 'ASIGNACIÓN',
                 'propia' => 'PROPIA',
+                'mercal' => 'MERCAL',
+                'pdval' => 'PDVAL',
+                'fundaproal' => 'FUNDAPROAL',
+                'inn' => 'INN',
             ])
             ->live()
             ->required();

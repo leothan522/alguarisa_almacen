@@ -24,6 +24,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 trait AlmacenSchemas
@@ -240,7 +241,7 @@ trait AlmacenSchemas
     protected static function rulesCantidad(): array
     {
         return [
-            fn (Get $get, ?Detalle $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
+            fn (Get $get, ?Model $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
                 // Solo validar si no es una recepción
                 if (! self::$recepcion) {
                     $rubroId = $get('rubros_id');
@@ -290,7 +291,7 @@ trait AlmacenSchemas
     protected static function rulesPeso(): array
     {
         return [
-            fn (Get $get, ?Detalle $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
+            fn (Get $get, ?Model $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
                 // Solo validar si no es una recepción
                 if (! self::$recepcion) {
                     $rubroId = $get('rubros_id');

@@ -12,14 +12,19 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class BodegaMovilsTable
@@ -126,9 +131,12 @@ class BodegaMovilsTable
             ->recordActions([
                 ActionGroup::make([
                     self::actionExportPdf(),
+                    self::actionSubirExpediente(),
+                    self::actionVerExpediente(),
+                    self::actionRevertirExpediente(),
                     EditAction::make(),
                     DeleteAction::make()
-                        ->visible(fn(Despacho $record): bool =>$record->is_merma),
+                        ->visible(fn (Despacho $record): bool => $record->is_merma),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {
                             $numero = Str::replace('*', '', $record->numero);
@@ -153,14 +161,10 @@ class BodegaMovilsTable
 
     public static function getEstatus(Despacho $record): string
     {
-        $validado = $record->is_return ?? false;
+        $validado = $record->is_complete ?? false;
         $response = 'default';
         if ($validado) {
-            if ($record->is_complete) {
-                $response = 'is_complete';
-            } else {
-                $response = 'is_return';
-            }
+            $response = 'is_complete';
         }
 
         return $response;
@@ -175,4 +179,116 @@ class BodegaMovilsTable
             ->openUrlInNewTab()
             ->visible(fn (Despacho $record): bool => ! $record->deleted_at);
     }
+
+    protected static function actionSubirExpediente()
+    {
+        return Action::make('subir-expediente')
+            ->label('Subir Expediente')
+            ->icon(Heroicon::OutlinedDocumentArrowUp)
+            ->color('success')
+            ->visible(fn (Despacho $record): bool => ! $record->is_complete && self::isVisible())
+            ->schema([
+                FileUpload::make('pdf_expediente')
+                    ->label('Expediente Escaneado (PDF)')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(20480) // 20M
+                    ->disk('public')
+                    ->directory('pdf-despachos-bm')
+                    ->visibility('public')
+                    ->required()
+                    ->helperText('Asegúrate de que todos los documentos estén en un solo PDF.')
+                    ->getUploadedFileNameForStorageUsing(function (Despacho $record, $file): string {
+                        $prefix = Str::slug("Expediente-{$record->numero}-Despacho");
+
+                        return (string) \str($prefix.'.'.$file->getClientOriginalExtension());
+                    }),
+            ])
+            ->action(function (array $data, Despacho $record) {
+                $record->update([
+                    'pdf_expediente' => $data['pdf_expediente'],
+                    'is_complete' => 1,
+                ]);
+                Notification::make()
+                    ->title('Expediente cargado con éxito')
+                    ->send();
+            })
+            ->modalWidth(Width::Small);
+    }
+
+    protected static function actionRevertirExpediente()
+    {
+        return Action::make('revertir-expediente')
+            ->label('Revertir Expediente')
+            ->icon(Heroicon::OutlinedArrowPath)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('¿Eliminar el expediente cargado?')
+            ->modalDescription('El archivo PDF se borrará permanentemente del servidor y podrás subir uno nuevo.')
+            ->visible(fn (Despacho $record): bool => $record->is_complete && self::isVisible())
+            ->action(function (Despacho $record) {
+                $pdfPath = $record->pdf_expediente;
+                self::borrarFotos($pdfPath);
+                $record->update([
+                    'pdf_expediente' => null,
+                    'is_complete' => false,
+                ]);
+                Notification::make()
+                    ->title('Expediente eliminado')
+                    ->body('Ahora puedes subir el archivo correcto.')
+                    ->warning()
+                    ->send();
+            });
+    }
+
+    protected static function isVisible(): bool
+    {
+        return isAdmin() || auth()->user()->hasRole('almacen');
+    }
+
+    protected static function borrarFotos($fotoPath): void
+    {
+        if ($fotoPath && Storage::disk('public')->exists($fotoPath)) {
+            Storage::disk('public')->delete($fotoPath);
+        }
+    }
+
+    protected static function actionVerExpediente()
+    {
+        return Action::make('abrir-expediente')
+            ->label('Ver Expediente')
+            ->icon(Heroicon::OutlinedDocumentCheck)
+            ->color('gray')
+            ->visible(fn (Despacho $record): bool => $record->is_complete)
+            ->mountUsing(function (Despacho $record, Action $action) {
+                if (! Storage::disk('public')->exists($record->pdf_expediente)) {
+                    Notification::make()
+                        ->title('Archivo no encontrado')
+                        ->body('El PDF del expediente no existe físicamente en el servidor.')
+                        ->danger()
+                        ->send();
+                    $action->halt();
+                }
+            })
+            ->modalWidth(Width::FiveExtraLarge)
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Cerrar')
+            ->modalContent(function (Despacho $record): HtmlString {
+                $pdfUrl = Storage::disk('public')->url($record->pdf_expediente);
+                $viewerPath = asset('lib/pdfjs-legacy/web/viewer.html');
+                $fullUrl = "{$viewerPath}?file=".urlencode($pdfUrl).'#view=FitW';
+
+                return new HtmlString("
+                    <div style='height: 60vh; width: 100%; overflow: hidden;'>
+                    <iframe
+                        src='{$fullUrl}'
+                        width='100%'
+                        height='100%'
+                        style='border: none; border-radius: 8px;'
+                        allow='fullscreen'>
+                    </iframe>
+                </div>
+                ");
+            });
+    }
+
 }

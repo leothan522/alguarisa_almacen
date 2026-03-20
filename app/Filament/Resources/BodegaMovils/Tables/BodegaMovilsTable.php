@@ -19,6 +19,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
@@ -416,6 +417,57 @@ class BodegaMovilsTable
                     ->compact()
                     ->columns()
                     ->reorderable(false),
-            ]);
+                Textarea::make('observacion')
+                    ->label('Observación')
+                    ->required()
+                    ->columnSpanFull(),
+            ])
+            ->action(function (array $data, Despacho $record) {
+                $devolucion = new Despacho;
+                $devolucion->parent_id = $record->id;
+                $devolucion->is_return = true;
+                $devolucion->numero = 'DEV-'.$record->numero;
+                $devolucion->fecha = now();
+                $devolucion->hora = now()->toTimeString();
+                $devolucion->observacion = $data['observacion'];
+                $devolucion->almacenes_id = $record->almacenes_id;
+                $devolucion->planes_id = $record->planes_id;
+                $devolucion->jefes_id = $record->jefes_id;
+                $devolucion->jefes_nombre = $record->jefes_nombre;
+                $devolucion->jefes_cedula = $record->jefes_cedula;
+                $devolucion->responsables_id = $record->responsables_id;
+                $devolucion->responsables_nombre = $record->responsables_nombre;
+                $devolucion->responsables_cedula = $record->responsables_cedula;
+                $devolucion->responsables_telefono = $record->responsables_telefono;
+                $devolucion->responsables_empresa = $record->responsables_empresa;
+                $devolucion->save();
+
+                foreach ($data['detalles_devolucion'] as $detalle) {
+                    Detalle::create([
+                        'despachos_id' => $devolucion->id,
+                        'rubros_id' => $detalle['rubros_id'],
+                        'rubros_nombre' => $detalle['rubros_nombre'],
+                        'rubros_unidad_medida' => $detalle['rubros_unidad_medida'],
+                        'cantidad_unidades' => $detalle['cantidad_unidades'],
+                        'peso_unitario' => $detalle['peso_unitario'],
+                        'total' => $detalle['total'],
+                        'tipo_adquisicion' => $detalle['tipo_adquisicion'],
+                    ]);
+                }
+
+                $devolucion->sincronizarStock();
+
+                Notification::make()
+                    ->title('Devolución procesada')
+                    ->success()
+                    ->send();
+
+            })
+            ->hidden(fn (Despacho $record): bool => self::existeDevolucion($record) || $record->is_return || $record->is_merma);
+    }
+
+    protected static function existeDevolucion(Despacho $record): bool
+    {
+        return $record->devoluciones()->exists();
     }
 }

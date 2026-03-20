@@ -100,15 +100,33 @@ class Despacho extends Model
                 SUM(CASE WHEN tipo_adquisicion = 'propia' THEN cantidad_unidades ELSE 0 END) as prop_cant,
                 SUM(CASE WHEN tipo_adquisicion = 'propia' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as prop_peso
                 ")*/
-                ->selectRaw("
+                /*->selectRaw("
                     SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN cantidad_unidades ELSE 0 END) as asig_cant,
                     SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN total ELSE 0 END) as asig_peso,
                     SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN cantidad_unidades ELSE 0 END) as prop_cant,
                     SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN total ELSE 0 END) as prop_peso
-                ")
+                ")*/
+                ->selectRaw("
+                        SUM(CASE
+                            WHEN tipo_adquisicion = 'asignacion'
+                            THEN (CASE WHEN is_return THEN -cantidad_unidades ELSE cantidad_unidades END)
+                            ELSE 0 END) as asig_cant,
+                        SUM(CASE
+                            WHEN tipo_adquisicion = 'asignacion'
+                            THEN (CASE WHEN is_return THEN -total ELSE total END)
+                            ELSE 0 END) as asig_peso,
+                        SUM(CASE
+                            WHEN tipo_adquisicion != 'asignacion'
+                            THEN (CASE WHEN is_return THEN -cantidad_unidades ELSE cantidad_unidades END)
+                            ELSE 0 END) as prop_cant,
+                        SUM(CASE
+                            WHEN tipo_adquisicion != 'asignacion'
+                            THEN (CASE WHEN is_return THEN -total ELSE total END)
+                            ELSE 0 END) as prop_peso
+                    ")
                 ->first();
 
-            $asigCant = $totalesDespacho->asig_cant ?? 0;
+            /*$asigCant = $totalesDespacho->asig_cant ?? 0;
             $asigPeso = $totalesDespacho->asig_peso ?? 0;
             $propCant = $totalesDespacho->prop_cant ?? 0;
             $propPeso = $totalesDespacho->prop_peso ?? 0;
@@ -127,6 +145,27 @@ class Despacho extends Model
                 //                'stock_total' => $stock->total - $despachoPesoTotal,
                 'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - (($asigCant + $propCant) * $factor),
                 'stock_total' => $stock->total - ($despachoPesoTotal * $factor),
+            ]);*/
+
+            $asigCant = $totalesDespacho->asig_cant ?? 0;
+            $asigPeso = $totalesDespacho->asig_peso ?? 0;
+            $propCant = $totalesDespacho->prop_cant ?? 0;
+            $propPeso = $totalesDespacho->prop_peso ?? 0;
+
+            $despachoPesoTotal = $asigPeso + $propPeso;
+            $despachoCantTotal = $asigCant + $propCant;
+
+            // Actualizamos el stock
+            // El stock_total es: (Lo que entró) - (Lo que salió neto)
+            // Como las devoluciones ya restan en $despachoPesoTotal, la resta simple funciona.
+            $stock->update([
+                'despacho_asignacion_cantidad' => $asigCant,
+                'despacho_asignacion_total' => $asigPeso,
+                'despacho_propia_cantidad' => $propCant,
+                'despacho_propia_total' => $propPeso,
+                'despacho_total' => $despachoPesoTotal,
+                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - $despachoCantTotal,
+                'stock_total' => ($stock->asignacion_total + $stock->propia_total) - $despachoPesoTotal,
             ]);
         }
     }

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Despacho;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class DespachoPolicy
 {
@@ -39,7 +38,7 @@ class DespachoPolicy
     {
         $edit = ! $despacho->is_merma && ! $despacho->is_return && ! $despacho->is_complete && ! $despacho->deleted_at;
 
-        return (isAdmin() || $user->hasRole('almacen')) && $edit;
+        return (isAdmin() || $user->hasRole('almacen')) && $edit && ! $despacho->devoluciones()->exists();
     }
 
     /**

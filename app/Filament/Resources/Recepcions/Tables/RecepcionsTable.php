@@ -86,7 +86,7 @@ class RecepcionsTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('items_sum_cantidad_unidades')
-                    ->label('Unidades')
+                    ->label('Und. Totales')
                     ->sum('items', 'cantidad_unidades')
                     ->numeric()
                     ->suffix(' UND')

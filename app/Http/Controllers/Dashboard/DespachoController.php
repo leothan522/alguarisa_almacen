@@ -21,7 +21,7 @@ class DespachoController extends Controller
         }
 
         // 2. Preparamos los datos dinámicos
-        $this->datosDinamicos($despacho, false);
+        $this->datosDinamicos($despacho, $despacho->is_return);
 
         // Obtenemos los rubros como array
         $rubros = $despacho->detalles->toArray();
@@ -32,13 +32,14 @@ class DespachoController extends Controller
         $pdf = new DespachoPDF;
         $pdf->SetTitle(verUtf8('DESPACHO N.º '.Str::upper($despacho->numero)));
         $pdf->family = 'Times';
-        $pdf->headerTitle = 'DESPACHO DE RUBROS';
+        $pdf->headerTitle = ! $despacho->is_return ? 'DESPACHO DE RUBROS' : 'DEVOLUCIÓN DE RUBROS';
         $pdf->headerSubtitle = Str::upper($this->model_plan);
         $pdf->footerImprecionDerecha = $this->model_plan;
         $pdf->texto = $this->texto;
         $pdf->codigo = $this->model_numero;
         $pdf->observacion = $this->model_observacion ?? '';
         $pdf->planCodigo = $this->model_planCodigo;
+        $pdf->devolucion = $despacho->is_return;
 
         $pdf->AliasNbPages(); // Necesario para el pie de página
 

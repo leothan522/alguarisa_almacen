@@ -44,7 +44,7 @@ class BodegaMovilsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('is_return', false)->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
@@ -143,6 +143,7 @@ class BodegaMovilsTable
             ->recordActions([
                 ActionGroup::make([
                     self::actionExportPdf(),
+                    self::actionImprimirDevolucion(),
                     self::actionCargarDevolucion(),
                     self::actionSubirExpediente(),
                     self::actionVerExpediente(),
@@ -469,5 +470,21 @@ class BodegaMovilsTable
     protected static function existeDevolucion(Despacho $record): bool
     {
         return $record->devoluciones()->exists();
+    }
+
+    protected static function actionImprimirDevolucion()
+    {
+        return Action::make('imprimir-devolucion')
+            ->label('Imprimir Devolución')
+            ->icon(Heroicon::OutlinedPrinter)
+            ->url(function (Despacho $record) {
+                $devolucion = Despacho::where('parent_id', $record->id)->first();
+                if ($devolucion){
+                    return route('dashboard.export-pdf.despacho', $devolucion->id);
+                }
+                return null;
+            })
+            ->openUrlInNewTab()
+            ->visible(fn (Despacho $record): bool => self::existeDevolucion($record));
     }
 }

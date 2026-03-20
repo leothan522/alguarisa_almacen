@@ -30,7 +30,8 @@ class DespachoController extends Controller
         $paginas = array_chunk($rubros, 11);
 
         $pdf = new DespachoPDF;
-        $pdf->SetTitle(verUtf8('DESPACHO N.º '.Str::upper($despacho->numero)));
+        $label = ! $despacho->is_return ? 'DESPACHO' : 'DEVOLUCIÓN';
+        $pdf->SetTitle(verUtf8($label.' N.º '.Str::upper($despacho->numero)));
         $pdf->family = 'Times';
         $pdf->headerTitle = ! $despacho->is_return ? 'DESPACHO DE RUBROS' : 'DEVOLUCIÓN DE RUBROS';
         $pdf->headerSubtitle = Str::upper($this->model_plan);
@@ -60,7 +61,8 @@ class DespachoController extends Controller
             }
         }
 
-        return response($pdf->Output('I', 'depacho-'.$this->model_numero.'.pdf'), 200)
+        $label = ! $despacho->is_return ? 'despacho' : 'devolucion';
+        return response($pdf->Output('I', $label.'-'.$this->model_numero.'.pdf'), 200)
             ->header('Content-Type', 'application/pdf');
 
     }

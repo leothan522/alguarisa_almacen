@@ -196,6 +196,7 @@ trait AlmacenSchemas
             ->schema([
                 Textarea::make('observacion')
                     ->hiddenLabel()
+                    ->required()
                     ->columnSpanFull(),
             ])
             ->compact()

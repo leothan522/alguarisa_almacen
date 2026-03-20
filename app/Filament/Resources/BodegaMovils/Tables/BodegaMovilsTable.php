@@ -53,7 +53,7 @@ class BodegaMovilsTable
                     ->hiddenFrom('md')
                     ->icon(fn (Despacho $record): Heroicon => match (self::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
-                        'is_return' => Heroicon::OutlinedCheckBadge,
+                        'is_return' => Heroicon::OutlinedInboxArrowDown,
                         default => Heroicon::OutlinedClock
                     })
                     ->iconColor(fn (Despacho $record): string => match (self::getEstatus($record)) {
@@ -126,7 +126,7 @@ class BodegaMovilsTable
                     ->default(fn (Despacho $record): string => self::getEstatus($record))
                     ->icon(fn (string $state): Heroicon => match ($state) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
-                        'is_return' => Heroicon::OutlinedCheckBadge,
+                        'is_return' => Heroicon::OutlinedInboxArrowDown,
                         default => Heroicon::OutlinedClock
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -148,6 +148,7 @@ class BodegaMovilsTable
                     self::actionSubirExpediente(),
                     self::actionVerExpediente(),
                     self::actionRevertirExpediente(),
+                    self::actionRevertirDevolucion(),
                     EditAction::make(),
                     DeleteAction::make()
                         ->visible(fn (Despacho $record): bool => $record->is_merma),
@@ -175,9 +176,13 @@ class BodegaMovilsTable
 
     public static function getEstatus(Despacho $record): string
     {
-        $validado = $record->is_complete ?? false;
         $response = 'default';
-        if ($validado) {
+
+        if (self::existeDevolucion($record)) {
+            $response = 'is_return';
+        }
+
+        if ($record->is_complete) {
             $response = 'is_complete';
         }
 
@@ -464,7 +469,7 @@ class BodegaMovilsTable
                     ->send();
 
             })
-            ->hidden(fn (Despacho $record): bool => self::existeDevolucion($record) || $record->is_return || $record->is_merma);
+            ->hidden(fn (Despacho $record): bool => self::existeDevolucion($record) || $record->is_complete || $record->is_merma);
     }
 
     protected static function existeDevolucion(Despacho $record): bool
@@ -475,16 +480,40 @@ class BodegaMovilsTable
     protected static function actionImprimirDevolucion()
     {
         return Action::make('imprimir-devolucion')
-            ->label('Imprimir Devolución')
+            ->label('Devolución')
             ->icon(Heroicon::OutlinedPrinter)
             ->url(function (Despacho $record) {
                 $devolucion = Despacho::where('parent_id', $record->id)->first();
-                if ($devolucion){
+                if ($devolucion) {
                     return route('dashboard.export-pdf.despacho', $devolucion->id);
                 }
+
                 return null;
             })
             ->openUrlInNewTab()
             ->visible(fn (Despacho $record): bool => self::existeDevolucion($record));
+    }
+
+    protected static function actionRevertirDevolucion()
+    {
+        return Action::make('eliminar-devolucion')
+            ->label('Revertir Devolución')
+            ->icon(Heroicon::OutlinedArrowPath)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('¿Eliminar la devolución cargada?')
+            ->visible(fn (Despacho $record): bool => ! $record->is_complete && self::existeDevolucion($record))
+            ->action(function (Despacho $record) {
+                $devolucion = Despacho::where('parent_id', $record->id)->first();
+                if ($devolucion) {
+                    $devolucion->numero = '*'.$devolucion->numero;
+                    $devolucion->save();
+                    $devolucion->delete();
+                }
+                Notification::make()
+                    ->title('Devolución eliminada')
+                    ->warning()
+                    ->send();
+            });
     }
 }

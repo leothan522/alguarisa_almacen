@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\BodegaMovils\Tables;
 
 use App\Models\Despacho;
+use App\Models\Detalle;
+use App\Models\Rubro;
+use App\Traits\AlmacenSchemas;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -13,7 +16,13 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
@@ -29,6 +38,8 @@ use Illuminate\Support\Str;
 
 class BodegaMovilsTable
 {
+    use AlmacenSchemas;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -131,6 +142,7 @@ class BodegaMovilsTable
             ->recordActions([
                 ActionGroup::make([
                     self::actionExportPdf(),
+                    self::actionCargarDevolucion(),
                     self::actionSubirExpediente(),
                     self::actionVerExpediente(),
                     self::actionRevertirExpediente(),
@@ -291,4 +303,119 @@ class BodegaMovilsTable
             });
     }
 
+    protected static function actionCargarDevolucion()
+    {
+        return Action::make('cargar-devolucion')
+            ->label('Registrar Devolución')
+            ->icon(Heroicon::OutlinedInboxArrowDown)
+            ->color('info')
+            ->modalHeading('Registrar Devolución')
+            ->schema([
+                Repeater::make('detalles_devolucion')
+                    ->label('Rubros')
+                    ->schema([
+                        Select::make('rubros_id')
+                            ->label('Rubro')
+                            ->options(fn (Despacho $record) => $record->detalles->pluck('rubros_nombre', 'rubros_id')->map(fn ($rubros_nombre) => Str::upper($rubros_nombre)))
+                            ->searchable()
+                            ->preload()
+                            ->distinct() // Asegura que el valor sea único en el contexto del Repeater
+                            ->disableOptionsWhenSelectedInSiblingRepeaterItems() // Deshabilita la opción en las otras filas
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(callback: function (?string $state, ?string $old, Set $set) {
+                                $rubro = Rubro::find($state);
+                                if ($rubro) {
+                                    $set('peso_unitario', $rubro->peso_unitario);
+                                    $set('rubros_nombre', $rubro->nombre);
+                                    $set('rubros_unidad_medida', $rubro->unidad_medida);
+                                }
+                            }),
+                        self::selectTipoAdquisicion(),
+                        TextInput::make('cantidad_unidades')
+                            ->label('Cantidad')
+                            ->integer()
+                            ->minValue(1)
+                            ->required()
+                            ->live(onBlur: true)
+                            ->rules(fn (Get $get, Despacho $record): array => [
+                                function ($attribute, $value, $fail) use ($get, $record) {
+                                    $rubroId = $get('rubros_id');
+                                    $tipoAdquisicion = $get('tipo_adquisicion');
+                                    if (! $rubroId) {
+                                        return;
+                                    }
+
+                                    // Buscamos cuánto salió originalmente de ese rubro
+                                    $original = $record->detalles->where('rubros_id', $rubroId)->where('tipo_adquisicion', $tipoAdquisicion)->sum('cantidad_unidades');
+
+                                    // Buscamos cuánto se ha devuelto ya en otras devoluciones previas (si existen)
+                                    $yaDevuelto = Detalle::whereHas('despacho', function ($q) use ($record) {
+                                        $q->where('parent_id', $record->id)->where('is_return', true);
+                                    })
+                                        ->where('rubros_id', $rubroId)
+                                        ->where('tipo_adquisicion', $tipoAdquisicion)
+                                        ->sum('cantidad_unidades');
+
+                                    $disponibleParaDevolver = $original - $yaDevuelto;
+
+                                    if ($value > $disponibleParaDevolver) {
+                                        $label = formatoMillares($disponibleParaDevolver, 0);
+                                        $fail("La cantidad máxima para devolver es: {$label}");
+                                    }
+                                },
+                            ]),
+                        TextInput::make('peso_unitario')
+                            ->label('Peso Unitario')
+                            ->numeric()
+                            ->step(0.01)
+                            ->required()
+                            ->live(onBlur: true)
+                            ->suffix(function (Get $get, Set $set): string {
+                                $cantidad = $get('cantidad_unidades');
+                                $peso = $get('peso_unitario');
+                                $total = $cantidad * $peso;
+                                $set('total', $total);
+                                $unidad = $get('rubros_unidad_medida') ?? 'KG';
+
+                                return 'Total: '.formatoMillares($total).' '.$unidad;
+                            })
+                            ->rules(fn (Get $get, Despacho $record): array => [
+                                function ($attribute, $value, $fail) use ($get, $record) {
+                                    $rubroId = $get('rubros_id');
+                                    $total = $get('total');
+                                    $tipoAdquisicion = $get('tipo_adquisicion');
+                                    if (! $rubroId) {
+                                        return;
+                                    }
+
+                                    // Buscamos cuánto salió originalmente de ese rubro
+                                    $original = $record->detalles->where('rubros_id', $rubroId)->where('tipo_adquisicion', $tipoAdquisicion)->sum('total');
+
+                                    // Buscamos cuánto se ha devuelto ya en otras devoluciones previas (si existen)
+                                    $yaDevuelto = Detalle::whereHas('despacho', function ($q) use ($record) {
+                                        $q->where('parent_id', $record->id)->where('is_return', true);
+                                    })
+                                        ->where('rubros_id', $rubroId)
+                                        ->where('tipo_adquisicion', $tipoAdquisicion)
+                                        ->sum('total');
+
+                                    $disponibleParaDevolver = $original - $yaDevuelto;
+
+                                    if ($total > $disponibleParaDevolver) {
+                                        $label = formatoMillares($disponibleParaDevolver);
+                                        $fail("El peso máximo para devolver es: {$label}");
+                                    }
+                                },
+                            ]),
+                        Hidden::make('rubros_nombre'),
+                        Hidden::make('rubros_unidad_medida'),
+                        Hidden::make('total'),
+                    ])
+                    ->minItems(1)
+                    ->compact()
+                    ->columns()
+                    ->reorderable(false),
+            ]);
+    }
 }

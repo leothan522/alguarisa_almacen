@@ -74,7 +74,7 @@ class BodegaMovilsTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('detalles_sum_cantidad_unidades')
-                    ->label('Unidades')
+                    ->label('Und. Totales')
                     ->sum('detalles', 'cantidad_unidades')
                     ->formatStateUsing(function ($state) {
                         // Si el estado es 0, nulo o vacío, retornamos el texto especial

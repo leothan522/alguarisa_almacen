@@ -169,4 +169,33 @@ class Despacho extends Model
             ]);
         }
     }
+
+    public function getVentasNetasParaImprimir()
+    {
+        // 1. Agrupar los rubros del despacho original
+        // Usamos el rubros_id como llave para poder restar fácilmente
+        $totales = $this->detalles->groupBy('rubros_id')->map(function ($items) {
+            return [
+                'nombre' => $items->first()->rubros_nombre,
+                'unidad' => $items->first()->rubros_unidad_medida,
+                'cantidad' => $items->sum('cantidad_unidades'),
+                'peso_total' => $items->sum('total'),
+            ];
+        })->toArray();
+
+        // 2. Restar las devoluciones (despachos hijos con parent_id = este_id)
+        $this->devoluciones()->with('detalles')->get()->each(function ($devolucion) use (&$totales) {
+            foreach ($devolucion->detalles as $detalle) {
+                if (isset($totales[$detalle->rubros_id])) {
+                    $totales[$detalle->rubros_id]['cantidad'] -= $detalle->cantidad_unidades;
+                    $totales[$detalle->rubros_id]['peso_total'] -= $detalle->total;
+                }
+            }
+        });
+
+        // 3. Filtrar los que quedaron en cero y convertir a objeto para FPDF
+        return collect($totales)
+            ->filter(fn ($item) => $item['cantidad'] > 0)
+            ->map(fn ($item) => (object) $item);
+    }
 }

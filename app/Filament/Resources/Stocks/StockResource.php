@@ -185,7 +185,7 @@ class StockResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->where('total', '>', 0))
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('stock_total', '>', 0))
             ->recordTitleAttribute('rubros_id')
             ->columns([
                 TextColumn::make('rubro_movil')

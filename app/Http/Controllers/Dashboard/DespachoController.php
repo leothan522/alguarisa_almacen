@@ -87,13 +87,13 @@ class DespachoController extends Controller
 
         $pdf = new DespachoPDF;
         $label = 'NOTA';
-        $pdf->SetTitle(verUtf8($label.' N.º NV-'.Str::upper($despacho->numero)));
+        $pdf->SetTitle(verUtf8($label.' N.º VEN-'.Str::upper($despacho->numero)));
         $pdf->family = 'Times';
         $pdf->headerTitle = 'NOTA DE VENTA';
         $pdf->headerSubtitle = Str::upper($this->model_plan);
         $pdf->footerImprecionDerecha = $this->model_plan;
         $pdf->texto = $this->texto;
-        $pdf->codigo = "NV-".$this->model_numero;
+        $pdf->codigo = "VEN-".$this->model_numero;
         $pdf->observacion = $this->model_observacion ?? '';
         $pdf->planCodigo = $this->model_planCodigo;
         $pdf->devolucion = $despacho->is_return;
@@ -127,7 +127,7 @@ class DespachoController extends Controller
             }
         }
 
-        $label = 'nota-venta-';
+        $label = 'nota-venta';
 
         return response($pdf->Output('I', $label.'-'.$this->model_numero.'.pdf'), 200)
             ->header('Content-Type', 'application/pdf');

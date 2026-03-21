@@ -8,5 +8,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('export-pdf/{id}/recepcion', [RecepcionController::class, 'descargarRecepcion'])->name('export-pdf.recepcion');
     Route::get('export-pdf/{id}/despacho', [DespachoController::class, 'descargarDespacho'])->name('export-pdf.despacho');
+    Route::get('export-pdf/{id}/nota-venta', [DespachoController::class, 'descargarNotaVenta'])->name('export-pdf.nota-venta');
 
 });

@@ -144,6 +144,7 @@ class BodegaMovilsTable
                 ActionGroup::make([
                     self::actionExportPdf(),
                     self::actionImprimirDevolucion(),
+                    self::actionImprimirNotaVenta(),
                     self::actionCargarDevolucion(),
                     self::actionSubirExpediente(),
                     self::actionVerExpediente(),
@@ -492,6 +493,16 @@ class BodegaMovilsTable
             })
             ->openUrlInNewTab()
             ->visible(fn (Despacho $record): bool => self::existeDevolucion($record));
+    }
+
+    protected static function actionImprimirNotaVenta()
+    {
+        return Action::make('nota-venta')
+            ->label('Nota de Venta')
+            ->icon(Heroicon::OutlinedPrinter)
+            ->url(fn(Despacho $record) => route('dashboard.export-pdf.nota-venta', $record->id))
+            ->openUrlInNewTab()
+            ->hidden(fn(Despacho $record): bool => $record->is_merma);
     }
 
     protected static function actionRevertirDevolucion()

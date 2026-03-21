@@ -178,6 +178,7 @@ class Despacho extends Model
             return [
                 'nombre' => $items->first()->rubros_nombre,
                 'unidad' => $items->first()->rubros_unidad_medida,
+                'tipo' => $items->first()->tipo_adquisicion,
                 'cantidad' => $items->sum('cantidad_unidades'),
                 'peso_total' => $items->sum('total'),
             ];

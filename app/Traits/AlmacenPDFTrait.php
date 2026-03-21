@@ -18,7 +18,7 @@ trait AlmacenPDFTrait
 
     public string $texto;
 
-    public function datosDinamicos(Recepcion|Despacho $model, $entrega = true): void
+    public function datosDinamicos(Recepcion|Despacho $model, $entrega = true, $nota = false): void
     {
         $jefe_nombre = Str::upper($model->jefes_nombre ?? '_____________________');
         $jefe_cedula = Str::upper($model->jefes_cedula ?? '_____________________');
@@ -37,8 +37,11 @@ trait AlmacenPDFTrait
 
         $etiqueta = $entrega ? 'entrega' : 'recibe';
 
-        $this->texto = "Quien suscribe, <b>$jefe_nombre;</b> titular de la Cédula de la Identidad N.º <b>$jefe_cedula</b> en su carácter de Responsable del Almacén de Rubros de <b>ALIMENTOS DEL GUARICO S.A;</b> siendo las: <b>$hora;</b> del día: <b>$dia / $mes / $anio;</b> en presencia de quien $etiqueta el material señalado en este documento, ciudadano: <b>$responsable_nombre;</b> titular de la Cédula de la Identidad o RIF: <b>$responsable_cedula;</b> perteneciente a la institución o empresa: <b>$responsable_empresa,</b> Teléfono: <b>$responsable_telefono.</b>\n";
-        $this->texto .= 'El bien y/o servicio, que a continuación se describe, dejando constancia, para los efectos inherentes al proceso de pago:';
-
+        if (! $nota) {
+            $this->texto = "Quien suscribe, <b>$jefe_nombre;</b> titular de la Cédula de la Identidad N.º <b>$jefe_cedula</b> en su carácter de Responsable del Almacén de Rubros de <b>ALIMENTOS DEL GUARICO S.A;</b> siendo las: <b>$hora;</b> del día: <b>$dia / $mes / $anio;</b> en presencia de quien $etiqueta el material señalado en este documento, ciudadano: <b>$responsable_nombre;</b> titular de la Cédula de Identidad o RIF: <b>$responsable_cedula;</b> perteneciente a la institución o empresa: <b>$responsable_empresa,</b> Teléfono: <b>$responsable_telefono.</b>\n";
+            $this->texto .= 'El bien y/o servicio, que a continuación se describe, dejando constancia, para los efectos inherentes al proceso de pago:';
+        } else {
+            $this->texto = "Quien suscribe, <b>$jefe_nombre;</b> titular de la Cédula de la Identidad N.º <b>$jefe_cedula</b> en su carácter de Responsable del Almacén de Rubros de <b>ALIMENTOS DEL GUARICO S.A;</b> siendo las: <b>$hora;</b> del día: <b>$dia / $mes / $anio;</b> en presencia de quien entrega la <b>RELACIÓN DE PRODUCTOS VENDIDOS EN BODEGA MÓVIL</b> señalado en este documento, ciudadano: <b>$responsable_nombre;</b> titular de la Cédula de la Identidad o RIF: <b>$responsable_cedula;</b> perteneciente a la institución o empresa: <b>$responsable_empresa,</b> Teléfono: <b>$responsable_telefono.</b>\n Los productos vendidos, a continuación se describen, dejando constancia:";
+        }
     }
 }

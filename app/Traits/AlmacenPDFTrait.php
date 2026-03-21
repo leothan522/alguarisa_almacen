@@ -41,6 +41,10 @@ trait AlmacenPDFTrait
             $this->texto = "Quien suscribe, <b>$jefe_nombre;</b> titular de la Cédula de la Identidad N.º <b>$jefe_cedula</b> en su carácter de Responsable del Almacén de Rubros de <b>ALIMENTOS DEL GUARICO S.A;</b> siendo las: <b>$hora;</b> del día: <b>$dia / $mes / $anio;</b> en presencia de quien $etiqueta el material señalado en este documento, ciudadano: <b>$responsable_nombre;</b> titular de la Cédula de Identidad o RIF: <b>$responsable_cedula;</b> perteneciente a la institución o empresa: <b>$responsable_empresa,</b> Teléfono: <b>$responsable_telefono.</b>\n";
             $this->texto .= 'El bien y/o servicio, que a continuación se describe, dejando constancia, para los efectos inherentes al proceso de pago:';
         } else {
+            $hora = date('h:i A'); // Formato 8:00 am
+            $dia = date('d');
+            $mes = date('m');
+            $anio = date('Y');
             $this->texto = "Quien suscribe, <b>$jefe_nombre;</b> titular de la Cédula de la Identidad N.º <b>$jefe_cedula</b> en su carácter de Responsable del Almacén de Rubros de <b>ALIMENTOS DEL GUARICO S.A;</b> siendo las: <b>$hora;</b> del día: <b>$dia / $mes / $anio;</b> en presencia de quien entrega la <b>RELACIÓN DE PRODUCTOS VENDIDOS EN BODEGA MÓVIL</b> señalado en este documento, ciudadano: <b>$responsable_nombre;</b> titular de la Cédula de la Identidad o RIF: <b>$responsable_cedula;</b> perteneciente a la institución o empresa: <b>$responsable_empresa,</b> Teléfono: <b>$responsable_telefono.</b>\n Los productos vendidos, a continuación se describen, dejando constancia:";
         }
     }

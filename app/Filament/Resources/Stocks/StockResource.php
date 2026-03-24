@@ -158,7 +158,7 @@ class StockResource extends Resource
                                     ->label('TOTAL UNIDADES')
                                     ->numeric()
                                     ->suffix(' UND')
-                                    ->color('gray') // Un tono más neutro para no competir con el peso
+                                    ->color('primary') // Un tono más neutro para no competir con el peso
                                     ->weight(FontWeight::Bold)
                                     ->size(TextSize::Large)
                                     ->alignCenter(),
@@ -296,23 +296,22 @@ class StockResource extends Resource
                     Column::make('rubro.unidad_medida')
                         ->heading('UNIDAD')
                         ->formatStateUsing(fn ($state) => Str::upper($state)),
-                    Column::make('asignacion_cantidad')
+                    Column::make('und_asignacion')
                         ->heading('ASIGNACIÓN (UND)')
                         ->format(NumberFormat::FORMAT_NUMBER),
-                    Column::make('asignacion_total')
+                    Column::make('full_asignacion')
                         ->heading('ASIGNACIÓN (PESO)')
                         ->format(NumberFormat::FORMAT_NUMBER_00),
-                    Column::make('propia_cantidad')
+                    Column::make('und_propia')
                         ->heading('PROPIO (UND)')
                         ->format(NumberFormat::FORMAT_NUMBER),
-                    Column::make('propia_total')
+                    Column::make('full_propia')
                         ->heading('PROPIO (PESO)')
                         ->format(NumberFormat::FORMAT_NUMBER_00),
-                    Column::make('created_at')
+                    Column::make('stock_cantidad')
                         ->heading('TOTAL UNIDADES')
-                        ->formatStateUsing(fn (Stock $record) => $record->asignacion_cantidad + $record->propia_cantidad)
                         ->format(NumberFormat::FORMAT_NUMBER),
-                    Column::make('total')
+                    Column::make('stock_total')
                         ->heading('PESO TOTAL')
                         ->format(NumberFormat::FORMAT_NUMBER_00),
                 ]),

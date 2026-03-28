@@ -44,7 +44,7 @@ class BodegaMovilsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->where('is_return', false)->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereRelation('plan', 'codigo', 'BM')->where('is_return', false)->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
@@ -190,7 +190,7 @@ class BodegaMovilsTable
         return $response;
     }
 
-    protected static function actionExportPdf()
+    public static function actionExportPdf()
     {
         return Action::make('export-pdf')
             ->label('Imprimir')
@@ -200,7 +200,7 @@ class BodegaMovilsTable
             ->visible(fn (Despacho $record): bool => ! $record->deleted_at);
     }
 
-    protected static function actionSubirExpediente()
+    public static function actionSubirExpediente()
     {
         return Action::make('subir-expediente')
             ->label('Subir Expediente')
@@ -235,7 +235,7 @@ class BodegaMovilsTable
             ->modalWidth(Width::Small);
     }
 
-    protected static function actionRevertirExpediente()
+    public static function actionRevertirExpediente()
     {
         return Action::make('revertir-expediente')
             ->label('Revertir Expediente')
@@ -260,19 +260,19 @@ class BodegaMovilsTable
             });
     }
 
-    protected static function isVisible(): bool
+    public static function isVisible(): bool
     {
         return isAdmin() || auth()->user()->hasRole('almacen');
     }
 
-    protected static function borrarFotos($fotoPath): void
+    public static function borrarFotos($fotoPath): void
     {
         if ($fotoPath && Storage::disk('public')->exists($fotoPath)) {
             Storage::disk('public')->delete($fotoPath);
         }
     }
 
-    protected static function actionVerExpediente()
+    public static function actionVerExpediente()
     {
         return Action::make('abrir-expediente')
             ->label('Ver Expediente')

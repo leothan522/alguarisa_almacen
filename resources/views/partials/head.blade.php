@@ -5,8 +5,9 @@
     {{ filled($title ?? null) ? $title.' - '.config('app.name', 'Laravel') : config('app.name', 'Laravel') }}
 </title>
 
+{{-- Favicon y PWA --}}
 <meta name="description" content="Plataforma de organización de Alimentos del Guárico S.A.">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#0056b3">
 
 <meta property="og:title" content="ALGUARISA">
 <meta property="og:description" content="Plataforma de organización de Alimentos del Guárico S.A.">

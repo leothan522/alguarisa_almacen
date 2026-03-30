@@ -15,13 +15,16 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\FontWeight;
@@ -152,6 +155,12 @@ class BodegaMovilsTable
                     self::actionRevertirDevolucion(),
                     EditAction::make(),
                     DeleteAction::make()
+                        ->before(function (Despacho $record) {
+                            $numero = '*'.$record->numero;
+                            $record->update([
+                                'numero' => $numero,
+                            ]);
+                        })
                         ->visible(fn (Despacho $record): bool => $record->is_merma),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {
@@ -319,6 +328,16 @@ class BodegaMovilsTable
             ->color('info')
             ->modalHeading('Registrar Devolución')
             ->schema([
+                Grid::make()
+                    ->schema([
+                        DatePicker::make('fecha')
+                            ->default(now())
+                            ->required(),
+                        TimePicker::make('hora')
+                            ->default(now())
+                            ->seconds(false)
+                            ->required(),
+                    ]),
                 Repeater::make('detalles_devolucion')
                     ->label('Rubros')
                     ->schema([
@@ -426,16 +445,15 @@ class BodegaMovilsTable
                     ->reorderable(false),
                 Textarea::make('observacion')
                     ->label('Observación')
-                    ->required()
-                    ->columnSpanFull(),
+                    ->required(),
             ])
             ->action(function (array $data, Despacho $record) {
                 $devolucion = new Despacho;
                 $devolucion->parent_id = $record->id;
                 $devolucion->is_return = true;
                 $devolucion->numero = 'DEV-'.$record->numero;
-                $devolucion->fecha = now();
-                $devolucion->hora = now()->toTimeString();
+                $devolucion->fecha = $data['fecha'];
+                $devolucion->hora = $data['hora'];
                 $devolucion->observacion = $data['observacion'];
                 $devolucion->almacenes_id = $record->almacenes_id;
                 $devolucion->planes_id = $record->planes_id;
@@ -500,9 +518,9 @@ class BodegaMovilsTable
         return Action::make('nota-venta')
             ->label('Nota de Venta')
             ->icon(Heroicon::OutlinedPrinter)
-            ->url(fn(Despacho $record) => route('dashboard.export-pdf.nota-venta', $record->id))
+            ->url(fn (Despacho $record) => route('dashboard.export-pdf.nota-venta', $record->id))
             ->openUrlInNewTab()
-            ->hidden(fn(Despacho $record): bool => $record->is_merma);
+            ->hidden(fn (Despacho $record): bool => $record->is_merma);
     }
 
     protected static function actionRevertirDevolucion()

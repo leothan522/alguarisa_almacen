@@ -15,9 +15,11 @@ use App\Models\Stock;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\Width;
@@ -41,6 +43,13 @@ class ListBodegaMovils extends ListRecords
             ->label('Despachar Merma')
             ->color('gray')
             ->schema([
+                DatePicker::make('fecha')
+                    ->default(now())
+                    ->required(),
+                TimePicker::make('hora')
+                    ->default(now())
+                    ->seconds(false)
+                    ->required(),
                 Select::make('responsables_id')
                     ->label('¿Quien recibe?')
                     ->options(Responsable::query()->pluck('nombre', 'id')->map(fn ($nombre) => Str::upper($nombre)))
@@ -80,8 +89,8 @@ class ListBodegaMovils extends ListRecords
             ->action(function (array $data): void {
 
                 $numero = self::getNumero();
-                $fecha = now();
-                $hora = $fecha->toDateTimeString();
+                $fecha = $data['fecha'];
+                $hora = $data['hora'];
                 $observacion = $data['observacion'];
                 $almacenes_id = self::getAlmacen();
                 $planes_id = self::getPlan();
@@ -120,6 +129,16 @@ class ListBodegaMovils extends ListRecords
                 $despacho->refresh();
                 // Llamamos al método centralizado para que recalcule todo correctamente
                 $despacho->sincronizarStock();
+                $parametro = Parametro::where('nombre', 'numero_despacho')->first();
+                if ($parametro) {
+                    $parametro->increment('valor_id');
+                    $parametro->save();
+                } else {
+                    Parametro::create([
+                        'nombre' => 'numero_despacho',
+                        'valor_id' => 2,
+                    ]);
+                }
             })
             ->modalWidth(Width::Small);
     }

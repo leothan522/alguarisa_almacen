@@ -9,7 +9,6 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
@@ -197,10 +196,12 @@ class RecepcionsTable
             ->visible(fn (Recepcion $record): bool => ! $record->deleted_at);
     }
 
-    protected static function actionValidarRecepcion()
+    public static function actionValidarRecepcion($ajuste = false)
     {
+        $label = $ajuste ? 'Entrada' : 'Recepción';
+
         return Action::make('subir-fotos')
-            ->label('Validar Recepción')
+            ->label('Validar '.$label)
             ->color('info')
             ->icon(Heroicon::OutlinedCheckBadge)
             ->schema([
@@ -264,7 +265,7 @@ class RecepcionsTable
         }
     }
 
-    protected static function actionRevertirRecepcion()
+    public static function actionRevertirRecepcion()
     {
         return Action::make('revertir-recepcion')
             ->label('Revertir Validación')
@@ -295,7 +296,7 @@ class RecepcionsTable
             });
     }
 
-    protected static function actionSubirExpediente()
+    public static function actionSubirExpediente()
     {
         return Action::make('subir-expediente')
             ->label('Subir Expediente')

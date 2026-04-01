@@ -12,6 +12,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
@@ -37,12 +38,12 @@ class AjusteEntradasTable
                     ->default(fn (Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
                     ->description(fn (Recepcion $record): string => $record->plan->nombre)
                     ->hiddenFrom('md')
-                    ->icon(fn (Recepcion $record): Heroicon => match (self::getEstatus($record)) {
+                    ->icon(fn (Recepcion $record): Heroicon => match (RecepcionsTable::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_sealed' => Heroicon::OutlinedCheckBadge,
                         default => Heroicon::OutlinedClock
                     })
-                    ->iconColor(fn (Recepcion $record): string => match (self::getEstatus($record)) {
+                    ->iconColor(fn (Recepcion $record): string => match (RecepcionsTable::getEstatus($record)) {
                         'is_complete' => 'success',
                         'is_sealed' => 'info',
                         default => 'gray'
@@ -101,7 +102,7 @@ class AjusteEntradasTable
                     ->visibleFrom('md'),
                 IconColumn::make('estatus')
                     ->label('Estatus')
-                    ->default(fn (Recepcion $record): string => self::getEstatus($record))
+                    ->default(fn (Recepcion $record): string => RecepcionsTable::getEstatus($record))
                     ->icon(fn (string $state): Heroicon => match ($state) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_sealed' => Heroicon::OutlinedCheckBadge,
@@ -121,9 +122,13 @@ class AjusteEntradasTable
             ->recordActions([
                 ActionGroup::make([
                     RecepcionsTable::actionExportPdf(),
-                    self::actionSubirExpediente(),
+                    ViewAction::make()
+                        ->label('Ver Fotos'),
+                    RecepcionsTable::actionValidarRecepcion(true),
+                    RecepcionsTable::actionSubirExpediente(),
                     RecepcionsTable::actionVerExpediente(),
                     EditAction::make(),
+                    RecepcionsTable::actionRevertirRecepcion(),
                     RecepcionsTable::actionRevertirExpediente(),
                     RestoreAction::make()
                         ->before(function (Recepcion $record) {
@@ -146,51 +151,5 @@ class AjusteEntradasTable
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),
             ]);
-    }
-
-    protected static function getEstatus(Recepcion $record): string
-    {
-        $validado = $record->is_complete ?? false;
-        $response = 'default';
-        if ($validado) {
-            $response = 'is_complete';
-        }
-
-        return $response;
-    }
-
-    protected static function actionSubirExpediente()
-    {
-        return Action::make('subir-expediente')
-            ->label('Subir Expediente')
-            ->icon(Heroicon::OutlinedDocumentArrowUp)
-            ->color('success')
-            ->visible(fn (Recepcion $record): bool => ! $record->deleted_at && ! $record->is_complete && RecepcionsTable::isVisible())
-            ->schema([
-                FileUpload::make('pdf_expediente')
-                    ->label('Expediente Escaneado (PDF)')
-                    ->acceptedFileTypes(['application/pdf'])
-                    ->maxSize(20480) // 20M
-                    ->disk('public')
-                    ->directory('pdf-recepciones')
-                    ->visibility('public')
-                    ->required()
-                    ->helperText('Asegúrate de que todos los documentos estén en un solo PDF.')
-                    ->getUploadedFileNameForStorageUsing(function (Recepcion $record, $file): string {
-                        $prefix = Str::slug("Expediente-{$record->numero}-Recepcion");
-
-                        return (string) \str($prefix.'.'.$file->getClientOriginalExtension());
-                    }),
-            ])
-            ->action(function (array $data, Recepcion $record) {
-                $record->update([
-                    'pdf_expediente' => $data['pdf_expediente'],
-                    'is_complete' => 1,
-                ]);
-                Notification::make()
-                    ->title('Expediente cargado con éxito')
-                    ->send();
-            })
-            ->modalWidth(Width::Small);
     }
 }

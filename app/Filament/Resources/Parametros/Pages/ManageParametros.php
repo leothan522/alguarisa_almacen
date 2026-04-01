@@ -29,13 +29,21 @@ class ManageParametros extends ManageRecords
                         ->required(),
                 ])
                 ->action(function (array $data) {
-                    Role::create([
-                        'name' => $data['nombre'],
-                    ]);
-                    Notification::make()
-                        ->title('Rol Creado')
-                        ->success()
-                        ->send();
+                    $existe = Role::where('name', $data['nombre'])->exists();
+                    if ($existe) {
+                        Notification::make()
+                            ->title('El Rol ya Existe')
+                            ->warning()
+                            ->send();
+                    } else {
+                        Role::create([
+                            'name' => $data['nombre'],
+                        ]);
+                        Notification::make()
+                            ->title('Rol Creado')
+                            ->success()
+                            ->send();
+                    }
                 })
                 ->modalWidth(Width::Small),
         ];

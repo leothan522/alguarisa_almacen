@@ -7,6 +7,7 @@ use App\Filament\Resources\AjusteEntradas\Pages\EditAjusteEntrada;
 use App\Filament\Resources\AjusteEntradas\Pages\ListAjusteEntradas;
 use App\Filament\Resources\AjusteEntradas\Schemas\AjusteEntradaForm;
 use App\Filament\Resources\AjusteEntradas\Tables\AjusteEntradasTable;
+use App\Filament\Resources\Recepcions\Schemas\RecepcionInfoList;
 use App\Models\Recepcion;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -67,6 +68,11 @@ class AjusteEntradaResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return RecepcionInfoList::configure($schema);
     }
 
     public static function canViewAny(): bool

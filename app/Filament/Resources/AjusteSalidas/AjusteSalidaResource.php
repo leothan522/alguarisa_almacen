@@ -6,6 +6,7 @@ use App\Filament\Resources\AjusteSalidas\Pages\CreateAjusteSalida;
 use App\Filament\Resources\AjusteSalidas\Pages\EditAjusteSalida;
 use App\Filament\Resources\AjusteSalidas\Pages\ListAjusteSalidas;
 use App\Filament\Resources\AjusteSalidas\Schemas\AjusteSalidaForm;
+use App\Filament\Resources\AjusteSalidas\Schemas\AjusteSalidaInfolist;
 use App\Filament\Resources\AjusteSalidas\Tables\AjusteSalidasTable;
 use App\Models\Despacho;
 use BackedEnum;
@@ -67,6 +68,11 @@ class AjusteSalidaResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return AjusteSalidaInfolist::configure($schema);
     }
 
     public static function canViewAny(): bool

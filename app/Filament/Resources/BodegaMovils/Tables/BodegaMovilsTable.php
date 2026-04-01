@@ -488,6 +488,7 @@ class BodegaMovilsTable
                     ->send();
 
             })
+            ->visible(fn() => self::isVisible())
             ->hidden(fn (Despacho $record): bool => self::existeDevolucion($record) || $record->is_complete || $record->is_merma);
     }
 
@@ -531,7 +532,7 @@ class BodegaMovilsTable
             ->color('danger')
             ->requiresConfirmation()
             ->modalHeading('¿Eliminar la devolución cargada?')
-            ->visible(fn (Despacho $record): bool => ! $record->is_complete && self::existeDevolucion($record))
+            ->visible(fn (Despacho $record): bool => ! $record->is_complete && self::existeDevolucion($record) && self::isVisible())
             ->action(function (Despacho $record) {
                 $devolucion = Despacho::where('parent_id', $record->id)->first();
                 if ($devolucion) {

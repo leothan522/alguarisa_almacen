@@ -68,4 +68,9 @@ class AjusteSalidaResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
+    public static function canViewAny(): bool
+    {
+        return ! auth()->user()->hasRole('Bodega Movil');
+    }
 }

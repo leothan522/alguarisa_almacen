@@ -136,9 +136,12 @@ class RubroResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
+                    ForceDeleteBulkAction::make()
+                        ->authorizeIndividualRecords('forceDelete'),
+                    RestoreBulkAction::make()
+                        ->authorizeIndividualRecords('restore'),
                 ]),
                 self::actionExportExcel(),
                 Action::make('actualizar')

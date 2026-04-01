@@ -4,8 +4,13 @@ namespace App\Filament\Resources\Parametros\Pages;
 
 use App\Filament\Resources\Parametros\ParametroResource;
 use App\Filament\Resources\Parametros\Widgets\ParametroWidget;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Support\Enums\Width;
+use Spatie\Permission\Models\Role;
 
 class ManageParametros extends ManageRecords
 {
@@ -16,6 +21,23 @@ class ManageParametros extends ManageRecords
         return [
             CreateAction::make()
                 ->createAnother(false),
+            Action::make('crear-role')
+                ->label('Crear Rol')
+                ->color('success')
+                ->schema([
+                    TextInput::make('nombre')
+                        ->required(),
+                ])
+                ->action(function (array $data) {
+                    Role::create([
+                        'name' => $data['nombre'],
+                    ]);
+                    Notification::make()
+                        ->title('Rol Creado')
+                        ->success()
+                        ->send();
+                })
+                ->modalWidth(Width::Small),
         ];
     }
 

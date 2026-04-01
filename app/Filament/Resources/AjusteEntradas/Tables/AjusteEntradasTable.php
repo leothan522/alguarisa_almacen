@@ -1,20 +1,22 @@
 <?php
 
-namespace App\Filament\Resources\ModulosClaps\Tables;
+namespace App\Filament\Resources\AjusteEntradas\Tables;
 
-use App\Filament\Resources\BodegaMovils\Tables\BodegaMovilsTable;
-use App\Models\Despacho;
+use App\Filament\Resources\Recepcions\Tables\RecepcionsTable;
+use App\Models\Recepcion;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -23,31 +25,31 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
-class ModulosClapsTable
+class AjusteEntradasTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereRelation('plan', 'codigo', 'MC')->where('is_return', false)->where('is_adjustment', false)->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('is_adjustment', true)->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
-                    ->default(fn (Despacho $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
-                    ->description(fn (Despacho $record): string => $record->plan->nombre)
+                    ->default(fn (Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
+                    ->description(fn (Recepcion $record): string => $record->plan->nombre)
                     ->hiddenFrom('md')
-                    ->icon(fn (Despacho $record): Heroicon => match (BodegaMovilsTable::getEstatus($record)) {
+                    ->icon(fn (Recepcion $record): Heroicon => match (self::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
-                        'is_return' => Heroicon::OutlinedInboxArrowDown,
+                        'is_sealed' => Heroicon::OutlinedCheckBadge,
                         default => Heroicon::OutlinedClock
                     })
-                    ->iconColor(fn (Despacho $record): string => match (BodegaMovilsTable::getEstatus($record)) {
+                    ->iconColor(fn (Recepcion $record): string => match (self::getEstatus($record)) {
                         'is_complete' => 'success',
-                        'is_return' => 'info',
+                        'is_sealed' => 'info',
                         default => 'gray'
                     }),
                 TextColumn::make('fecha')
                     ->date()
-                    ->description(fn (Despacho $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
+                    ->description(fn (Recepcion $record): string => Carbon::parse($record->hora)->translatedFormat('h:i a'))
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('numero')
@@ -63,31 +65,23 @@ class ModulosClapsTable
                     ->visibleFrom('2xl')
                     ->searchable(),
                 TextColumn::make('responsables_nombre')
-                    ->label('Recibe')
+                    ->label('Entrega')
                     ->wrap()
-                    ->description(fn (Despacho $record): string => $record->responsables_telefono ?? '-')
+                    ->description(fn (Recepcion $record): string => $record->responsables_telefono ?? '-')
                     ->formatStateUsing(fn (string $state): string => Str::upper($state))
                     ->searchable()
                     ->visibleFrom('md'),
-                TextColumn::make('detalles_sum_cantidad_unidades')
+                TextColumn::make('items_sum_cantidad_unidades')
                     ->label('Und. Totales')
-                    ->sum('detalles', 'cantidad_unidades')
-                    ->formatStateUsing(function ($state) {
-                        // Si el estado es 0, nulo o vacío, retornamos el texto especial
-                        if (! $state || $state == 0) {
-                            return 'MERMA';
-                        }
-
-                        // Si tiene valor, lo formateamos manualmente (ya que formatStateUsing anula el ->numeric())
-                        return formatoMillares($state, 0).' UND';
-                    })
-                    ->badge(fn (Despacho $record): bool => $record->is_merma)
+                    ->sum('items', 'cantidad_unidades')
+                    ->numeric()
+                    ->suffix(' UND')
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
                     ->label('Peso Total')
-                    ->default(fn (Despacho $record) => $record->detalles()->sum('total'))
-                    ->description(fn (Despacho $record): string => $record->is_merma ? 'MERMA' : formatoMillares($record->detalles()->sum('cantidad_unidades'), 0).' UND')
+                    ->default(fn (Recepcion $record) => $record->items()->sum('total'))
+                    ->description(fn (Recepcion $record): string => formatoMillares($record->items()->sum('cantidad_unidades'), 0).' UND')
                     ->numeric(decimalPlaces: 2)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
@@ -95,9 +89,9 @@ class ModulosClapsTable
                     ->suffix(' KG')
                     ->alignEnd()
                     ->hiddenFrom('md'),
-                TextColumn::make('detalles_sum_total')
+                TextColumn::make('items_sum_total')
                     ->label('Peso Total')
-                    ->sum('detalles', 'total')
+                    ->sum('items', 'total')
                     ->numeric(decimalPlaces: 2)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
@@ -107,15 +101,15 @@ class ModulosClapsTable
                     ->visibleFrom('md'),
                 IconColumn::make('estatus')
                     ->label('Estatus')
-                    ->default(fn (Despacho $record): string => BodegaMovilsTable::getEstatus($record))
+                    ->default(fn (Recepcion $record): string => self::getEstatus($record))
                     ->icon(fn (string $state): Heroicon => match ($state) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
-                        'is_return' => Heroicon::OutlinedInboxArrowDown,
+                        'is_sealed' => Heroicon::OutlinedCheckBadge,
                         default => Heroicon::OutlinedClock
                     })
                     ->color(fn (string $state): string => match ($state) {
                         'is_complete' => 'success',
-                        'is_return' => 'info',
+                        'is_sealed' => 'info',
                         default => 'gray'
                     })
                     ->alignCenter()
@@ -126,15 +120,13 @@ class ModulosClapsTable
             ])
             ->recordActions([
                 ActionGroup::make([
-                    BodegaMovilsTable::actionExportPdf(),
-                    BodegaMovilsTable::actionSubirExpediente(),
-                    BodegaMovilsTable::actionVerExpediente(),
-                    BodegaMovilsTable::actionRevertirExpediente(),
+                    RecepcionsTable::actionExportPdf(),
+                    self::actionSubirExpediente(),
+                    RecepcionsTable::actionVerExpediente(),
                     EditAction::make(),
-                    DeleteAction::make()
-                        ->visible(fn (Despacho $record): bool => $record->is_merma),
+                    RecepcionsTable::actionRevertirExpediente(),
                     RestoreAction::make()
-                        ->before(function (Despacho $record) {
+                        ->before(function (Recepcion $record) {
                             $numero = Str::replace('*', '', $record->numero);
                             $record->update([
                                 'numero' => $numero,
@@ -149,9 +141,56 @@ class ModulosClapsTable
                     RestoreBulkAction::make()
                         ->authorizeIndividualRecords('restore'),
                 ]),
+                RecepcionsTable::actionExportExcel(),
                 Action::make('actualizar')
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),
             ]);
+    }
+
+    protected static function getEstatus(Recepcion $record): string
+    {
+        $validado = $record->is_complete ?? false;
+        $response = 'default';
+        if ($validado) {
+            $response = 'is_complete';
+        }
+
+        return $response;
+    }
+
+    protected static function actionSubirExpediente()
+    {
+        return Action::make('subir-expediente')
+            ->label('Subir Expediente')
+            ->icon(Heroicon::OutlinedDocumentArrowUp)
+            ->color('success')
+            ->visible(fn (Recepcion $record): bool => ! $record->deleted_at && ! $record->is_complete && RecepcionsTable::isVisible())
+            ->schema([
+                FileUpload::make('pdf_expediente')
+                    ->label('Expediente Escaneado (PDF)')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(20480) // 20M
+                    ->disk('public')
+                    ->directory('pdf-recepciones')
+                    ->visibility('public')
+                    ->required()
+                    ->helperText('Asegúrate de que todos los documentos estén en un solo PDF.')
+                    ->getUploadedFileNameForStorageUsing(function (Recepcion $record, $file): string {
+                        $prefix = Str::slug("Expediente-{$record->numero}-Recepcion");
+
+                        return (string) \str($prefix.'.'.$file->getClientOriginalExtension());
+                    }),
+            ])
+            ->action(function (array $data, Recepcion $record) {
+                $record->update([
+                    'pdf_expediente' => $data['pdf_expediente'],
+                    'is_complete' => 1,
+                ]);
+                Notification::make()
+                    ->title('Expediente cargado con éxito')
+                    ->send();
+            })
+            ->modalWidth(Width::Small);
     }
 }

@@ -44,7 +44,7 @@ class RecepcionsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('is_adjustment', false)->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
@@ -187,7 +187,7 @@ class RecepcionsTable
         return $response;
     }
 
-    protected static function actionExportPdf()
+    public static function actionExportPdf()
     {
         return Action::make('export-pdf')
             ->label('Imprimir')
@@ -257,7 +257,7 @@ class RecepcionsTable
             ->visible(fn ($record) => ! $record->is_sealed && ! $record->deleted_at && self::isVisible());
     }
 
-    protected static function borrarFotos($fotoPath): void
+    public static function borrarFotos($fotoPath): void
     {
         if ($fotoPath && Storage::disk('public')->exists($fotoPath)) {
             Storage::disk('public')->delete($fotoPath);
@@ -330,7 +330,7 @@ class RecepcionsTable
             ->modalWidth(Width::Small);
     }
 
-    protected static function actionRevertirExpediente()
+    public static function actionRevertirExpediente()
     {
         return Action::make('revertir-expediente')
             ->label('Revertir Expediente')
@@ -355,7 +355,7 @@ class RecepcionsTable
             });
     }
 
-    protected static function actionVerExpediente()
+    public static function actionVerExpediente()
     {
         return Action::make('abrir-expediente')
             ->label('Ver Expediente')
@@ -403,7 +403,7 @@ class RecepcionsTable
             '))*/ ;
     }
 
-    protected static function filterEstatus()
+    public static function filterEstatus()
     {
         return SelectFilter::make('estatus')
             ->label('Estatus')
@@ -428,7 +428,7 @@ class RecepcionsTable
             });
     }
 
-    protected static function filterMes()
+    public static function filterMes()
     {
         return Filter::make('fecha')
             ->schema([
@@ -457,12 +457,12 @@ class RecepcionsTable
             });
     }
 
-    protected static function isVisible(): bool
+    public static function isVisible(): bool
     {
         return isAdmin() || auth()->user()->hasRole('almacen');
     }
 
-    protected static function actionExportExcel()
+    public static function actionExportExcel()
     {
         return ExportBulkAction::make()->exports([
             ExcelExport::make()

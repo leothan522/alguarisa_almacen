@@ -15,6 +15,8 @@ class ParametroWidget extends Widget implements HasSchemas
 
     protected string $view = 'filament.resources.parametros.widgets.parametro-widget';
 
+    protected static bool $isLazy = false;
+
     public function parametroInfoList(Schema $schema): Schema
     {
         return $schema
@@ -22,6 +24,9 @@ class ParametroWidget extends Widget implements HasSchemas
                 'parametros' => [
                     'size_codigo' => 'valor_id = size, valor_texto = null',
                     'numero_recepcion' => 'valor_id = numero, valor_texto = formato',
+                    'numero_despacho' => 'valor_id = numero, valor_texto = formato',
+                    'numero_entrada' => 'valor_id = numero, valor_texto = formato',
+                    'numero_salida' => 'valor_id = numero, valor_texto = formato',
                 ],
             ])
             ->components([

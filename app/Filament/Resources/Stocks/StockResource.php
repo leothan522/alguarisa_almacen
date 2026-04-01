@@ -38,7 +38,7 @@ class StockResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquare3Stack3d;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Almacén';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestión de Almacén';
 
     protected static ?int $navigationSort = 80;
 

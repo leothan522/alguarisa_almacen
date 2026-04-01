@@ -35,7 +35,7 @@ class RecepcionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Recepciones';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Almacén';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestión de Almacén';
 
     protected static ?int $navigationSort = 81;
 

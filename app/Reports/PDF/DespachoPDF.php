@@ -16,6 +16,8 @@ class DespachoPDF extends InventarioReport
 
     public bool $nota = false;
 
+    public bool $ajuste = false;
+
     public function Header(): void
     {
         $this->headerBase();
@@ -29,6 +31,9 @@ class DespachoPDF extends InventarioReport
         $this->SetTextColor(255, 0, 0);
         $this->SetFont('Times', 'B', 12);
         $tipo = ! $this->nota ? $this->devolucion ? 'DEVOLUCIÓN' : 'DESPACHO' : 'NOTA';
+        if ($this->ajuste){
+            $tipo = 'AJUSTE';
+        }
         $this->Cell(0, 10, verUtf8('N.º '.$tipo.': '.$this->codigo.'    '), 1, 1, 'R');
 
         $this->SetFont('Times', 'B', 9);

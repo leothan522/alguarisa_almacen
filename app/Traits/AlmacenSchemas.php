@@ -4,7 +4,6 @@ namespace App\Traits;
 
 use App\Models\Almacen;
 use App\Models\Despacho;
-use App\Models\Detalle;
 use App\Models\Parametro;
 use App\Models\Plan;
 use App\Models\Recepcion;
@@ -35,6 +34,8 @@ trait AlmacenSchemas
 
     public static string $repeatRelation = 'items';
 
+    public static bool $ajuste = false;
+
     protected static function sectionDatos()
     {
         return Section::make('Datos Básicos')
@@ -43,7 +44,11 @@ trait AlmacenSchemas
                     ->default(function (): string {
                         $num = 1;
                         $formato = '';
-                        $nombre = self::$recepcion ? 'numero_recepcion' : 'numero_despacho';
+                        if (! self::$ajuste) {
+                            $nombre = self::$recepcion ? 'numero_recepcion' : 'numero_despacho';
+                        } else {
+                            $nombre = self::$recepcion ? 'numero_entrada' : 'numero_salida';
+                        }
                         $parametro = Parametro::where('nombre', $nombre)->first();
                         if ($parametro) {
                             $formato = $parametro->valor_texto;
@@ -53,6 +58,9 @@ trait AlmacenSchemas
                         do {
                             $num = $num + $i;
                             $codigo = $formato.cerosIzquierda($num, numSizeCodigo());
+                            if (self::$ajuste) {
+                                $codigo = self::$recepcion ? 'ENT-'.$codigo : 'SAL-'.$codigo;
+                            }
                             $existe = self::$recepcion ? Recepcion::where('numero', $codigo)->exists() : Despacho::where('numero', $codigo)->exists();
                             $i++;
                         } while ($existe);
@@ -67,7 +75,7 @@ trait AlmacenSchemas
                     ->required()
                     ->disabledOn('edit')
                     ->default(self::$plan)
-                    ->disableOptionWhen(fn (string $value): bool => $value != self::$plan && ! self::$recepcion),
+                    ->disableOptionWhen(fn (string $value): bool => (! self::$ajuste && $value != self::$plan) && ! self::$recepcion),
                 DatePicker::make('fecha')
                     ->default(now())
                     ->required(),

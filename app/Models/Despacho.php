@@ -32,6 +32,7 @@ class Despacho extends Model
         'is_return',
         'is_complete',
         'pdf_expediente',
+        'is_adjustment',
         'parent_id',
     ];
 

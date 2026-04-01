@@ -47,7 +47,7 @@ class BodegaMovilsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereRelation('plan', 'codigo', 'BM')->where('is_return', false)->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereRelation('plan', 'codigo', 'BM')->where('is_return', false)->where('is_adjustment', false)->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
@@ -215,7 +215,7 @@ class BodegaMovilsTable
             ->label('Subir Expediente')
             ->icon(Heroicon::OutlinedDocumentArrowUp)
             ->color('success')
-            ->visible(fn (Despacho $record): bool => ! $record->is_complete && self::isVisible())
+            ->visible(fn (Despacho $record): bool => ! $record->deleted_at && ! $record->is_complete && self::isVisible())
             ->schema([
                 FileUpload::make('pdf_expediente')
                     ->label('Expediente Escaneado (PDF)')

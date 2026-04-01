@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ModulosClaps\Tables;
+namespace App\Filament\Resources\AjusteSalidas\Tables;
 
 use App\Filament\Resources\BodegaMovils\Tables\BodegaMovilsTable;
 use App\Models\Despacho;
@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
@@ -23,24 +23,24 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
-class ModulosClapsTable
+class AjusteSalidasTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereRelation('plan', 'codigo', 'MC')->where('is_return', false)->where('is_adjustment', false)->orderByDesc('fecha')->orderByDesc('hora'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('is_adjustment', true)->orderByDesc('fecha')->orderByDesc('hora'))
             ->columns([
                 TextColumn::make('recepcion')
                     ->label('Fecha')
                     ->default(fn (Despacho $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
                     ->description(fn (Despacho $record): string => $record->plan->nombre)
                     ->hiddenFrom('md')
-                    ->icon(fn (Despacho $record): Heroicon => match (BodegaMovilsTable::getEstatus($record)) {
+                    ->icon(fn (Despacho $record): Heroicon => match (self::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_return' => Heroicon::OutlinedInboxArrowDown,
                         default => Heroicon::OutlinedClock
                     })
-                    ->iconColor(fn (Despacho $record): string => match (BodegaMovilsTable::getEstatus($record)) {
+                    ->iconColor(fn (Despacho $record): string => match (self::getEstatus($record)) {
                         'is_complete' => 'success',
                         'is_return' => 'info',
                         default => 'gray'
@@ -107,7 +107,7 @@ class ModulosClapsTable
                     ->visibleFrom('md'),
                 IconColumn::make('estatus')
                     ->label('Estatus')
-                    ->default(fn (Despacho $record): string => BodegaMovilsTable::getEstatus($record))
+                    ->default(fn (Despacho $record): string => self::getEstatus($record))
                     ->icon(fn (string $state): Heroicon => match ($state) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
                         'is_return' => Heroicon::OutlinedInboxArrowDown,
@@ -131,8 +131,6 @@ class ModulosClapsTable
                     BodegaMovilsTable::actionVerExpediente(),
                     BodegaMovilsTable::actionRevertirExpediente(),
                     EditAction::make(),
-                    DeleteAction::make()
-                        ->visible(fn (Despacho $record): bool => $record->is_merma),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {
                             $numero = Str::replace('*', '', $record->numero);
@@ -153,5 +151,16 @@ class ModulosClapsTable
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),
             ]);
+    }
+
+    protected static function getEstatus(Despacho $record): string
+    {
+        $validado = $record->is_complete ?? false;
+        $response = 'default';
+        if ($validado) {
+            $response = 'is_complete';
+        }
+
+        return $response;
     }
 }

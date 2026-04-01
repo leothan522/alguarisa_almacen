@@ -41,7 +41,7 @@ class RubroResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Almacén';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestión de Almacén';
 
     protected static ?int $navigationSort = 84;
 

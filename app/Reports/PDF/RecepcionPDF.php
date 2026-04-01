@@ -12,6 +12,8 @@ class RecepcionPDF extends InventarioReport
 
     public string $planCodigo = '';
 
+    public bool $ajuste = false;
+
     public function Header(): void
     {
         $this->headerBase();
@@ -24,7 +26,8 @@ class RecepcionPDF extends InventarioReport
         // Tabla de Rubros
         $this->SetTextColor(255, 0, 0);
         $this->SetFont('Times', 'B', 12);
-        $this->Cell(0, 10, verUtf8('N.º RECEPCIÓN: '.$this->codigo.'    '), 1, 1, 'R');
+        $label = $this->ajuste ? 'AJUSTE' : 'RECEPCIÓN';
+        $this->Cell(0, 10, verUtf8('N.º '.$label.': '.$this->codigo.'    '), 1, 1, 'R');
 
         $this->SetFont('Times', 'B', 9);
         $this->SetTextColor(0, 0, 0);

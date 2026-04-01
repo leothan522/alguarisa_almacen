@@ -23,7 +23,7 @@ class ModulosClapResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Almacén';
+    protected static string | UnitEnum | null $navigationGroup = 'Gestión de Almacén';
 
     protected static ?string $navigationLabel = 'Módulos CLAP';
 

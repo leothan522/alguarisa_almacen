@@ -23,7 +23,7 @@ class BodegaMovilResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Almacén';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestión de Almacén';
 
     protected static ?string $slug = 'bodega-movil';
 

@@ -31,9 +31,14 @@ class DespachoController extends Controller
 
         $pdf = new DespachoPDF;
         $label = ! $despacho->is_return ? 'DESPACHO' : 'DEVOLUCIÓN';
+        $titulo = ! $despacho->is_return ? 'DESPACHO DE RUBROS' : 'DEVOLUCIÓN DE RUBROS';
+        if ($despacho->is_adjustment) {
+            $label = 'AJUSTE';
+            $titulo = 'SALIDA POR AJUSTE';
+        }
         $pdf->SetTitle(verUtf8($label.' N.º '.Str::upper($despacho->numero)));
         $pdf->family = 'Times';
-        $pdf->headerTitle = ! $despacho->is_return ? 'DESPACHO DE RUBROS' : 'DEVOLUCIÓN DE RUBROS';
+        $pdf->headerTitle = $titulo;
         $pdf->headerSubtitle = Str::upper($this->model_plan);
         $pdf->footerImprecionDerecha = $this->model_plan;
         $pdf->texto = $this->texto;
@@ -41,6 +46,7 @@ class DespachoController extends Controller
         $pdf->observacion = $this->model_observacion ?? '';
         $pdf->planCodigo = $this->model_planCodigo;
         $pdf->devolucion = $despacho->is_return;
+        $pdf->ajuste = $despacho->is_adjustment;
 
         $pdf->AliasNbPages(); // Necesario para el pie de página
 
@@ -62,6 +68,9 @@ class DespachoController extends Controller
         }
 
         $label = ! $despacho->is_return ? 'despacho' : 'devolucion';
+        if ($despacho->is_adjustment) {
+            $label = 'ajuste';
+        }
 
         return response($pdf->Output('I', $label.'-'.$this->model_numero.'.pdf'), 200)
             ->header('Content-Type', 'application/pdf');
@@ -93,7 +102,7 @@ class DespachoController extends Controller
         $pdf->headerSubtitle = Str::upper($this->model_plan);
         $pdf->footerImprecionDerecha = $this->model_plan;
         $pdf->texto = $this->texto;
-        $pdf->codigo = "VEN-".$this->model_numero;
+        $pdf->codigo = 'VEN-'.$this->model_numero;
         $pdf->observacion = $this->model_observacion ?? '';
         $pdf->planCodigo = $this->model_planCodigo;
         $pdf->devolucion = $despacho->is_return;

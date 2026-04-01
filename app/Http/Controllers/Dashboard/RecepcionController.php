@@ -30,18 +30,19 @@ class RecepcionController extends Controller
         // --- LÓGICA DE PAGINACIÓN (10 ítems por página) ---
         $paginas = array_chunk($rubros, 10);
 
-
         // Instanciamos nuestra clase personalizada
         $pdf = new RecepcionPDF;
-        $pdf->SetTitle(verUtf8('RECEPCIÓN N.º '.Str::upper($recepcion->numero)));
+        $label = $recepcion->is_adjustment ? 'AJUSTE' : 'RECEPCIÓN';
+        $pdf->SetTitle(verUtf8($label.' N.º '.Str::upper($recepcion->numero)));
         $pdf->family = 'Times';
-        $pdf->headerTitle = 'ACTA DE CONTROL PERCEPTIVO';
-        $pdf->headerSubtitle = 'RECEPCIÓN DE RUBROS';
+        $pdf->headerTitle = $recepcion->is_adjustment ? 'ENTRADA POR AJUSTE' : 'ACTA DE CONTROL PERCEPTIVO';
+        $pdf->headerSubtitle = $recepcion->is_adjustment ? Str::upper($this->model_plan) : 'RECEPCIÓN DE RUBROS';
         $pdf->footerImprecionDerecha = $this->model_plan;
         $pdf->texto = $this->texto;
         $pdf->codigo = $this->model_numero;
         $pdf->observacion = $this->model_observacion ?? '';
         $pdf->planCodigo = $this->model_planCodigo;
+        $pdf->ajuste = $recepcion->is_adjustment;
 
         $pdf->AliasNbPages(); // Necesario para el pie de página
 
@@ -61,8 +62,9 @@ class RecepcionController extends Controller
                 $this->dibujarFilaVacia($pdf, ++$num);
             }
         }
+        $label = $recepcion->is_adjustment ? 'ajuste-' : 'recepcion-';
 
-        return response($pdf->Output('I', 'recepcion-'.$this->model_numero.'.pdf'), 200)
+        return response($pdf->Output('I', $label.$this->model_numero.'.pdf'), 200)
             ->header('Content-Type', 'application/pdf');
     }
 

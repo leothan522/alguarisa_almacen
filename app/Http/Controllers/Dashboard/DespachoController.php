@@ -27,7 +27,7 @@ class DespachoController extends Controller
         $rubros = $despacho->detalles->toArray();
 
         // --- LÓGICA DE PAGINACIÓN (11 ítems por página) ---
-        $paginas = array_chunk($rubros, 11);
+        $paginas = array_chunk($rubros, 10);
 
         $pdf = new DespachoPDF;
         $label = ! $despacho->is_return ? 'DESPACHO' : 'DEVOLUCIÓN';
@@ -61,7 +61,7 @@ class DespachoController extends Controller
             }
 
             // --- RELLENO DE FILAS VACÍAS ---
-            $filasRestantes = 11 - count($itemsPagina);
+            $filasRestantes = 10 - count($itemsPagina);
             for ($i = 0; $i < $filasRestantes; $i++) {
                 $this->dibujarFilaVacia($pdf, ++$num);
             }
@@ -147,13 +147,14 @@ class DespachoController extends Controller
     {
         $tipo = $item['tipo_adquisicion'] == 'asignacion' ? 'ASIGNACIÓN' : Str::upper($item['tipo_adquisicion']);
         $unidades = $item['cantidad_unidades'] ? formatoMillares($item['cantidad_unidades'], 0) : 'MERMA';
+        $peso_unitario = $item['cantidad_unidades'] ? formatoMillares($item['peso_unitario']) : '-';
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, verUtf8($num), 1, 0, 'C');
         $pdf->Cell(35, 10, verUtf8($tipo), 1, 0, 'C');
         $pdf->Cell(78, 10, verUtf8(Str::upper($item['rubros_nombre'])), 1, 0, 'C');
         $pdf->SetFont('Times', 'B', 11);
         $pdf->Cell(20, 10, verUtf8($unidades), 1, 0, 'C');
-        $pdf->Cell(20, 10, verUtf8(formatoMillares($item['peso_unitario'])), 1, 0, 'C');
+        $pdf->Cell(20, 10, verUtf8($peso_unitario), 1, 0, 'C');
         $pdf->Cell(30, 10, verUtf8((formatoMillares($item['total'])).' '.$item['rubros_unidad_medida']), 1, 1, 'C');
     }
 

@@ -50,7 +50,7 @@ class DespachoPDF extends InventarioReport
     public function Footer(): void
     {
         $this->footerBase();
-        $this->SetY(218);
+        $this->SetY(208);
         $this->SetTextColor(0, 0, 0);
 
         $this->SetFont('Times', 'BU', 8);
@@ -58,16 +58,16 @@ class DespachoPDF extends InventarioReport
         $this->MultiCell(140, 5, verUtf8($textp));
 
         $this->SetFont('Times', 'B', 8);
-        $this->SetXY(150, 218);
+        $this->SetXY(150, 208);
         $this->Cell(0, 5, 'SELLO', 0, 1, 'C');
-        $this->Rect(150, 218, 50, 64);
-        $this->Rect(150, 218, 50, 64);
-        $this->Line(10, 218, 10, 248);
-        $this->Line(10, 218, 10, 248);
-        $this->Line(10, 218, 150, 218);
+        $this->Rect(150, 208, 50, 74);
+        $this->Rect(150, 208, 50, 74);
+        $this->Line(10, 208, 10, 248);
+        $this->Line(10, 208, 10, 248);
+        $this->Line(10, 208, 150, 208);
 
-        $this->SetY(238);
-        $this->Line(10, 238, 150, 238);
+        $this->SetY(228);
+        $this->Line(10, 228, 150, 228);
         $this->SetFont('Times', 'B', 9);
         $this->Cell(140, 10, 'AUTORIZADO POR: HUMBERTO ALBANI', 1, 1, 'C');
         $this->SetFont('Times', '', 6);
@@ -77,14 +77,22 @@ class DespachoPDF extends InventarioReport
         $this->Cell(47, 3, 'QUIEN ENTREGA', 0, 0, 'C');
         $this->Cell(46, 3, verUtf8('RESPONSABLE DE ALMACÉN'), 0, 0, 'C');
         $this->Cell(47, 3, 'QUIEN RECIBE', 0, 1, 'C');
-        $this->Ln(27);
+        $this->Ln(22);
 
-        $this->Rect(10, 248, 47, 34);
-        $this->Rect(57, 248, 46, 34);
-        $this->Rect(103, 248, 47, 34);
-        $this->Rect(10, 248, 47, 34);
-        $this->Rect(57, 248, 46, 34);
-        $this->Rect(103, 248, 47, 34);
+        $this->Rect(10, 238, 47, 27);
+        $this->Rect(57, 238, 46, 27);
+        $this->Rect(103, 238, 47, 27);
+        $this->Rect(10, 238, 47, 27);
+        $this->Rect(57, 238, 46, 27);
+        $this->Rect(103, 238, 47, 27);
+
+        $this->Cell(70, 3, 'NOMBRE - FIRMA - CEDULA', 0, 1, 'C');
+        $this->Cell(70, 3, 'SEGURIDAD', 0, 0, 'C');
+
+        $this->Rect(10, 265, 70, 17);
+        $this->Rect(80, 265, 70, 17);
+        $this->Rect(10, 265, 70, 17);
+        $this->Rect(80, 265, 70, 17);
 
     }
 }

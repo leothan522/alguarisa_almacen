@@ -78,9 +78,11 @@ class RecepcionPDF extends InventarioReport
         $this->Rect(103, 228, 47, 33);
 
         $this->Cell(70, 3, 'NOMBRE - FIRMA - CEDULA', 0, 0, 'C');
-        $this->Cell(70, 3, $this->planCodigo == 'BM' ? 'NOMBRE - FIRMA - CEDULA' : '', 0, 1, 'C');
+        $label = ! $this->ajuste && $this->planCodigo == 'BM' ? 'NOMBRE - FIRMA - CEDULA' : '';
+        $this->Cell(70, 3, $label, 0, 1, 'C');
         $this->Cell(70, 3, 'SEGURIDAD', 0, 0, 'C');
-        $this->Cell(70, 3, $this->planCodigo == 'BM' ? 'INSPECTOR DE CUSPAL' : '', 0, 1, 'C');
+        $label = ! $this->ajuste && $this->planCodigo == 'BM' ? 'INSPECTOR DE CUSPAL' : '';
+        $this->Cell(70, 3, $label, 0, 1, 'C');
 
         $this->Rect(10, 261, 70, 21);
         $this->Rect(80, 261, 70, 21);

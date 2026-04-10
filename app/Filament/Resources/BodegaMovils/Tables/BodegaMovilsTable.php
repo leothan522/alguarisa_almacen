@@ -401,7 +401,7 @@ class BodegaMovilsTable
                             ->suffix(function (Get $get, Set $set): string {
                                 $cantidad = $get('cantidad_unidades');
                                 $peso = $get('peso_unitario');
-                                $total = $cantidad * $peso;
+                                $total = round($cantidad * $peso, 2);
                                 $set('total', $total);
                                 $unidad = $get('rubros_unidad_medida') ?? 'KG';
 

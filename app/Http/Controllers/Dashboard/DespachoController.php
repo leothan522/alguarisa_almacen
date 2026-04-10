@@ -92,7 +92,7 @@ class DespachoController extends Controller
         $rubros = $despacho->getVentasNetasParaImprimir()->toArray();
 
         // --- LÓGICA DE PAGINACIÓN (11 ítems por página) ---
-        $paginas = array_chunk($rubros, 11);
+        $paginas = array_chunk($rubros, 10);
 
         $pdf = new DespachoPDF;
         $label = 'NOTA';
@@ -130,7 +130,7 @@ class DespachoController extends Controller
             }
 
             // --- RELLENO DE FILAS VACÍAS ---
-            $filasRestantes = 11 - count($itemsPagina);
+            $filasRestantes = 10 - count($itemsPagina);
             for ($i = 0; $i < $filasRestantes; $i++) {
                 $this->dibujarFilaVacia($pdf, ++$num);
             }

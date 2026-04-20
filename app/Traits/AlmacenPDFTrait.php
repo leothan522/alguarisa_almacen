@@ -29,7 +29,7 @@ trait AlmacenPDFTrait
         $responsable_nombre = Str::upper($model->responsables_nombre ?? '_____________________');
         $responsable_cedula = Str::upper($model->responsables_cedula ? formatoMillares($model->responsables_cedula, 0) : '_____________________');
         $responsable_empresa = Str::upper($model->responsables_empresa ?? '_____________________');
-        $responsable_telefono = Str::upper($model->responsables_telefono ?? '_____________________');
+        $responsable_telefono = Str::upper($model->responsables_telefono ?? '___________');
         $this->model_numero = Str::upper($model->numero) ?? '__________';
         $this->model_observacion = Str::upper($model->observacion);
         $this->model_plan = $model->plan->nombre;

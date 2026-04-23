@@ -100,10 +100,10 @@ trait AlmacenSchemas
                     ->createOptionAction(function (Action $action) {
                         return $action->modalWidth(Width::ExtraSmall);
                     })
-                    ->editOptionForm(self::formResponsable())
+                    /*->editOptionForm(self::formResponsable())
                     ->editOptionAction(function (Action $action) {
                         return $action->modalWidth(Width::ExtraSmall);
-                    })
+                    })*/
                     ->getOptionLabelFromRecordUsing(fn (Responsable $record): string => Str::upper(formatoMillares($record->cedula, 0).' '.$record->nombre))
                     ->searchable(['nombre', 'cedula'])
                     ->preload()

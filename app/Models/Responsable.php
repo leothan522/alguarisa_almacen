@@ -24,4 +24,9 @@ class Responsable extends Model
         return $this->hasMany(Recepcion::class, 'responsables_id', 'id');
     }
 
+    public function despachos(): HasMany
+    {
+        return $this->hasMany(Despacho::class, 'responsables_id', 'id');
+    }
+
 }

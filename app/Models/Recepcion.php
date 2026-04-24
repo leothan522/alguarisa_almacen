@@ -35,6 +35,7 @@ class Recepcion extends Model
         'image_2',
         'pdf_expediente',
         'is_adjustment',
+        'asignacion_referencia',
     ];
 
     public function almacen(): BelongsTo

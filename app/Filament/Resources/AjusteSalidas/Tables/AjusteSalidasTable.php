@@ -60,6 +60,14 @@ class AjusteSalidasTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('plan.nombre')
+                    ->description(function (Despacho $record) {
+                        if ($record->asignacion_referencia) {
+                            return '🚩 CORTE: '.Str::upper($record->asignacion_referencia);
+                        }
+
+                        return null;
+                    })
+                    ->color(fn ($record) => $record->asignacion_referencia ? 'primary' : 'gray')
                     ->wrap()
                     ->visibleFrom('md'),
                 TextColumn::make('responsables_cedula')
@@ -141,6 +149,8 @@ class AjusteSalidasTable
                     self::actionRevertirValidacion(),
                     BodegaMovilsTable::actionRevertirExpediente(),
                     EditAction::make(),
+                    RecepcionsTable::actionMarcarCierre(),
+                    RecepcionsTable::actionRevirtirMarcaCierre(),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {
                             $numero = Str::replace('*', '', $record->numero);

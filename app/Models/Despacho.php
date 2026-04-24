@@ -38,6 +38,7 @@ class Despacho extends Model
         'pdf_expediente',
         'is_adjustment',
         'parent_id',
+        'asignacion_referencia',
     ];
 
     public function almacen(): BelongsTo

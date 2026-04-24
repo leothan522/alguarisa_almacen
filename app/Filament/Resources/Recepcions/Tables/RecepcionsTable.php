@@ -70,6 +70,14 @@ class RecepcionsTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('plan.nombre')
+                    ->description(function (Recepcion $record) {
+                        if ($record->asignacion_referencia) {
+                            return '🚩 CORTE: '.Str::upper($record->asignacion_referencia);
+                        }
+
+                        return null;
+                    })
+                    ->color(fn ($record) => $record->asignacion_referencia ? 'primary' : 'gray')
                     ->wrap()
                     ->visibleFrom('md'),
                 TextColumn::make('responsables_cedula')
@@ -148,6 +156,8 @@ class RecepcionsTable
                     self::actionRevertirRecepcion(),
                     self::actionRevertirExpediente(),
                     self::actionRevertirMerma(),
+                    self::actionMarcarCierre(),
+                    self::actionRevirtirMarcaCierre(),
                     RestoreAction::make()
                         ->before(function (Recepcion $record) {
                             $numero = Str::replace('*', '', $record->numero);
@@ -347,6 +357,7 @@ class RecepcionsTable
                 $record->update([
                     'pdf_expediente' => null,
                     'is_complete' => false,
+                    'asignacion_referencia' => null,
                 ]);
                 Notification::make()
                     ->title('Expediente eliminado')
@@ -579,5 +590,79 @@ class RecepcionsTable
     protected static function existeMerma(Recepcion $record): bool
     {
         return Merma::where('recepciones_id', $record->id)->exists();
+    }
+
+    public static function actionMarcarCierre()
+    {
+        return Action::make('marcar_cierre')
+            ->label('Marcar como Último')
+            ->icon(Heroicon::OutlinedFlag)
+            ->color('info')
+            // LÓGICA DE VISIBILIDAD
+            ->visible(function ($record) {
+                // 1. Debe estar completado (is_complete es true)
+                if (! $record->is_complete) {
+                    return false;
+                }
+
+                // 2. NO debe estar marcado ya (si ya tiene valor, desaparece la acción)
+                if (filled($record->asignacion_referencia)) {
+                    return false;
+                }
+
+                // 3. No debe haber ningún registro posterior (por encima) que ya esté marcado
+                // Esto asegura que el "corte" siempre sea el punto más reciente del historial
+                $existeHitoPosterior = $record::where('id', '>', $record->id)
+                    ->whereNotNull('asignacion_referencia')
+                    ->exists();
+
+                return ! $existeHitoPosterior;
+            })
+            ->modalWidth(Width::Small)
+            ->modalHeading('Finalizar Asignación Actual')
+            ->modalDescription('Este registro se marcará como el último de la distribución.')
+            ->schema([
+                TextInput::make('asignacion_referencia')
+                    ->label('Nombre de la Asignación')
+                    ->placeholder('Ej: Asignación de Abril 2026')
+                    ->required(),
+            ])
+            ->action(function ($record, array $data): void {
+                $record->update([
+                    'asignacion_referencia' => $data['asignacion_referencia'],
+                ]);
+
+                Notification::make()
+                    ->title('Cierre registrado')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    public static function actionRevirtirMarcaCierre()
+    {
+        return Action::make('revertir_hito')
+            ->label('Revertir Corte')
+            ->icon(Heroicon::OutlinedArrowPath)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('¿Eliminar hito de control?')
+            ->modalDescription('Esta acción quitará la marca de asignación. El registro volverá a ser un movimiento estándar.')
+            // LÓGICA DE VISIBILIDAD PARA REVERTIR
+            ->visible(function ($record) {
+                // Solo es visible si el registro YA tiene una asignación marcada
+                return filled($record->asignacion_referencia);
+            })
+            ->action(function ($record): void {
+                $record->update([
+                    'asignacion_referencia' => null,
+                ]);
+
+                Notification::make()
+                    ->title('Hito eliminado')
+                    ->body('El registro ya no cuenta como cierre de asignación.')
+                    ->warning()
+                    ->send();
+            });
     }
 }

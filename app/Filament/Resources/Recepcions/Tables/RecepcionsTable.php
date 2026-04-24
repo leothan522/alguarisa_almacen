@@ -463,11 +463,11 @@ class RecepcionsTable
         return isAdmin() || auth()->user()->hasRole('almacen');
     }
 
-    public static function actionExportExcel()
+    public static function actionExportExcel($name = 'recepciones')
     {
         return ExportBulkAction::make()->exports([
             ExcelExport::make()
-                ->withFilename('recepciones-export')
+                ->withFilename($name.'-export')
                 ->withColumns([
                     Column::make('fecha')
                         ->heading('FECHA')

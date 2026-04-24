@@ -117,6 +117,7 @@ class AjusteEntradasTable
                     ->visibleFrom('md'),
             ])
             ->filters([
+                RecepcionsTable::filterMes(),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -146,7 +147,7 @@ class AjusteEntradasTable
                     RestoreBulkAction::make()
                         ->authorizeIndividualRecords('restore'),
                 ]),
-                RecepcionsTable::actionExportExcel(),
+                RecepcionsTable::actionExportExcel('ajustes-entrada'),
                 Action::make('actualizar')
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),

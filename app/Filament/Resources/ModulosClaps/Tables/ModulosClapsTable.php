@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ModulosClaps\Tables;
 
 use App\Filament\Resources\BodegaMovils\Tables\BodegaMovilsTable;
+use App\Filament\Resources\Recepcions\Tables\RecepcionsTable;
 use App\Models\Despacho;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -122,6 +123,7 @@ class ModulosClapsTable
                     ->visibleFrom('md'),
             ])
             ->filters([
+                RecepcionsTable::filterMes(),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -149,6 +151,7 @@ class ModulosClapsTable
                     RestoreBulkAction::make()
                         ->authorizeIndividualRecords('restore'),
                 ]),
+                BodegaMovilsTable::actionExportExcel('modulo-clap'),
                 Action::make('actualizar')
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),

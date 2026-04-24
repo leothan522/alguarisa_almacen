@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BodegaMovils\Tables;
 
+use App\Filament\Resources\Recepcions\Tables\RecepcionsTable;
 use App\Models\Despacho;
 use App\Models\Detalle;
 use App\Models\Rubro;
@@ -39,6 +40,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class BodegaMovilsTable
 {
@@ -141,6 +146,7 @@ class BodegaMovilsTable
                     ->visibleFrom('md'),
             ])
             ->filters([
+                RecepcionsTable::filterMes(),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -178,6 +184,7 @@ class BodegaMovilsTable
                     RestoreBulkAction::make()
                         ->authorizeIndividualRecords('restore'),
                 ]),
+                self::actionExportExcel(),
                 Action::make('actualizar')
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),
@@ -545,5 +552,52 @@ class BodegaMovilsTable
                     ->warning()
                     ->send();
             });
+    }
+
+    public static function actionExportExcel($name = 'bodega-movil')
+    {
+        return ExportBulkAction::make()->exports([
+            ExcelExport::make()
+                ->withFilename($name.'-export')
+                ->withColumns([
+                    Column::make('fecha')
+                        ->heading('FECHA')
+                        ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('d/m/Y'))
+                        ->format(NumberFormat::FORMAT_DATE_DDMMYYYY),
+                    Column::make('hora')
+                        ->heading('Hora')
+                        ->formatStateUsing(fn ($state) => Carbon::parse($state)->translatedFormat('h:i a'))
+                        ->format(NumberFormat::FORMAT_DATE_TIME1),
+                    Column::make('numero')
+                        ->heading('NÚMERO')
+                        // ->formatStateUsing(fn($state) => '="' . $state . '"')
+                        ->format(NumberFormat::FORMAT_TEXT),
+                    Column::make('plan.nombre')
+                        ->heading('PLAN'),
+                    Column::make('responsables_nombre')
+                        ->heading('RECIBE')
+                        ->formatStateUsing(fn ($state) => Str::upper($state)),
+                    Column::make('responsables_cedula')
+                        ->heading('CÉDULA')
+                        ->format(NumberFormat::FORMAT_NUMBER),
+                    Column::make('responsables_telefono')
+                        ->heading('TELÉFONO')
+                        ->format(NumberFormat::FORMAT_TEXT),
+                    /*Column::make('is_sealed')
+                        ->heading('ESTATUS')
+                        ->formatStateUsing(fn (Recepcion $record) => match (self::getEstatus($record)) {
+                            'is_sealed' => 'VALIDADA',
+                            'is_complete' => 'COMPLETA',
+                            default => 'PENDIENTE'
+                        }),*/
+                    Column::make('total_unidades')
+                        ->heading('UNIDADES')
+                        ->format(NumberFormat::FORMAT_NUMBER),
+                    Column::make('total_peso')
+                        ->heading('PESO TOTAL (KG)')
+                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                ])
+                ->modifyQueryUsing(fn (Builder $query) => $query->with('detalles')->orderBy('fecha')),
+        ]);
     }
 }

@@ -204,4 +204,15 @@ class Despacho extends Model
             ->filter(fn ($item) => $item['cantidad'] > 0)
             ->map(fn ($item) => (object) $item);
     }
+
+    public function getTotalUnidadesAttribute()
+    {
+        // Asegúrate de que 'items' sea el nombre exacto de la relación
+        return $this->detalles()->sum('cantidad_unidades');
+    }
+
+    public function getTotalPesoAttribute()
+    {
+        return $this->detalles()->sum('total');
+    }
 }

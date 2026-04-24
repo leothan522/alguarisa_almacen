@@ -127,6 +127,7 @@ class AjusteSalidasTable
                     ->visibleFrom('md'),
             ])
             ->filters([
+                RecepcionsTable::filterMes(),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -156,6 +157,7 @@ class AjusteSalidasTable
                     RestoreBulkAction::make()
                         ->authorizeIndividualRecords('restore'),
                 ]),
+                BodegaMovilsTable::actionExportExcel('ajustes-salida'),
                 Action::make('actualizar')
                     ->icon(Heroicon::ArrowPath)
                     ->iconButton(),

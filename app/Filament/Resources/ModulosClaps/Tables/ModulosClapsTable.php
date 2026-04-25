@@ -34,7 +34,13 @@ class ModulosClapsTable
                 TextColumn::make('recepcion')
                     ->label('Fecha')
                     ->default(fn (Despacho $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
-                    ->description(fn (Despacho $record): string => $record->plan->nombre)
+                    ->description(function (Despacho $record): string {
+                        if ($record->asignacion_referencia) {
+                            return '🚩 '.$record->plan->nombre;
+                        }
+
+                        return $record->plan->nombre;
+                    })
                     ->hiddenFrom('md')
                     ->icon(fn (Despacho $record): Heroicon => match (BodegaMovilsTable::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
@@ -143,7 +149,7 @@ class ModulosClapsTable
                     EditAction::make(),
                     DeleteAction::make()
                         ->visible(fn (Despacho $record): bool => $record->is_merma),
-                    RecepcionsTable::actionMarcarCierre(),
+                    RecepcionsTable::actionMarcarCierre('MC'),
                     RecepcionsTable::actionRevirtirMarcaCierre(),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {

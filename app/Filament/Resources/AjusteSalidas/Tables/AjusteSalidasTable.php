@@ -38,7 +38,12 @@ class AjusteSalidasTable
                 TextColumn::make('recepcion')
                     ->label('Fecha')
                     ->default(fn (Despacho $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
-                    ->description(fn (Despacho $record): string => $record->plan->nombre)
+                    ->description(function (Despacho $record): string{
+                        if ($record->asignacion_referencia) {
+                            return '🚩 '. $record->plan->nombre;
+                        }
+                        return $record->plan->nombre;
+                    })
                     ->hiddenFrom('md')
                     ->icon(fn (Despacho $record): Heroicon => match (self::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
@@ -149,7 +154,7 @@ class AjusteSalidasTable
                     self::actionRevertirValidacion(),
                     BodegaMovilsTable::actionRevertirExpediente(),
                     EditAction::make(),
-                    RecepcionsTable::actionMarcarCierre(),
+                    RecepcionsTable::actionMarcarCierre('AJUSTE'),
                     RecepcionsTable::actionRevirtirMarcaCierre(),
                     RestoreAction::make()
                         ->before(function (Despacho $record) {

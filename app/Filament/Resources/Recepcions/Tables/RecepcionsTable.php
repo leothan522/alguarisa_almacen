@@ -48,7 +48,13 @@ class RecepcionsTable
                 TextColumn::make('recepcion')
                     ->label('Fecha')
                     ->default(fn (Recepcion $record): string => Carbon::parse($record->fecha)->translatedFormat('M d, Y'))
-                    ->description(fn (Recepcion $record): string => $record->plan->nombre)
+                    ->description(function (Recepcion $record): string {
+                        if ($record->asignacion_referencia) {
+                            return '🚩 '.$record->plan->nombre;
+                        }
+
+                        return $record->plan->nombre;
+                    })
                     ->hiddenFrom('md')
                     ->icon(fn (Recepcion $record): Heroicon => match (self::getEstatus($record)) {
                         'is_complete' => Heroicon::OutlinedDocumentCheck,
@@ -592,14 +598,46 @@ class RecepcionsTable
         return Merma::where('recepciones_id', $record->id)->exists();
     }
 
-    public static function actionMarcarCierre()
+    public static function actionMarcarCierre(?string $codigoPlan = null)
     {
         return Action::make('marcar_cierre')
             ->label('Marcar como Último')
             ->icon(Heroicon::OutlinedFlag)
             ->color('info')
             // LÓGICA DE VISIBILIDAD
-            ->visible(function ($record) {
+            ->visible(function ($record) use ($codigoPlan) {
+                if (! $record->is_complete || filled($record->asignacion_referencia) || ! self::isVisible()) {
+                    return false;
+                }
+
+                // Iniciamos la consulta limpia
+                $query = $record::query();
+
+                // REPLICAMOS LA LÓGICA DE TUS ESPEJOS
+                if ($codigoPlan === 'MC') {
+                    $query->whereRelation('plan', 'codigo', 'MC')->where('is_return', false)->where('is_adjustment', false);
+                } elseif ($codigoPlan === 'AJUSTE') {
+                    $query->where('is_adjustment', true);
+                } else {
+                    // Por defecto para Recepciones
+                    $query->where('is_adjustment', false);
+                }
+
+                // Validamos registros cronológicamente superiores
+                $existeHitoPosterior = $query
+                    ->where(function ($q) use ($record) {
+                        $q->where('fecha', '>', $record->fecha)
+                            ->orWhere(function ($sq) use ($record) {
+                                $sq->where('fecha', $record->fecha)
+                                    ->where('hora', '>', $record->hora);
+                            });
+                    })
+                    ->whereNotNull('asignacion_referencia')
+                    ->exists();
+
+                return ! $existeHitoPosterior;
+            })
+            /*->visible(function ($record) {
                 // 1. Debe estar completado (is_complete es true)
                 if (! $record->is_complete) {
                     return false;
@@ -617,7 +655,7 @@ class RecepcionsTable
                     ->exists();
 
                 return ! $existeHitoPosterior && self::isVisible();
-            })
+            })*/
             ->modalWidth(Width::Small)
             ->modalHeading('Finalizar Asignación Actual')
             ->modalDescription('Este registro se marcará como el último de la distribución.')

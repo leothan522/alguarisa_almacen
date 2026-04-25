@@ -596,6 +596,9 @@ class BodegaMovilsTable
                     Column::make('total_peso')
                         ->heading('PESO TOTAL (KG)')
                         ->format(NumberFormat::FORMAT_NUMBER_00),
+                    Column::make('asignacion_referencia')
+                        ->heading('ASIGNACIÓN REFERENCIA')
+                        ->formatStateUsing(fn(Despacho $record):?string => $record->asignacion_referencia ? 'CORTE: '.Str::upper($record->asignacion_referencia) : null)
                 ])
                 ->modifyQueryUsing(fn (Builder $query) => $query->with('detalles')->orderBy('fecha')),
         ]);

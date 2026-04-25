@@ -616,7 +616,7 @@ class RecepcionsTable
                     ->whereNotNull('asignacion_referencia')
                     ->exists();
 
-                return ! $existeHitoPosterior;
+                return ! $existeHitoPosterior && self::isVisible();
             })
             ->modalWidth(Width::Small)
             ->modalHeading('Finalizar Asignación Actual')
@@ -651,7 +651,7 @@ class RecepcionsTable
             // LÓGICA DE VISIBILIDAD PARA REVERTIR
             ->visible(function ($record) {
                 // Solo es visible si el registro YA tiene una asignación marcada
-                return filled($record->asignacion_referencia);
+                return filled($record->asignacion_referencia) && self::isVisible();
             })
             ->action(function ($record): void {
                 $record->update([

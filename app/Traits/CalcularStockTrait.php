@@ -28,6 +28,8 @@ trait CalcularStockTrait
 
     public bool $noExiste = false;
 
+    public mixed $bolsas = null;
+
     public function calcularStock(): void
     {
         // 1. Buscamos el Plan por su código interno y el Almacén principal
@@ -51,6 +53,13 @@ trait CalcularStockTrait
         // Calculamos el total de unidades físicas para el plan
         $this->cantidadAsignacion = $query->sum('asignacion_cantidad') - $query->sum('despacho_asignacion_cantidad');
         $this->cantidadPropia = $query->sum('propia_cantidad') - $query->sum('despacho_propia_cantidad');
+
+        if ($this->codigoPlan = 'MC') {
+            $bolsas = $query->where('rubros_id', 3)->first();
+            if ($bolsas) {
+                $this->bolsas = $bolsas->stock_cantidad;
+            }
+        }
 
     }
 }

@@ -31,7 +31,7 @@ class StockModulosClapOverview extends StatsOverviewWidget
 
         return [
             // Stat Principal con el nombre del Plan y el del Almacén
-            Stat::make($this->plan->nombre ?? '', formatoMillares($this->unidadesTotales, 0).' '.($this->plan->unidad_medida ?? 'UND'))
+            Stat::make($this->plan->nombre ?? '', formatoMillares($this->bolsas, 0).' '.($this->plan->unidad_medida ?? 'UND'))
                 ->description("{$this->almacen->nombre}")
                 ->descriptionIcon(Heroicon::OutlinedHome)
                 ->color('primary')

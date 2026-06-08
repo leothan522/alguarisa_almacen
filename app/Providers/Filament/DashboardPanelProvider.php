@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use Hammadzafar05\MobileBottomNav\MobileBottomNav;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -86,7 +87,11 @@ class DashboardPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn (): string => view('filament.loader-html')
-            );
+            )
+            ->plugins([
+                MobileBottomNav::make()
+                    ->moreButtonLabel('Más'),
+            ]);
     }
 
     protected function widget(): array

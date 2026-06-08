@@ -90,7 +90,8 @@ class DashboardPanelProvider extends PanelProvider
             )
             ->plugins([
                 MobileBottomNav::make()
-                    ->moreButtonLabel('Más'),
+                    ->moreButtonLabel('Más')
+                    ->fromNavigation(5),
             ]);
     }
 

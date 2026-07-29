@@ -42,6 +42,7 @@ class MovimientosRubroExport implements FromCollection, ShouldAutoSize, WithHead
             ->map(function ($item) {
                 return [
                     'fecha' => $item->recepcion->fecha,
+                    'plan' => $item->recepcion->plan->nombre,
                     'documento' => 'RECEPCIÓN #'.$item->recepcion->numero,
                     'tipo_movimiento' => 'ENTRADA',
                     'tipo_adquisicion' => strtoupper($item->tipo_adquisicion),
@@ -67,6 +68,7 @@ class MovimientosRubroExport implements FromCollection, ShouldAutoSize, WithHead
 
                 return [
                     'fecha' => $detalle->despacho->fecha,
+                    'plan' => $detalle->despacho->plan->nombre,
                     'documento' => ($esDevolucion ? 'DEVOLUCIÓN #' : 'DESPACHO #').$detalle->despacho->numero,
                     'tipo_movimiento' => $esDevolucion ? 'DEVOLUCIÓN (ENTRADA)' : 'SALIDA',
                     'tipo_adquisicion' => strtoupper($detalle->tipo_adquisicion),
@@ -84,6 +86,7 @@ class MovimientosRubroExport implements FromCollection, ShouldAutoSize, WithHead
     {
         return [
             'Fecha',
+            'Plan',
             'Documento / Referencia',
             'Tipo Movimiento',
             'Tipo Adquisición',
@@ -99,6 +102,7 @@ class MovimientosRubroExport implements FromCollection, ShouldAutoSize, WithHead
         return [
             // Si viene como string o Carbon, nos aseguramos del formato de fecha d/m/Y
             Carbon::parse($movimiento['fecha'])->format('d/m/Y'),
+            $movimiento['plan'],
             $movimiento['documento'],
             $movimiento['tipo_movimiento'],
             $movimiento['tipo_adquisicion'],

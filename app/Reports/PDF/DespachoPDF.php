@@ -69,7 +69,7 @@ class DespachoPDF extends InventarioReport
         $this->SetY(228);
         $this->Line(10, 228, 150, 228);
         $this->SetFont('Times', 'B', 9);
-        $this->Cell(140, 10, 'AUTORIZADO POR: HUMBERTO ALBANI', 1, 1, 'C');
+        $this->Cell(140, 10, 'AUTORIZADO POR: SAYMAR PETTI', 1, 1, 'C');
         $this->SetFont('Times', '', 6);
         $this->Cell(47, 3, 'NOMBRE - FIRMA - CEDULA', 0, 0, 'C');
         $this->Cell(46, 3, 'NOMBRE - FIRMA - CEDULA', 0, 0, 'C');

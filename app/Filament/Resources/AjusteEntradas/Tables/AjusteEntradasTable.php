@@ -77,24 +77,34 @@ class AjusteEntradasTable
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
-                    ->label('Peso Total')
-                    ->default(fn (Recepcion $record) => round($record->items()->sum('total'), 3))
+                    ->label('Peso Total (TN)')
+                    ->default(function (Recepcion $record) {
+                        // Obtenemos la suma de los items en KG y la dividimos entre 1000
+                        $totalKg = $record->items_sum_total ?? $record->items()->sum('total');
+
+                        return $totalKg ? ($totalKg / 1000) : 0;
+                    })
                     ->description(fn (Recepcion $record): string => formatoMillares($record->items()->sum('cantidad_unidades'), 0).' UND')
                     ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
-                    ->suffix(' KG')
+                    ->suffix(' TN')
                     ->alignEnd()
                     ->hiddenFrom('md'),
                 TextColumn::make('items_sum_total')
-                    ->label('Peso Total')
-                    ->sum('items', 'total')
+                    ->label('Peso Total (TN)')
+                    ->state(function (Recepcion $record) {
+                        // Obtenemos la suma de los items en KG y la dividimos entre 1000
+                        $totalKg = $record->items_sum_total ?? $record->items()->sum('total');
+
+                        return $totalKg ? ($totalKg / 1000) : 0;
+                    })
                     ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
-                    ->suffix(' KG')
+                    ->suffix(' TN')
                     ->alignEnd()
                     ->visibleFrom('md'),
                 IconColumn::make('estatus')

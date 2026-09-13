@@ -114,7 +114,8 @@ class StockResource extends Resource
                                     ->numeric()
                                     ->alignCenter()
                                     ->size(TextSize::Large)
-                                    ->weight(FontWeight::Bold),
+                                    ->weight(FontWeight::Bold)
+                                    ->color('info'),
                                 TextEntry::make('full_asignacion')
                                     ->label('Peso Total Asignación')
                                     ->numeric(decimalPlaces: 3)
@@ -135,7 +136,8 @@ class StockResource extends Resource
                                     ->numeric()
                                     ->alignCenter()
                                     ->size(TextSize::Large)
-                                    ->weight(FontWeight::Bold),
+                                    ->weight(FontWeight::Bold)
+                                    ->color('success'),
                                 TextEntry::make('full_propia')
                                     ->label('Peso Total Propio')
                                     ->numeric(decimalPlaces: 3)
@@ -188,7 +190,7 @@ class StockResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->where('stock_total', '>', 0))
             ->recordTitleAttribute('rubros_id')
             ->columns([
-                TextColumn::make('rubro_movil')
+                /*TextColumn::make('rubro_movil')
                     ->label('Rubro')
                     ->default(fn (Stock $record): string => Str::upper($record->rubro->nombre))
                     ->description(fn (Stock $record): string => $record->plan->nombre)
@@ -240,6 +242,81 @@ class StockResource extends Resource
                     ->color('violet')
                     ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
                     ->sortable()
+                    ->alignCenter()
+                    ->visibleFrom('md'),*/
+
+                // --- VISTA MÓVIL (SÓLO SMARTPHONES) ---
+                TextColumn::make('rubro_movil')
+                    ->label('Rubro / Plan')
+                    ->default(fn (Stock $record): string => Str::upper($record->rubro->nombre))
+                    ->description(fn (Stock $record): string => $record->plan->nombre)
+                    ->wrap()
+                    ->hiddenFrom('md'),
+
+                TextColumn::make('total_movil')
+                    ->label('Peso Total')
+                    ->state(fn (Stock $record) => $record->stock_total / 1000) // Conversión a TN
+                    ->numeric(decimalPlaces: 3)
+                    ->suffix(' TN')
+                    ->description(fn (Stock $record): string => formatoMillares($record->stock_cantidad, 0).' UND')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Medium)
+                    ->color('violet')
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('stock_total', $direction))
+                    ->alignEnd()
+                    ->hiddenFrom('md'),
+
+                // --- VISTA ESCRITORIO (PANTALLAS MD O SUPERIORES) ---
+                TextColumn::make('plan.nombre')
+                    ->label('Plan')
+                    ->searchable()
+                    ->sortable()
+                    ->visibleFrom('md'),
+
+                TextColumn::make('rubro.nombre')
+                    ->label('Rubro')
+                    ->formatStateUsing(fn (Stock $record): string => Str::upper($record->rubro->nombre))
+                    ->searchable()
+                    ->sortable()
+                    ->visibleFrom('md'),
+
+                // Unidades por Asignación (Institucional)
+                TextColumn::make('und_asignacion') // Asegúrate de usar el atributo/relación correspondiente a las unidades
+                ->label('Asig. (UND)')
+                    ->default(fn (Stock $record) => $record->und_asignacion ?? 0)
+                    ->numeric()
+                    ->alignEnd()
+                    ->color('info')
+                    ->visibleFrom('md'),
+
+                // Unidades Propias (Comercial / Compra Directa)
+                TextColumn::make('und_propia') // Asegúrate de usar el atributo/relación correspondiente a las unidades
+                ->label('Propio (UND)')
+                    ->default(fn (Stock $record) => $record->cantidad_propia ?? 0)
+                    ->numeric()
+                    ->alignEnd()
+                    ->color('success')
+                    ->visibleFrom('md'),
+
+                // Totales Unidades
+                TextColumn::make('stock_cantidad')
+                    ->label('Total Unidades')
+                    ->numeric()
+                    ->suffix(' UND')
+                    ->weight(FontWeight::SemiBold)
+                    ->alignEnd()
+                    ->visibleFrom('md'),
+
+                // Peso Total transformado a Toneladas (TN)
+                TextColumn::make('stock_total_toneladas')
+                    ->label('Peso Total (TN)')
+                    ->state(fn (Stock $record) => $record->stock_total / 1000)
+                    ->numeric(decimalPlaces: 3)
+                    ->suffix(' TN')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Medium)
+                    ->color('violet')
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('stock_total', $direction))
                     ->alignCenter()
                     ->visibleFrom('md'),
             ])

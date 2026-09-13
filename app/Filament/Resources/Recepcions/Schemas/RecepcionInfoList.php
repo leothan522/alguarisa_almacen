@@ -54,8 +54,13 @@ class RecepcionInfoList
                             ->weight(FontWeight::Bold)
                             ->copyable(),
                         TextEntry::make('total')
-                            ->label('Recepción Total')
-                            ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total'), 3).' KG')
+                            ->label('Peso Total (TN)')
+                            ->default(function (Recepcion $record): string {
+                                $totalKg = $record->items->sum('total');
+                                $totalTn = $totalKg / 1000;
+
+                                return formatoMillares($totalTn, 3).' TN';
+                            })
                             ->color('primary')
                             ->size(TextSize::Large)
                             ->weight(FontWeight::ExtraBold)
@@ -70,7 +75,7 @@ class RecepcionInfoList
                             ->visible(fn (Recepcion $record): bool => self::exiteMerma($record)),
                         TextEntry::make('totalGuia')
                             ->label('Total Guía')
-                            ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total') + $record->mermas->sum('total')).' KG')
+                            ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total') + $record->mermas->sum('total'), 3).' KG')
                             ->color('primary')
                             ->size(TextSize::Large)
                             ->weight(FontWeight::ExtraBold)

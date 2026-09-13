@@ -103,24 +103,34 @@ class AjusteSalidasTable
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
-                    ->label('Peso Total')
-                    ->default(fn (Despacho $record) => $record->detalles()->sum('total'))
+                    ->label('Peso Total (TN)')
+                    ->default(function (Despacho $record) {
+                        // Obtenemos la suma de los items en KG y la dividimos entre 1000
+                        $totalKg = $record->detalles_sum_total ?? $record->detalles()->sum('total');
+
+                        return $totalKg ? ($totalKg / 1000) : 0;
+                    })
                     ->description(fn (Despacho $record): string => $record->is_merma ? 'MERMA' : formatoMillares($record->detalles()->sum('cantidad_unidades'), 0).' UND')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
-                    ->suffix(' KG')
+                    ->suffix(' TN')
                     ->alignEnd()
                     ->hiddenFrom('md'),
                 TextColumn::make('detalles_sum_total')
-                    ->label('Peso Total')
-                    ->sum('detalles', 'total')
-                    ->numeric(decimalPlaces: 2)
+                    ->label('Peso Total (TN)')
+                    ->state(function (Despacho $record) {
+                        // Obtenemos la suma de los items en KG y la dividimos entre 1000
+                        $totalKg = $record->detalles_sum_total ?? $record->detalles()->sum('total');
+
+                        return $totalKg ? ($totalKg / 1000) : 0;
+                    })
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
-                    ->suffix(' KG')
+                    ->suffix(' TN')
                     ->alignEnd()
                     ->visibleFrom('md'),
                 IconColumn::make('estatus')

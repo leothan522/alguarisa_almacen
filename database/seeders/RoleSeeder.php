@@ -20,5 +20,10 @@ class RoleSeeder extends Seeder
         Role::create([
             'name' => 'almacen',
         ]);
+
+        Role::create([
+            'name' => 'Bodega Movil',
+        ]);
+
     }
 }

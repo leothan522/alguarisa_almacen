@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AlmacenSeeder::class,
             PlanSeeder::class,
             JefeSeeder::class,
+            CargaInicialSeeder::class,
         ]);
     }
 }

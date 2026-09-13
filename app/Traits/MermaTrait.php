@@ -30,6 +30,7 @@ trait MermaTrait
         return Action::make('merma-sacar')
             ->label('Despachar Merma')
             ->color('gray')
+            ->visible(fn (): bool => isAdmin() || auth()->user()->hasRole('almacen'))
             ->schema([
                 DatePicker::make('fecha')
                     ->default(now())

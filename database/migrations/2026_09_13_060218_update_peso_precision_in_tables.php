@@ -12,31 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('despachos_detalles', function (Blueprint $table) {
-            $table->decimal('peso_unitario', 12, 3)->change();
-            $table->decimal('total', 12, 3)->change();
+            $table->decimal('peso_unitario', 12, 3)->nullable()->change();
+            $table->decimal('total', 12, 3)->nullable()->change();
         });
 
         Schema::table('recepciones_items', function (Blueprint $table) {
-            $table->decimal('peso_unitario', 12, 3)->change();
-            $table->decimal('total', 12, 3)->change();
+            $table->decimal('peso_unitario', 12, 3)->nullable()->change();
+            $table->decimal('total', 12, 3)->nullable()->change();
         });
 
         Schema::table('recepciones_mermas', function (Blueprint $table) {
-            $table->decimal('total', 12, 3)->change();
+            $table->decimal('total', 12, 3)->nullable()->change();
         });
 
         Schema::table('rubros', function (Blueprint $table) {
-            $table->decimal('peso_unitario', 12, 3)->change();
+            $table->decimal('peso_unitario', 12, 3)->nullable()->change();
         });
 
         Schema::table('stocks', function (Blueprint $table) {
-            $table->decimal('asignacion_total', 12, 3)->change();
-            $table->decimal('propia_total', 12, 3)->change();
-            $table->decimal('total', 12, 3)->change();
-            $table->decimal('despacho_asignacion_total', 12, 3)->change();
-            $table->decimal('despacho_propia_total', 12, 3)->change();
-            $table->decimal('despacho_total', 12, 3)->change();
-            $table->decimal('stock_total', 12, 3)->change();
+            $table->decimal('asignacion_total', 12, 3)->nullable()->change();
+            $table->decimal('propia_total', 12, 3)->nullable()->change();
+            $table->decimal('total', 12, 3)->nullable()->change();
+            $table->decimal('despacho_asignacion_total', 12, 3)->nullable()->change();
+            $table->decimal('despacho_propia_total', 12, 3)->nullable()->change();
+            $table->decimal('despacho_total', 12, 3)->nullable()->change();
+            $table->decimal('stock_total', 12, 3)->nullable()->change();
         });
 
     }

@@ -110,9 +110,9 @@ class BodegaMovilsTable
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
                     ->label('Peso Total')
-                    ->default(fn (Despacho $record) => $record->detalles()->sum('total'))
+                    ->default(fn (Despacho $record) => round($record->detalles()->sum('total'), 3))
                     ->description(fn (Despacho $record): string => $record->is_merma ? 'MERMA' : formatoMillares($record->detalles()->sum('cantidad_unidades'), 0).' UND')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
@@ -122,7 +122,7 @@ class BodegaMovilsTable
                 TextColumn::make('detalles_sum_total')
                     ->label('Peso Total')
                     ->sum('detalles', 'total')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
@@ -402,17 +402,17 @@ class BodegaMovilsTable
                         TextInput::make('peso_unitario')
                             ->label('Peso Unitario')
                             ->numeric()
-                            ->step(0.01)
+                            ->step(0.001)
                             ->required()
                             ->live(onBlur: true)
                             ->suffix(function (Get $get, Set $set): string {
-                                $cantidad = $get('cantidad_unidades');
-                                $peso = $get('peso_unitario');
-                                $total = round($cantidad * $peso, 2);
+                                $cantidad = (float) $get('cantidad_unidades');
+                                $peso = (float) $get('peso_unitario');
+                                $total = round($cantidad * $peso, 3);
                                 $set('total', $total);
                                 $unidad = $get('rubros_unidad_medida') ?? 'KG';
 
-                                return 'Total: '.formatoMillares($total).' '.$unidad;
+                                return 'Total: '.formatoMillares($total, 3).' '.$unidad;
                             })
                             ->rules(fn (Get $get, Despacho $record): array => [
                                 function ($attribute, $value, $fail) use ($get, $record) {
@@ -437,7 +437,7 @@ class BodegaMovilsTable
                                     $disponibleParaDevolver = $original - $yaDevuelto;
 
                                     if ($total > $disponibleParaDevolver) {
-                                        $label = formatoMillares($disponibleParaDevolver);
+                                        $label = formatoMillares($disponibleParaDevolver, 3);
                                         $fail("El peso máximo para devolver es: {$label}");
                                     }
                                 },
@@ -495,12 +495,15 @@ class BodegaMovilsTable
                     ->send();
 
             })
-            ->visible(fn() => self::isVisible())
+            ->visible(fn () => self::isVisible())
             ->hidden(fn (Despacho $record): bool => self::existeDevolucion($record) || $record->is_complete || $record->is_merma);
     }
 
     protected static function existeDevolucion(Despacho $record): bool
     {
+        if ($record->relationLoaded('devoluciones')) {
+            return $record->devoluciones->isNotEmpty();
+        }
         return $record->devoluciones()->exists();
     }
 
@@ -595,10 +598,10 @@ class BodegaMovilsTable
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('total_peso')
                         ->heading('PESO TOTAL (KG)')
-                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                        ->format('0.000'),
                     Column::make('asignacion_referencia')
                         ->heading('ASIGNACIÓN REFERENCIA')
-                        ->formatStateUsing(fn(Despacho $record):?string => $record->asignacion_referencia ? 'CORTE: '.Str::upper($record->asignacion_referencia) : null)
+                        ->formatStateUsing(fn (Despacho $record): ?string => $record->asignacion_referencia ? 'CORTE: '.Str::upper($record->asignacion_referencia) : null),
                 ])
                 ->modifyQueryUsing(fn (Builder $query) => $query->with('detalles')->orderBy('fecha')),
         ]);

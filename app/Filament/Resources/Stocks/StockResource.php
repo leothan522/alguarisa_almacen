@@ -59,7 +59,7 @@ class StockResource extends Resource
         return [
             'Plan' => $record->plan->nombre,
             'Cant' => formatoMillares($record->asignacion_cantidad + $record->propia_cantidad, 0).' UND',
-            'Total' => formatoMillares($record->total).' KG',
+            'Total' => formatoMillares($record->total, 3).' KG',
         ];
     }
 
@@ -117,7 +117,7 @@ class StockResource extends Resource
                                     ->weight(FontWeight::Bold),
                                 TextEntry::make('full_asignacion')
                                     ->label('Peso Total Asignación')
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric(decimalPlaces: 3)
                                     ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
                                     ->alignCenter()
                                     ->size(TextSize::Large)
@@ -138,7 +138,7 @@ class StockResource extends Resource
                                     ->weight(FontWeight::Bold),
                                 TextEntry::make('full_propia')
                                     ->label('Peso Total Propio')
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric(decimalPlaces: 3)
                                     ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
                                     ->alignCenter()
                                     ->size(TextSize::Large)
@@ -166,7 +166,7 @@ class StockResource extends Resource
                                 // TOTAL PESO (Tu dato estrella)
                                 TextEntry::make('stock_total')
                                     ->label('PESO TOTAL')
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric(decimalPlaces: 3)
                                     ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
                                     ->color('violet') // Tu color insignia para el stock real
                                     ->weight(FontWeight::Black)
@@ -206,21 +206,18 @@ class StockResource extends Resource
                     ->default(fn (Stock $record): int => $record->stock_cantidad)
                     ->suffix(' UND')
                     ->numeric()
-                    //->sortable()
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('full_asignacion')
                     ->label('Asignación')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
-                    //->sortable()
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('full_propia')
                     ->label('Propio')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
-                    //->sortable()
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
@@ -230,14 +227,14 @@ class StockResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
                     ->sortable()
                     ->alignEnd()
                     ->hiddenFrom('md'),
                 TextColumn::make('stock_total')
                     ->label('Peso Total')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
@@ -301,19 +298,19 @@ class StockResource extends Resource
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('full_asignacion')
                         ->heading('ASIGNACIÓN (PESO)')
-                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                        ->format('0.000'),
                     Column::make('und_propia')
                         ->heading('PROPIO (UND)')
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('full_propia')
                         ->heading('PROPIO (PESO)')
-                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                        ->format('0.000'),
                     Column::make('stock_cantidad')
                         ->heading('TOTAL UNIDADES')
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('stock_total')
                         ->heading('PESO TOTAL')
-                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                        ->format('0.000'),
                 ]),
             // ->modifyQueryUsing(fn(Builder $query) => $query->with('items')->orderBy('fecha')),
         ]);

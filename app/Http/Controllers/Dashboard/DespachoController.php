@@ -118,15 +118,15 @@ class DespachoController extends Controller
             // Dibujamos los items actuales (hasta 10)
             foreach ($itemsPagina as $item) {
                 $tipo = $item->tipo == 'asignacion' ? 'ASIGNACIÓN' : Str::upper($item->tipo);
-                $peso_unitario = round($item->peso_total / $item->cantidad, 2);
+                $peso_unitario = round($item->peso_total / $item->cantidad, 3);
                 $pdf->SetFont('Times', 'B', 9);
                 $pdf->Cell(7, 10, verUtf8(++$num), 1, 0, 'C');
-                $pdf->Cell(35, 10, verUtf8($tipo), 1, 0, 'C');
-                $pdf->Cell(78, 10, verUtf8(Str::upper($item->nombre)), 1, 0, 'C');
+                $pdf->Cell(32, 10, verUtf8($tipo), 1, 0, 'C');
+                $pdf->Cell(73, 10, verUtf8(Str::upper($item->nombre)), 1, 0, 'C');
                 $pdf->SetFont('Times', 'B', 11);
-                $pdf->Cell(20, 10, verUtf8(formatoMillares($item->cantidad)), 1, 0, 'C');
-                $pdf->Cell(20, 10, verUtf8(formatoMillares($peso_unitario)), 1, 0, 'C');
-                $pdf->Cell(30, 10, verUtf8((formatoMillares($item->peso_total)).' '.$item->unidad), 1, 1, 'C');
+                $pdf->Cell(20, 10, verUtf8(formatoMillares($item->cantidad, 0)), 1, 0, 'C');
+                $pdf->Cell(28, 10, verUtf8(formatoMillares($peso_unitario,3).' '.$item->unidad), 1, 0, 'C');
+                $pdf->Cell(30, 10, verUtf8((formatoMillares($item->peso_total, 3)).' '.$item->unidad), 1, 1, 'C');
             }
 
             // --- RELLENO DE FILAS VACÍAS ---
@@ -147,25 +147,25 @@ class DespachoController extends Controller
     {
         $tipo = $item['tipo_adquisicion'] == 'asignacion' ? 'ASIGNACIÓN' : Str::upper($item['tipo_adquisicion']);
         $unidades = $item['cantidad_unidades'] ? formatoMillares($item['cantidad_unidades'], 0) : 'MERMA';
-        $peso_unitario = $item['cantidad_unidades'] ? formatoMillares($item['peso_unitario']) : '-';
+        $peso_unitario = $item['cantidad_unidades'] ? formatoMillares($item['peso_unitario'], 3).' '.$item['rubros_unidad_medida'] : '-';
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, verUtf8($num), 1, 0, 'C');
-        $pdf->Cell(35, 10, verUtf8($tipo), 1, 0, 'C');
-        $pdf->Cell(78, 10, verUtf8(Str::upper($item['rubros_nombre'])), 1, 0, 'C');
+        $pdf->Cell(32, 10, verUtf8($tipo), 1, 0, 'C');
+        $pdf->Cell(73, 10, verUtf8(Str::upper($item['rubros_nombre'])), 1, 0, 'C');
         $pdf->SetFont('Times', 'B', 11);
         $pdf->Cell(20, 10, verUtf8($unidades), 1, 0, 'C');
-        $pdf->Cell(20, 10, verUtf8($peso_unitario), 1, 0, 'C');
-        $pdf->Cell(30, 10, verUtf8((formatoMillares($item['total'])).' '.$item['rubros_unidad_medida']), 1, 1, 'C');
+        $pdf->Cell(28, 10, verUtf8($peso_unitario), 1, 0, 'C');
+        $pdf->Cell(30, 10, verUtf8((formatoMillares($item['total'], 3)).' '.$item['rubros_unidad_medida']), 1, 1, 'C');
     }
 
     private function dibujarFilaVacia($pdf, $num)
     {
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, $num, 1, 0, 'C');
-        $pdf->Cell(35, 10, '', 1, 0, 'C');
-        $pdf->Cell(78, 10, '', 1, 0, 'C');
+        $pdf->Cell(32, 10, '', 1, 0, 'C');
+        $pdf->Cell(73, 10, '', 1, 0, 'C');
         $pdf->Cell(20, 10, '', 1, 0, 'C');
-        $pdf->Cell(20, 10, '', 1, 0, 'C');
+        $pdf->Cell(28, 10, '', 1, 0, 'C');
         $pdf->Cell(30, 10, '', 1, 1, 'C');
     }
 }

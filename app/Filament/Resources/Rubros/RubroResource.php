@@ -57,7 +57,7 @@ class RubroResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Peso' => formatoMillares($record->peso_unitario).' '.$record->unidad_medida,
+            'Peso' => formatoMillares($record->peso_unitario, 3).' '.$record->unidad_medida,
         ];
     }
 
@@ -82,6 +82,7 @@ class RubroResource extends Resource
                 TextInput::make('peso_unitario')
                     ->label('Peso Unitario')
                     ->numeric()
+                    ->step('0.001')
                     ->required()
                     ->columnSpanFull(),
                 Select::make('unidad_medida')
@@ -108,12 +109,12 @@ class RubroResource extends Resource
                     ->label('Peso Unitario')
                     ->default(fn (Rubro $record) => $record->peso_unitario)
                     ->suffix(fn (Rubro $record): string => ' '.$record->unidad_medida)
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->alignEnd()
                     ->hiddenFrom('md'),
                 TextColumn::make('peso_unitario')
                     ->label('Peso Unitario')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->alignEnd()
                     ->visibleFrom('md'),
                 TextColumn::make('unidad_medida')
@@ -176,7 +177,8 @@ class RubroResource extends Resource
                         ->formatStateUsing(fn ($state) => Str::upper($state)),
                     Column::make('peso_unitario')
                         ->heading('PESO UNITARIO')
-                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                        //->format(NumberFormat::FORMAT_NUMBER_00),
+                        ->format('0.000'),
                     Column::make('unidad_medida')
                         ->heading('UNIDAD')
                         ->formatStateUsing(fn ($state) => Str::upper($state)),

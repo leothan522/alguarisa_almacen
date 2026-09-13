@@ -38,6 +38,17 @@ class Recepcion extends Model
         'asignacion_referencia',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'fecha' => 'date',
+            'is_sealed' => 'boolean',
+            'is_complete' => 'boolean',
+            'is_adjustment' => 'boolean',
+            'total_peso' => 'decimal:3', // Garantiza 3 decimales al acceder al atributo total_peso
+        ];
+    }
+
     public function almacen(): BelongsTo
     {
         return $this->belongsTo(Almacen::class, 'almacenes_id', 'id');
@@ -61,6 +72,11 @@ class Recepcion extends Model
     public function items(): HasMany
     {
         return $this->hasMany(Item::class, 'recepciones_id', 'id');
+    }
+
+    public function mermas(): HasMany
+    {
+        return $this->hasMany(Merma::class, 'recepciones_id', 'id');
     }
 
     public function sincronizarStock(?array $idsManuales = []): void
@@ -87,7 +103,7 @@ class Recepcion extends Model
                 'almacenes_id' => $this->almacenes_id ?? 1,
             ]);
 
-            // 1. Totales de Items
+            // 1. Totales de Items (usamos directamente la columna 'total' para mantener los 3 decimales exactos)
             $totalesItems = \DB::table('recepciones_items')
                 ->join('recepciones', 'recepciones_items.recepciones_id', '=', 'recepciones.id')
                 ->where('recepciones.planes_id', $this->planes_id)
@@ -95,9 +111,9 @@ class Recepcion extends Model
                 ->whereNull('recepciones.deleted_at')
                 ->selectRaw("
                 SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN cantidad_unidades ELSE 0 END) as asig_cant,
-                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as asig_peso,
+                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN total ELSE 0 END) as asig_peso,
                 SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN cantidad_unidades ELSE 0 END) as prop_cant,
-                SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as prop_peso
+                SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN total ELSE 0 END) as prop_peso
             ")
                 ->first();
 
@@ -115,9 +131,11 @@ class Recepcion extends Model
 
             $asigCant = $totalesItems->asig_cant ?? 0;
             $propCant = $totalesItems->prop_cant ?? 0;
-            $finalAsigPeso = ($totalesItems->asig_peso ?? 0) + ($totalesMermas->asig_merma ?? 0);
-            $finalPropPeso = ($totalesItems->prop_peso ?? 0) + ($totalesMermas->prop_merma ?? 0);
-            $totalEntradaPeso = $finalAsigPeso + $finalPropPeso;
+
+            // Redondeo explícito a 3 decimales para pesos acumulados
+            $finalAsigPeso = round((float) ($totalesItems->asig_peso ?? 0) + (float) ($totalesMermas->asig_merma ?? 0), 3);
+            $finalPropPeso = round((float) ($totalesItems->prop_peso ?? 0) + (float) ($totalesMermas->prop_merma ?? 0), 3);
+            $totalEntradaPeso = round($finalAsigPeso + $finalPropPeso, 3);
 
             $stock->update([
                 'asignacion_cantidad' => $asigCant,
@@ -128,7 +146,7 @@ class Recepcion extends Model
 
                 // BALANCE NETO: Entradas actuales - Despachos registrados
                 'stock_cantidad' => ($asigCant + $propCant) - ($stock->despacho_asignacion_cantidad + $stock->despacho_propia_cantidad),
-                'stock_total' => $totalEntradaPeso - ($stock->despacho_total ?? 0),
+                'stock_total' => round($totalEntradaPeso - (float) ($stock->despacho_total ?? 0), 3),
             ]);
         }
     }
@@ -141,11 +159,6 @@ class Recepcion extends Model
 
     public function getTotalPesoAttribute()
     {
-        return $this->items()->sum('total');
-    }
-
-    public function mermas(): HasMany
-    {
-        return $this->hasMany(Merma::class, 'recepciones_id', 'id');
+        return round((float) $this->items()->sum('total'), 3);
     }
 }

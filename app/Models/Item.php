@@ -22,6 +22,14 @@ class Item extends Model
         'tipo_adquisicion',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'peso_unitario' => 'decimal:3',
+            'total' => 'decimal:3',
+        ];
+    }
+
     public function recepcion(): BelongsTo
     {
         return $this->belongsTo(Recepcion::class, 'recepciones_id', 'id');

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Detalle extends Model
 {
     protected $table = 'despachos_detalles';
+
     protected $fillable = [
         'despachos_id',
         'rubros_id',
@@ -19,6 +20,14 @@ class Detalle extends Model
         'tipo_adquisicion',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'peso_unitario' => 'decimal:3',
+            'total' => 'decimal:3',
+        ];
+    }
+
     public function despacho(): BelongsTo
     {
         return $this->belongsTo(Despacho::class, 'despachos_id', 'id');
@@ -28,5 +37,4 @@ class Detalle extends Model
     {
         return $this->belongsTo(Rubro::class, 'rubros_id', 'id');
     }
-
 }

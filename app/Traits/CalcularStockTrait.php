@@ -32,7 +32,7 @@ trait CalcularStockTrait
 
     public function calcularStock(): void
     {
-        // 1. Buscamos el Plan por su código interno y el Almacén principal
+        /*// 1. Buscamos el Plan por su código interno y el Almacén principal
         $this->plan = Plan::where('codigo', $this->codigoPlan)->first();
         $this->almacen = Almacen::where('is_main', 1)->first();
 
@@ -56,6 +56,43 @@ trait CalcularStockTrait
 
         if ($this->codigoPlan = 'MC') {
             $bolsas = $query->where('rubros_id', 3)->first();
+            if ($bolsas) {
+                $this->bolsas = $bolsas->stock_cantidad;
+            }
+        }*/
+
+        // 1. Buscamos el Plan por su código interno y el Almacén principal
+        $this->plan = Plan::where('codigo', $this->codigoPlan)->first();
+        $this->almacen = Almacen::where('is_main', 1)->first();
+
+        // Si alguno no existe, marcamos la bandera y detenemos la ejecución de forma segura
+        if (! $this->plan || ! $this->almacen) {
+            $this->noExiste = true;
+
+            return;
+        }
+
+        $this->noExiste = false;
+
+        // 2. Base de la consulta de Stock para Almacén Principal + Plan seleccionado
+        $query = Stock::where('almacenes_id', $this->almacen->id)
+            ->where('planes_id', $this->plan->id);
+
+        // 3. Cálculos de totales generales (Unidades y Pesos)
+        $this->unidadesTotales = (clone $query)->sum('stock_cantidad');
+        $this->totalGeneral = (clone $query)->sum('stock_total');
+
+        // Totales desglosados (Pesos netos)
+        $this->totalAsignacion = (clone $query)->sum('asignacion_total') - (clone $query)->sum('despacho_asignacion_total');
+        $this->totalPropia = (clone $query)->sum('propia_total') - (clone $query)->sum('despacho_propia_total');
+
+        // Totales desglosados (Unidades físicas)
+        $this->cantidadAsignacion = (clone $query)->sum('asignacion_cantidad') - (clone $query)->sum('despacho_asignacion_cantidad');
+        $this->cantidadPropia = (clone $query)->sum('propia_cantidad') - (clone $query)->sum('despacho_propia_cantidad');
+
+        // 4. Lógica específica para Plan Módulos / combos ('MC')
+        if ($this->codigoPlan === 'MC') {
+            $bolsas = (clone $query)->where('rubros_id', 3)->first();
             if ($bolsas) {
                 $this->bolsas = $bolsas->stock_cantidad;
             }

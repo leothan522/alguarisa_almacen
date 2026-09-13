@@ -54,7 +54,7 @@ trait MermaTrait
                 TextInput::make('total')
                     ->label('Peso Total')
                     ->numeric()
-                    ->step(0.01)
+                    ->step(0.001)
                     ->required()
                     ->live(onBlur: true)
                     ->rules(self::rulesPeso()),
@@ -103,6 +103,7 @@ trait MermaTrait
                 $despacho->save();
 
                 $rubro = Rubro::find($data['rubros_id']);
+                $totalPeso = (float) $data['total'];
 
                 Detalle::create([
                     'despachos_id' => $despacho->id,
@@ -110,8 +111,8 @@ trait MermaTrait
                     'rubros_nombre' => $rubro->nombre,
                     'rubros_unidad_medida' => $rubro->unidad_medida,
                     'cantidad_unidades' => 0,
-                    'peso_unitario' => $data['total'],
-                    'total' => $data['total'],
+                    'peso_unitario' => $totalPeso,
+                    'total' => $totalPeso,
                     'tipo_adquisicion' => $data['tipo_adquisicion'],
                 ]);
                 $despacho->refresh();
@@ -159,7 +160,7 @@ trait MermaTrait
                 $almacenId = self::getAlmacen();
                 $planId = self::getPlan();
                 $tipoAdquisicion = $get('tipo_adquisicion');
-                $total = $get('total');
+                $total = (float) $get('total');
 
                 if (! $rubroId) {
                     return;
@@ -171,20 +172,20 @@ trait MermaTrait
                     ->where('almacenes_id', $almacenId)
                     ->first();
 
-                $disponible = 0.00; // Inicializamos como float
+                $disponible = 0.000; // Inicializamos como float
 
                 if ($stock) {
                     if ($tipoAdquisicion == 'asignacion') {
-                        // Calculamos y redondeamos a 2 decimales
-                        $disponible = round($stock->asignacion_total - $stock->despacho_asignacion_total, 2);
+                        // Calculamos y redondeamos a 3 decimales
+                        $disponible = round((float) $stock->asignacion_total - (float) $stock->despacho_asignacion_total, 3);
                     } else {
-                        $disponible = round($stock->propia_total - $stock->despacho_propia_total, 2);
+                        $disponible = round((float) $stock->propia_total - (float) $stock->despacho_propia_total, 3);
                     }
                 }
 
                 if ($total > $disponible) {
                     $unidad = $stock?->rubro?->unidad_medida ?? '';
-                    $disponibleFormateado = number_format($disponible, 2, ',', '.');
+                    $disponibleFormateado = number_format($disponible, 3, ',', '.');
 
                     $fail("Stock insuficiente. Hay {$disponibleFormateado} {$unidad} disponibles.");
                 }

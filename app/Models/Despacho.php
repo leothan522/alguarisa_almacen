@@ -41,6 +41,19 @@ class Despacho extends Model
         'asignacion_referencia',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'fecha' => 'date',
+            'is_merma' => 'boolean',
+            'is_return' => 'boolean',
+            'is_sealed' => 'boolean',
+            'is_complete' => 'boolean',
+            'is_adjustment' => 'boolean',
+            'total_peso' => 'decimal:3', // Garantiza 3 decimales al acceder al atributo total_peso
+        ];
+    }
+
     public function almacen(): BelongsTo
     {
         return $this->belongsTo(Almacen::class, 'almacenes_id', 'id');
@@ -100,18 +113,6 @@ class Despacho extends Model
                 ->where('despachos.planes_id', $this->planes_id)
                 ->where('despachos_detalles.rubros_id', $rubroId)
                 ->whereNull('despachos.deleted_at')
-                /*->selectRaw("
-                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN cantidad_unidades ELSE 0 END) as asig_cant,
-                SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as asig_peso,
-                SUM(CASE WHEN tipo_adquisicion = 'propia' THEN cantidad_unidades ELSE 0 END) as prop_cant,
-                SUM(CASE WHEN tipo_adquisicion = 'propia' THEN (cantidad_unidades * peso_unitario) ELSE 0 END) as prop_peso
-                ")*/
-                /*->selectRaw("
-                    SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN cantidad_unidades ELSE 0 END) as asig_cant,
-                    SUM(CASE WHEN tipo_adquisicion = 'asignacion' THEN total ELSE 0 END) as asig_peso,
-                    SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN cantidad_unidades ELSE 0 END) as prop_cant,
-                    SUM(CASE WHEN tipo_adquisicion != 'asignacion' THEN total ELSE 0 END) as prop_peso
-                ")*/
                 ->selectRaw("
                         SUM(CASE
                             WHEN tipo_adquisicion = 'asignacion'
@@ -132,33 +133,12 @@ class Despacho extends Model
                     ")
                 ->first();
 
-            /*$asigCant = $totalesDespacho->asig_cant ?? 0;
-            $asigPeso = $totalesDespacho->asig_peso ?? 0;
-            $propCant = $totalesDespacho->prop_cant ?? 0;
-            $propPeso = $totalesDespacho->prop_peso ?? 0;
-            $despachoPesoTotal = $asigPeso + $propPeso;
-
-            $factor = $this->is_return ? -1 : 1; // Si es devolución, multiplicamos por -1 para que la resta sea una suma
-
-            $stock->update([
-                'despacho_asignacion_cantidad' => $asigCant,
-                'despacho_asignacion_total' => $asigPeso,
-                'despacho_propia_cantidad' => $propCant,
-                'despacho_propia_total' => $propPeso,
-                'despacho_total' => $despachoPesoTotal,
-                // Recalcular el balance neto
-                //                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - ($asigCant + $propCant),
-                //                'stock_total' => $stock->total - $despachoPesoTotal,
-                'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - (($asigCant + $propCant) * $factor),
-                'stock_total' => $stock->total - ($despachoPesoTotal * $factor),
-            ]);*/
-
             $asigCant = $totalesDespacho->asig_cant ?? 0;
-            $asigPeso = $totalesDespacho->asig_peso ?? 0;
+            $asigPeso = round((float) ($totalesDespacho->asig_peso ?? 0), 3);
             $propCant = $totalesDespacho->prop_cant ?? 0;
-            $propPeso = $totalesDespacho->prop_peso ?? 0;
+            $propPeso = round((float) ($totalesDespacho->prop_peso ?? 0), 3);
 
-            $despachoPesoTotal = $asigPeso + $propPeso;
+            $despachoPesoTotal = round($asigPeso + $propPeso, 3);
             $despachoCantTotal = $asigCant + $propCant;
 
             // Actualizamos el stock
@@ -171,7 +151,7 @@ class Despacho extends Model
                 'despacho_propia_total' => $propPeso,
                 'despacho_total' => $despachoPesoTotal,
                 'stock_cantidad' => ($stock->asignacion_cantidad + $stock->propia_cantidad) - $despachoCantTotal,
-                'stock_total' => ($stock->asignacion_total + $stock->propia_total) - $despachoPesoTotal,
+                'stock_total' => round(((float) $stock->asignacion_total + (float) $stock->propia_total) - $despachoPesoTotal, 3),
             ]);
         }
     }
@@ -186,7 +166,7 @@ class Despacho extends Model
                 'unidad' => $items->first()->rubros_unidad_medida,
                 'tipo' => $items->first()->tipo_adquisicion,
                 'cantidad' => $items->sum('cantidad_unidades'),
-                'peso_total' => $items->sum('total'),
+                'peso_total' => round((float) $items->sum('total'), 3),
             ];
         })->toArray();
 
@@ -195,14 +175,17 @@ class Despacho extends Model
             foreach ($devolucion->detalles as $detalle) {
                 if (isset($totales[$detalle->rubros_id])) {
                     $totales[$detalle->rubros_id]['cantidad'] -= $detalle->cantidad_unidades;
-                    $totales[$detalle->rubros_id]['peso_total'] -= $detalle->total;
+                    $totales[$detalle->rubros_id]['peso_total'] = round(
+                        (float) $totales[$detalle->rubros_id]['peso_total'] - (float) $detalle->total,
+                        3
+                    );
                 }
             }
         });
 
         // 3. Filtrar los que quedaron en cero y convertir a objeto para FPDF
         return collect($totales)
-            ->filter(fn ($item) => $item['cantidad'] > 0)
+            ->filter(fn ($item) => $item['cantidad'] > 0 || $item['peso_total'] > 0)
             ->map(fn ($item) => (object) $item);
     }
 
@@ -214,6 +197,6 @@ class Despacho extends Model
 
     public function getTotalPesoAttribute()
     {
-        return $this->detalles()->sum('total');
+        return round((float) $this->detalles()->sum('total'), 3);
     }
 }

@@ -107,9 +107,9 @@ class RecepcionsTable
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
                     ->label('Peso Total')
-                    ->default(fn (Recepcion $record) => $record->items()->sum('total'))
+                    ->default(fn (Recepcion $record) => round($record->items()->sum('total'), 3))
                     ->description(fn (Recepcion $record): string => formatoMillares($record->items()->sum('cantidad_unidades'), 0).' UND')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
@@ -119,7 +119,7 @@ class RecepcionsTable
                 TextColumn::make('items_sum_total')
                     ->label('Peso Total')
                     ->sum('items', 'total')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
@@ -521,10 +521,11 @@ class RecepcionsTable
                         ->format(NumberFormat::FORMAT_NUMBER),
                     Column::make('total_peso')
                         ->heading('PESO TOTAL (KG)')
-                        ->format(NumberFormat::FORMAT_NUMBER_00),
+                        // ->format(NumberFormat::FORMAT_NUMBER_00),
+                        ->format('0.000'),
                     Column::make('asignacion_referencia')
                         ->heading('ASIGNACIÓN REFERENCIA')
-                        ->formatStateUsing(fn(Recepcion $record):?string => $record->asignacion_referencia ? 'CORTE: '.Str::upper($record->asignacion_referencia) : null)
+                        ->formatStateUsing(fn (Recepcion $record): ?string => $record->asignacion_referencia ? 'CORTE: '.Str::upper($record->asignacion_referencia) : null),
                 ])
                 ->modifyQueryUsing(fn (Builder $query) => $query->with('items')->orderBy('fecha')),
         ]);
@@ -545,7 +546,7 @@ class RecepcionsTable
                 TextInput::make('total')
                     ->label('Peso Total')
                     ->numeric()
-                    ->step(0.01)
+                    ->step(0.001)
                     ->required(),
                 Select::make('tipo_adquisicion')
                     ->label('Tipo adquisición')
@@ -562,7 +563,7 @@ class RecepcionsTable
                     'planes_id' => $record->planes_id,
                     'rubros_id' => $data['rubros_id'],
                     'tipo_adquisicion' => $data['tipo_adquisicion'],
-                    'total' => $data['total'],
+                    'total' => (float) $data['total'],
                 ]);
 
                 // Llamamos al método centralizado para que recalcule todo correctamente
@@ -598,6 +599,9 @@ class RecepcionsTable
 
     protected static function existeMerma(Recepcion $record): bool
     {
+        if ($record->relationLoaded('mermas')) {
+            return $record->mermas->isNotEmpty();
+        }
         return Merma::where('recepciones_id', $record->id)->exists();
     }
 

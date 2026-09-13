@@ -77,13 +77,13 @@ class RecepcionController extends Controller
         $vencimiento = $item['fecha_vencimiento'] ? getFecha($item['fecha_vencimiento'], 'd/m/Y') : '';
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, verUtf8($num), 1, 0, 'C');
-        $pdf->Cell(20, 10, verUtf8($fabricacion), 1, 0, 'C'); // Aquí iría $item['f_fab']
-        $pdf->Cell(20, 10, verUtf8($vencimiento), 1, 0, 'C'); // Aquí iría $item['f_venc']
+        $pdf->Cell(16, 10, verUtf8($fabricacion), 1, 0, 'C'); // Aquí iría $item['f_fab']
+        $pdf->Cell(16, 10, verUtf8($vencimiento), 1, 0, 'C'); // Aquí iría $item['f_venc']
         $pdf->Cell(73, 10, verUtf8(Str::upper($item['rubros_nombre'])), 1, 0, 'C');
         $pdf->SetFont('Times', 'B', 11);
         $pdf->Cell(20, 10, verUtf8(formatoMillares($item['cantidad_unidades'], 0)), 1, 0, 'C');
-        $pdf->Cell(20, 10, verUtf8(formatoMillares($item['peso_unitario'])), 1, 0, 'C');
-        $pdf->Cell(30, 10, verUtf8((formatoMillares($item['total'])).' '.$item['rubros_unidad_medida']), 1, 1, 'C');
+        $pdf->Cell(28, 10, verUtf8(formatoMillares($item['peso_unitario'], 3).' '.$item['rubros_unidad_medida']), 1, 0, 'C');
+        $pdf->Cell(30, 10, verUtf8(formatoMillares($item['total'], 3).' '.$item['rubros_unidad_medida']), 1, 1, 'C');
     }
 
     /**
@@ -93,11 +93,11 @@ class RecepcionController extends Controller
     {
         $pdf->SetFont('Times', 'B', 9);
         $pdf->Cell(7, 10, $num, 1, 0, 'C');
-        $pdf->Cell(20, 10, '', 1, 0, 'C');
-        $pdf->Cell(20, 10, '', 1, 0, 'C');
+        $pdf->Cell(16, 10, '', 1, 0, 'C');
+        $pdf->Cell(16, 10, '', 1, 0, 'C');
         $pdf->Cell(73, 10, '', 1, 0, 'C');
         $pdf->Cell(20, 10, '', 1, 0, 'C');
-        $pdf->Cell(20, 10, '', 1, 0, 'C');
+        $pdf->Cell(28, 10, '', 1, 0, 'C');
         $pdf->Cell(30, 10, '', 1, 1, 'C');
     }
 }

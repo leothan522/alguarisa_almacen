@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Merma extends Model
 {
     protected $table = 'recepciones_mermas';
+
     protected $fillable = [
         'recepciones_id',
         'almacenes_id',
@@ -17,9 +18,15 @@ class Merma extends Model
         'total',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'total' => 'decimal:3',
+        ];
+    }
+
     public function recepcion(): BelongsTo
     {
         return $this->belongsTo(Recepcion::class, 'recepciones_id', 'id');
     }
-
 }

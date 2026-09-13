@@ -31,6 +31,19 @@ class Stock extends Model
         'stock_total',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'asignacion_total' => 'decimal:3',
+            'propia_total' => 'decimal:3',
+            'total' => 'decimal:3',
+            'despacho_asignacion_total' => 'decimal:3',
+            'despacho_propia_total' => 'decimal:3',
+            'despacho_total' => 'decimal:3',
+            'stock_total' => 'decimal:3',
+        ];
+    }
+
     public function almacen(): BelongsTo
     {
         return $this->belongsTo(Almacen::class, 'almacenes_id', 'id');
@@ -48,12 +61,16 @@ class Stock extends Model
 
     public function fullAsignacion(): Attribute
     {
-        return Attribute::make(get: fn () => $this->asignacion_total - $this->despacho_asignacion_total);
+        return Attribute::make(
+            get: fn () => round((float) $this->asignacion_total - (float) $this->despacho_asignacion_total, 3)
+        );
     }
 
     public function fullPropia(): Attribute
     {
-        return Attribute::make(get: fn () => $this->propia_total - $this->despacho_propia_total);
+        return Attribute::make(
+            get: fn () => round((float) $this->propia_total - (float) $this->despacho_propia_total, 3)
+        );
     }
 
     public function undAsignacion(): Attribute

@@ -40,10 +40,10 @@ class DespachoPDF extends InventarioReport
         $this->SetTextColor(0, 0, 0);
         $this->SetFillColor(161, 208, 73);
         $this->Cell(7, 10, verUtf8('N.º'), 1, 0, 'C', 1);
-        $this->Cell(35, 10, verUtf8('TIPO ADQUISICIÓN'), 1, 0, 'C', 1);
-        $this->Cell(78, 10, verUtf8('DESCRIPCIÓN FÍSICA DEL PRODUCTO'), 1, 0, 'C', 1);
+        $this->Cell(32, 10, verUtf8('TIPO ADQUISICIÓN'), 1, 0, 'C', 1);
+        $this->Cell(73, 10, verUtf8('DESCRIPCIÓN FÍSICA DEL PRODUCTO'), 1, 0, 'C', 1);
         $this->Cell(20, 10, verUtf8('CANTIDAD'), 1, 0, 'C', 1);
-        $this->Cell(20, 10, verUtf8('PESO UND'), 1, 0, 'C', 1);
+        $this->Cell(28, 10, verUtf8('PESO UND'), 1, 0, 'C', 1);
         $this->Cell(30, 10, verUtf8('PESO TOTAL'), 1, 1, 'C', 1);
     }
 

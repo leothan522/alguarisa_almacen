@@ -55,7 +55,7 @@ class AjusteSalidaInfolist
                             ->copyable(),
                         TextEntry::make('total')
                             ->label('Salida Total')
-                            ->default(fn (Despacho $record): string => formatoMillares($record->detalles->sum('total')).' KG')
+                            ->default(fn (Despacho $record): string => formatoMillares($record->detalles->sum('total'), 3).' KG')
                             ->color('primary')
                             ->size(TextSize::Large)
                             ->weight(FontWeight::ExtraBold)

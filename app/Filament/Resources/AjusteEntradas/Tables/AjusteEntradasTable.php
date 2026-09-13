@@ -13,11 +13,8 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\FileUpload;
-use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
-use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -81,9 +78,9 @@ class AjusteEntradasTable
                     ->visibleFrom('md'),
                 TextColumn::make('total_movil')
                     ->label('Peso Total')
-                    ->default(fn (Recepcion $record) => $record->items()->sum('total'))
+                    ->default(fn (Recepcion $record) => round($record->items()->sum('total'), 3))
                     ->description(fn (Recepcion $record): string => formatoMillares($record->items()->sum('cantidad_unidades'), 0).' UND')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')
@@ -93,7 +90,7 @@ class AjusteEntradasTable
                 TextColumn::make('items_sum_total')
                     ->label('Peso Total')
                     ->sum('items', 'total')
-                    ->numeric(decimalPlaces: 2)
+                    ->numeric(decimalPlaces: 3)
                     ->weight(FontWeight::Bold)
                     ->size(TextSize::Medium)
                     ->color('violet')

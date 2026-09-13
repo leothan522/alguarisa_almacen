@@ -55,7 +55,7 @@ class RecepcionInfoList
                             ->copyable(),
                         TextEntry::make('total')
                             ->label('Recepción Total')
-                            ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total')).' KG')
+                            ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total'), 3).' KG')
                             ->color('primary')
                             ->size(TextSize::Large)
                             ->weight(FontWeight::ExtraBold)
@@ -63,13 +63,13 @@ class RecepcionInfoList
                             ->copyable(),
                         TextEntry::make('mermas.total')
                             ->label('Merma')
-                            ->formatStateUsing(fn ($state) => formatoMillares($state).' KG')
+                            ->formatStateUsing(fn ($state) => formatoMillares($state, 3).' KG')
                             ->color('primary')
                             ->size(TextSize::Large)
                             ->weight(FontWeight::ExtraBold)
                             ->visible(fn (Recepcion $record): bool => self::exiteMerma($record)),
                         TextEntry::make('totalGuia')
-                            ->label('Todal Guía')
+                            ->label('Total Guía')
                             ->default(fn (Recepcion $record): string => formatoMillares($record->items->sum('total') + $record->mermas->sum('total')).' KG')
                             ->color('primary')
                             ->size(TextSize::Large)
@@ -122,7 +122,7 @@ class RecepcionInfoList
     protected static function exiteMerma(Recepcion $record): bool
     {
         // Verificamos si la relación mermas tiene algún registro
-        return $record->mermas()->exists();
+        return $record->mermas->isNotEmpty();
         // O si prefieres usar la colección ya cargada en memoria:
         // return $record->mermas->count() > 0;
     }

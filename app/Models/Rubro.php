@@ -12,6 +12,13 @@ class Rubro extends Model
     protected $table = 'rubros';
     protected $fillable = ['nombre', 'peso_unitario', 'unidad_medida'];
 
+    protected function casts(): array
+    {
+        return [
+            'peso_unitario' => 'decimal:3',
+        ];
+    }
+
     public function stocks(): HasMany
     {
         return $this->hasMany(Stock::class, 'rubros_id', 'id');

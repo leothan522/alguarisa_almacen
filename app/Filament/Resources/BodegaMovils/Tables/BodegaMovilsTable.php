@@ -79,6 +79,7 @@ class BodegaMovilsTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('plan.nombre')
+                    ->label('Programa / Grupo')
                     ->wrap()
                     ->visibleFrom('md'),
                 TextColumn::make('responsables_cedula')
@@ -586,7 +587,7 @@ class BodegaMovilsTable
                         // ->formatStateUsing(fn($state) => '="' . $state . '"')
                         ->format(NumberFormat::FORMAT_TEXT),
                     Column::make('plan.nombre')
-                        ->heading('PLAN'),
+                        ->heading('Programa / Grupo'),
                     Column::make('responsables_nombre')
                         ->heading('RECIBE')
                         ->formatStateUsing(fn ($state) => Str::upper($state)),

@@ -62,6 +62,7 @@ class ModulosClapsTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('plan.nombre')
+                    ->label('Programa / Grupo')
                     ->description(function (Despacho $record) {
                         if ($record->asignacion_referencia) {
                             return '🚩 CORTE: '.Str::upper($record->asignacion_referencia);

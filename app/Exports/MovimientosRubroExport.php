@@ -86,7 +86,7 @@ class MovimientosRubroExport implements FromCollection, ShouldAutoSize, WithHead
     {
         return [
             'Fecha',
-            'Plan',
+            'Programa / Grupo',
             'Documento / Referencia',
             'Tipo Movimiento',
             'Tipo Adquisición',

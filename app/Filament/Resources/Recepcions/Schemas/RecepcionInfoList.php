@@ -48,7 +48,7 @@ class RecepcionInfoList
                             ->weight(FontWeight::Bold)
                             ->copyable(),
                         TextEntry::make('numero')
-                            ->label('Número y Plan')
+                            ->label('Número / Grupo')
                             ->belowContent(fn (Recepcion $record): string => $record->plan->nombre)
                             ->color('primary')
                             ->weight(FontWeight::Bold)

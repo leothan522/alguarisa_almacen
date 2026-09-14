@@ -55,6 +55,7 @@ class AjusteEntradasTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('plan.nombre')
+                    ->label('Programa / Grupo')
                     ->wrap()
                     ->visibleFrom('md'),
                 TextColumn::make('responsables_cedula')

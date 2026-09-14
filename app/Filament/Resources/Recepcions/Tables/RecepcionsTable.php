@@ -76,6 +76,7 @@ class RecepcionsTable
                     ->searchable()
                     ->visibleFrom('md'),
                 TextColumn::make('plan.nombre')
+                    ->label('Programa / Grupo')
                     ->description(function (Recepcion $record) {
                         if ($record->asignacion_referencia) {
                             return '🚩 CORTE: '.Str::upper($record->asignacion_referencia);
@@ -155,7 +156,12 @@ class RecepcionsTable
             ->filters([
                 self::filterMes(),
                 SelectFilter::make('plan')
-                    ->relationship('plan', 'nombre'),
+                    ->label('Programa / Grupo')
+                    ->relationship(
+                        name: 'plan',
+                        titleAttribute: 'nombre',
+                        modifyQueryUsing: fn(Builder $query) => $query->orderBy('id')
+                    ),
                 self::filterEstatus(),
                 TrashedFilter::make(),
             ])
@@ -509,7 +515,7 @@ class RecepcionsTable
                         // ->formatStateUsing(fn($state) => '="' . $state . '"')
                         ->format(NumberFormat::FORMAT_TEXT),
                     Column::make('plan.nombre')
-                        ->heading('PLAN'),
+                        ->heading('Programa / Grupo'),
                     Column::make('responsables_nombre')
                         ->heading('ENTREGA')
                         ->formatStateUsing(fn ($state) => Str::upper($state)),

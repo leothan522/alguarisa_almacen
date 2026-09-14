@@ -24,5 +24,31 @@ class PlanSeeder extends Seeder
             'nombre' => 'Módulos CLAP',
             'unidad_medida' => 'UND',
         ]);
+
+        Plan::create([
+            'codigo' => '001',
+            'nombre' => 'MERCAL',
+            'unidad_medida' => 'UND',
+        ]);
+
+        Plan::create([
+            'codigo' => '002',
+            'nombre' => 'PDVAL',
+            'unidad_medida' => 'UND',
+        ]);
+
+        Plan::create([
+            'codigo' => '003',
+            'nombre' => 'FUNDAPROAL',
+            'unidad_medida' => 'UND',
+        ]);
+
+        Plan::create([
+            'codigo' => '004',
+            'nombre' => 'INN',
+            'unidad_medida' => 'UND',
+        ]);
+
+
     }
 }

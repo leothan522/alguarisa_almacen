@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -70,8 +71,12 @@ trait AlmacenSchemas
                     ->unique()
                     ->required(),
                 Select::make('planes_id')
-                    ->label('Plan')
-                    ->relationship(name: 'plan', titleAttribute: 'nombre')
+                    ->label('Programa / Grupo')
+                    ->relationship(
+                        name: 'plan',
+                        titleAttribute: 'nombre',
+                        modifyQueryUsing: fn(Builder $query) => $query->orderBy('id')
+                    )
                     ->required()
                     ->disabledOn('edit')
                     ->default(self::$plan)
@@ -239,10 +244,10 @@ trait AlmacenSchemas
             ->options([
                 'asignacion' => 'ASIGNACIÓN',
                 'propia' => 'PROPIA',
-                'mercal' => 'MERCAL',
+                /*'mercal' => 'MERCAL',
                 'pdval' => 'PDVAL',
                 'fundaproal' => 'FUNDAPROAL',
-                'inn' => 'INN',
+                'inn' => 'INN',*/
             ])
             ->live()
             ->required();

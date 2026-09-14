@@ -88,7 +88,7 @@ class StockResource extends Resource
                                     ->weight(FontWeight::Bold)
                                     ->color('primary'),
                                 TextEntry::make('plan.nombre')
-                                    ->label('Plan')
+                                    ->label('Programa / Grupo')
                                     ->weight(FontWeight::Bold)
                                     ->color('primary'),
                                 TextEntry::make('rubro.nombre')
@@ -190,64 +190,9 @@ class StockResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->where('stock_total', '>', 0))
             ->recordTitleAttribute('rubros_id')
             ->columns([
-                /*TextColumn::make('rubro_movil')
-                    ->label('Rubro')
-                    ->default(fn (Stock $record): string => Str::upper($record->rubro->nombre))
-                    ->description(fn (Stock $record): string => $record->plan->nombre)
-                    ->wrap()
-                    ->hiddenFrom('md'),
-                TextColumn::make('plan.nombre')
-                    ->searchable()
-                    ->visibleFrom('md'),
-                TextColumn::make('rubro.nombre')
-                    ->formatStateUsing(fn (Stock $record): string => Str::upper($record->rubro->nombre))
-                    ->searchable()
-                    ->visibleFrom('md'),
-                TextColumn::make('unidades')
-                    ->label('Unidades')
-                    ->default(fn (Stock $record): int => $record->stock_cantidad)
-                    ->suffix(' UND')
-                    ->numeric()
-                    ->alignEnd()
-                    ->visibleFrom('md'),
-                TextColumn::make('full_asignacion')
-                    ->label('Asignación')
-                    ->numeric(decimalPlaces: 3)
-                    ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
-                    ->alignEnd()
-                    ->visibleFrom('md'),
-                TextColumn::make('full_propia')
-                    ->label('Propio')
-                    ->numeric(decimalPlaces: 3)
-                    ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
-                    ->alignEnd()
-                    ->visibleFrom('md'),
-                TextColumn::make('total_movil')
-                    ->label('Peso Total')
-                    ->default(fn (Stock $record) => $record->stock_total)
-                    ->description(fn (Stock $record): string => formatoMillares($record->stock_cantidad, 0).' UND')
-                    ->weight(FontWeight::Bold)
-                    ->size(TextSize::Medium)
-                    ->color('violet')
-                    ->numeric(decimalPlaces: 3)
-                    ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
-                    ->sortable()
-                    ->alignEnd()
-                    ->hiddenFrom('md'),
-                TextColumn::make('stock_total')
-                    ->label('Peso Total')
-                    ->numeric(decimalPlaces: 3)
-                    ->weight(FontWeight::Bold)
-                    ->size(TextSize::Medium)
-                    ->color('violet')
-                    ->suffix(fn (Stock $record): string => ' '.$record->rubro->unidad_medida)
-                    ->sortable()
-                    ->alignCenter()
-                    ->visibleFrom('md'),*/
-
                 // --- VISTA MÓVIL (SÓLO SMARTPHONES) ---
                 TextColumn::make('rubro_movil')
-                    ->label('Rubro / Plan')
+                    ->label('Rubro / Grupo')
                     ->default(fn (Stock $record): string => Str::upper($record->rubro->nombre))
                     ->description(fn (Stock $record): string => $record->plan->nombre)
                     ->wrap()
@@ -268,7 +213,7 @@ class StockResource extends Resource
 
                 // --- VISTA ESCRITORIO (PANTALLAS MD O SUPERIORES) ---
                 TextColumn::make('plan.nombre')
-                    ->label('Plan')
+                    ->label('Programa / Grupo')
                     ->searchable()
                     ->sortable()
                     ->visibleFrom('md'),
@@ -322,8 +267,12 @@ class StockResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('planes_id')
-                    ->label('Plan')
-                    ->relationship('plan', 'nombre'),
+                    ->label('Programa / Grupo')
+                    ->relationship(
+                        name: 'plan',
+                        titleAttribute: 'nombre',
+                        modifyQueryUsing: fn(Builder $query) => $query->orderBy('id')
+                    ),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -362,7 +311,7 @@ class StockResource extends Resource
                 ->withFilename('stocks-export')
                 ->withColumns([
                     Column::make('plan.nombre')
-                        ->heading('PLAN')
+                        ->heading('Programa / Grupo')
                         ->formatStateUsing(fn ($state) => Str::upper($state)),
                     Column::make('rubro.nombre')
                         ->heading('RUBRO')

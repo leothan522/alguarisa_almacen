@@ -49,6 +49,12 @@ class PlanSeeder extends Seeder
             'unidad_medida' => 'UND',
         ]);
 
+        Plan::create([
+            'codigo' => '005',
+            'nombre' => 'Gobernación',
+            'unidad_medida' => 'UND',
+        ]);
+
 
     }
 }

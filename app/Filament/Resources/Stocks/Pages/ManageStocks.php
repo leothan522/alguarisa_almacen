@@ -24,7 +24,7 @@ class ManageStocks extends ManageRecords
                 ->label('Reporte de Movimientos')
                 ->icon(Heroicon::OutlinedDocumentArrowDown)
                 ->color('success')
-                ->visible(fn (): bool => isAdmin() || auth()->user()->hasRole('almacen'))
+                //->visible(fn (): bool => isAdmin() || auth()->user()->hasRole('almacen'))
                 ->modalWidth(Width::Small)
                 ->modalHeading('Historial de Movimientos por Rubro')
                 ->modalDescription('Selecciona el rubro y el rango de fechas para generar el reporte en Excel.')

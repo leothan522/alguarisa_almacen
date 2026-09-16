@@ -136,5 +136,6 @@ return [
     'filament_info_widget' => env('FILAMENT_INFO_WIDGET', true),
     'chrome_path' => env('CHROME_PATH', false),
     'data_init' => env('DATA_INIT', false),
+    'historico_url' => env('HISTORICO_URL', false),
 
 ];

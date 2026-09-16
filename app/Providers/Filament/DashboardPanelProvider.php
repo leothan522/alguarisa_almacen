@@ -9,6 +9,8 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -72,6 +74,21 @@ class DashboardPanelProvider extends PanelProvider
                     ->label(__('Log out'))
                     ->icon(Heroicon::ArrowRightStartOnRectangle)
                     ->extraAttributes(['onclick' => "Alpine.store('loader').show()"]),
+            ])
+            ->navigationItems([
+                NavigationItem::make('Histórico')
+                    ->url(
+                        url: fn()=> config('app.historico_url') ? config('app.historico_url') : config('app.url'),
+                        shouldOpenInNewTab: true
+                    )
+                    ->icon(Heroicon::OutlinedServerStack)
+                    ->group('Antigua Gestión')
+                    ->sort(99),
+            ])
+            ->navigationGroups([
+                NavigationGroup::make('Antigua Gestión')
+                ->collapsed()
+                ->collapsible()
             ])
             ->resourceCreatePageRedirect('index')
             ->resourceEditPageRedirect('index')

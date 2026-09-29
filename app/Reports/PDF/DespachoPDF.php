@@ -74,7 +74,7 @@ class DespachoPDF extends InventarioReport
         $this->Cell(47, 3, 'NOMBRE - FIRMA - CEDULA', 0, 0, 'C');
         $this->Cell(46, 3, 'NOMBRE - FIRMA - CEDULA', 0, 0, 'C');
         $this->Cell(47, 3, 'NOMBRE - FIRMA - CEDULA', 0, 1, 'C');
-        $this->Cell(47, 3, 'QUIEN ENTREGA', 0, 0, 'C');
+        $this->Cell(47, 3, verUtf8('SUPERVISOR DE ALMACÉN'), 0, 0, 'C');
         $this->Cell(46, 3, verUtf8('RESPONSABLE DE ALMACÉN'), 0, 0, 'C');
         $this->Cell(47, 3, 'QUIEN RECIBE', 0, 1, 'C');
         $this->Ln(22);

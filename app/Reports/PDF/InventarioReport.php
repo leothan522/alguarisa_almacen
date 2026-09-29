@@ -32,7 +32,7 @@ class InventarioReport extends Fpdf
     public function headerBase(): void
     {
         // Logo (Si tienes uno en public/img/logo.png)
-        $this->Image(public_path('img/pdf/membrete-recepcion.png'), 11, 9, 190);
+        $this->Image(public_path('img/pdf/membrete-recepcion-2.png'), 11, 9, 190);
         $this->Ln($this->headerSubtitle ? 6 : 9);
 
         $this->SetFont($this->family, 'B', 14);

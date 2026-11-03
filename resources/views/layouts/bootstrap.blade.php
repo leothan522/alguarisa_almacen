@@ -157,7 +157,7 @@
                                 @if(Route::currentRouteName() != 'instalar-app')
                                     <div class="text-center">
                                         <a x-data href="{{ route('home') }}">
-                                            <img class="img-fluid" src="{{ asset('img/logo_alguarisa.png') }}" alt="Logo AlGUARISA" @click="mostrarPreloader()">
+                                            <img class="img-fluid" src="{{ asset('img/alguarisa_logo_nuevo_fondo_transparente.png') }}" alt="Logo AlGUARISA" @click="mostrarPreloader()">
                                         </a>
                                         <h6 class="mt-1 mb-4 pb-1 text_title"><strong>Dirección de Tecnología y Sistemas</strong></h6>
                                     </div>
@@ -171,7 +171,7 @@
                              style="min-height: 70vh">
                             <img class="gobernacion" src="{{ asset('img/logo_gobernacion_white.png') }}" alt="Logo Gobernación Guárico">
                             <div class="text-white px-3 py-4 p-md-5 mx-md-4">
-                                <img class="img-fluid rounded-2 border border-light" src="{{ asset('img/logo_tecnologia.png') }}" alt="Logo Tecnología Alguarisa">
+                                <img class="img-fluid rounded-2 border border-light" src="{{ asset('img/logo_tecnologia_new.png') }}" alt="Logo Tecnología Alguarisa">
                             </div>
                         </div>
                     </div>

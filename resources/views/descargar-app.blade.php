@@ -16,7 +16,7 @@
 
         <div x-data class="col-6 text-center">
             <a href="{{ route('home') }}" @click="mostrarPreloader">
-                <img class="img-fluid" src="{{ asset('img/logo.png') }}" alt="Logo de ALGUARISA" />
+                <img class="img-fluid mt-5" src="{{ asset('img/alguarisa_logo_nuevo_fondo_transparente.png') }}" alt="Logo de ALGUARISA" />
             </a>
         </div>
 
